@@ -1,0 +1,8 @@
+{
+  "autoload": {
+    "RecursiveTree\\Seat\\InfoPlugin\\": "packages/src"
+  },
+  "providers": [
+    "RecursiveTree\\Seat\\InfoPlugin\\InfoServiceProvider"
+  ]
+}
