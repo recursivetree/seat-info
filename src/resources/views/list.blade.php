@@ -14,9 +14,22 @@
         <div class="card-header" >Articles</div>
         <div class="card-body">
 
-          <p class="card-text">
-            list
-          </p>
+          <table id="pages" class="table table table-bordered table-striped">
+            <thead>
+            <tr>
+              <th>Name</th>
+              <th>Text</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach ($articles as $article)
+              <tr>
+                <td>{{ $article->name }}</td>
+                <td>{{ substr(preg_replace( "/\r|\n/", "", $article->text), 0, 60) }}</td>
+              </tr>
+            @endforeach
+            </tbody>
+          </table>
 
         </div>
       </div>

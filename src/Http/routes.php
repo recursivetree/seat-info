@@ -20,6 +20,11 @@ Route::group([
         'uses' => 'InfoController@getSaveInterface',
     ]);
 
+    Route::post('/delete', [
+        'as'   => 'info.delete_article',
+        'uses' => 'InfoController@getDeleteInterface',
+    ]);
+
     Route::get('/list', [
         'as'   => 'info.list',
         'uses' => 'InfoController@getListView',

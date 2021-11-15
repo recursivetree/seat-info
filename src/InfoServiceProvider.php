@@ -18,6 +18,7 @@ class InfoServiceProvider extends AbstractSeatPlugin
         }
         $this->loadTranslationsFrom(__DIR__ . '/lang', 'info');
         $this->loadViewsFrom(__DIR__ . '/resources/views', 'info');
+        $this->loadMigrationsFrom(__DIR__ . '/database/migrations/');
     }
 
     /**
@@ -27,9 +28,6 @@ class InfoServiceProvider extends AbstractSeatPlugin
      */
     public function register(){
         $this->mergeConfigFrom(__DIR__ . '/Config/info.sidebar.php','package.sidebar');
-    }
-
-    private function addMigrations(){
     }
 
 
