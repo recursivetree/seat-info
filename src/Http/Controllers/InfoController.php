@@ -11,6 +11,50 @@ use Illuminate\Database\QueryException;
 
 class InfoController extends Controller
 {
+    public function getHomeView(){
+        try {
+            $article = Article::where("home_entry",true)->first();
+
+            if ($article===null){
+                return view("info::view", [
+                    'error_message' => "No home page configured!",
+                ]);
+            }
+
+            return view("info::view", [
+                "title" => $article->name,
+                "content" => $article->text
+            ]);
+        } catch (QueryException $e){
+            return view("info::view", [
+                'error_message' => "Could not fetch article!",
+            ]);
+        }
+    }
+
+    public function getSetHomeArticleInterface(CommonModifyArticleRequest $request){
+        try {
+            Article::query()->update(['home_entry' => false]);
+
+            $article = Article::find($request->id);
+            $article->home_entry = true;
+            $article->save();
+
+            $articles = Article::all();
+
+            return view("info::manage", [
+                'articles' => $articles
+            ]);
+        } catch (QueryException $e){
+            $articles = Article::all();
+
+            return view("info::manage", [
+                'error_message' => "Could not delete article!",
+                'articles' => $articles
+            ]);
+        }
+    }
+
     public function getCreateView(){
         return view("info::edit", [
             "id" => 0,

@@ -5,6 +5,11 @@ Route::group([
     'prefix' => 'info'
 ], function () {
 
+    Route::get('/home', [
+        'as'   => 'info.home',
+        'uses' => 'InfoController@getHomeView',
+    ]);
+
     Route::get('/create', [
         'as'   => 'info.create',
         'uses' => 'InfoController@getCreateView',
@@ -23,6 +28,11 @@ Route::group([
     Route::post('/edit', [
         'as'   => 'info.edit_article',
         'uses' => 'InfoController@getEditView',
+    ]);
+
+    Route::post('/set_home_article', [
+        'as'   => 'info.set_home_article',
+        'uses' => 'InfoController@getSetHomeArticleInterface',
     ]);
 
     Route::get('/list', [

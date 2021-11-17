@@ -6,6 +6,11 @@ return [
         'route_segment' => 'info',
         'entries'       => [
             [   // List
+                'name'  => 'Start',
+                'icon'  => 'fas fa-home',
+                'route' => 'info.home'
+            ],
+            [   // List
                 'name'  => 'Articles',
                 'icon'  => 'fas fa-list',
                 'route' => 'info.list'

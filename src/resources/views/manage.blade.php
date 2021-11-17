@@ -67,10 +67,23 @@
                             <tbody>
                             @foreach ($articles as $article)
                                 <tr>
-                                    <td><a href="{{ route("info.view", $article->id) }}">{{ $article->name }}</a></td>
+                                    <td>
+                                        <a href="{{ route("info.view", $article->id) }}">{{ $article->name }}</a>
+                                        @if($article->home_entry)
+                                            <span class="badge badge-info">Home Article</span>
+                                        @endif
+                                    </td>
                                     <td>{{ substr(preg_replace( "/\r|\n/", "", $article->text), 0, 60) }}</td>
                                     <td>
                                         <div class="float-right row">
+                                            @if(!$article->home_entry)
+                                                <form method="post" action="{{ route("info.set_home_article") }}">
+                                                    @csrf
+                                                    <button class="btn btn-secondary">Set Home Article</button>
+                                                    <input type="hidden" value="{{ $article->id }}" name="id">
+                                                </form>
+                                            @endif
+
                                             <form method="post" action="{{ route("info.edit_article") }}">
                                                 @csrf
                                                 <button class="btn btn-secondary">Edit</button>
