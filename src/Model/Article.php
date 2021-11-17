@@ -11,6 +11,6 @@ class Article extends Model
     protected $table = 'recursive_tree_seat_info_articles';
 
     protected $fillable = [
-        'name', 'text'
+        'name', 'text', 'id'
     ];
 }

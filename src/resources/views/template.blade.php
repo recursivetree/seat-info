@@ -5,24 +5,25 @@
 
 @section('full')
 
-<!-- Instructions -->
-<div class="row w-100">
-  <div class="col">
-    <div class="card-deck">
+    <!-- Instructions -->
+    <div class="row w-100">
+        <div class="col">
+            <div class="card-column">
 
-      <div class="card">
-        <div class="card-header" >Step 1</div>
-        <div class="card-body">
+                <div class="card">
+                    <div class="card-header">Step 1</div>
+                    <div class="card-body">
 
-          <p class="card-text">
-            Click on the <span class="fa fa-plus-square"></span> on the top right of the text table in order to create a new text. This will open a modal where you can enter the required data.
-          </p>
+                        <p class="card-text">
+                            Click on the <span class="fa fa-plus-square"></span> on the top right of the text table in
+                            order to create a new text. This will open a modal where you can enter the required data.
+                        </p>
 
+                    </div>
+                </div>
+
+            </div>
         </div>
-      </div>
-
     </div>
-  </div>
-</div>
 
 @stop

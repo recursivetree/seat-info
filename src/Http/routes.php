@@ -5,11 +5,6 @@ Route::group([
     'prefix' => 'info'
 ], function () {
 
-    Route::get('/edit', [
-        'as'   => 'info.edit',
-        'uses' => 'InfoController@getEditView',
-    ]);
-
     Route::get('/create', [
         'as'   => 'info.create',
         'uses' => 'InfoController@getCreateView',
@@ -25,6 +20,11 @@ Route::group([
         'uses' => 'InfoController@getDeleteInterface',
     ]);
 
+    Route::post('/edit', [
+        'as'   => 'info.edit_article',
+        'uses' => 'InfoController@getEditView',
+    ]);
+
     Route::get('/list', [
         'as'   => 'info.list',
         'uses' => 'InfoController@getListView',
@@ -33,5 +33,10 @@ Route::group([
     Route::get('/manage', [
         'as'   => 'info.manage',
         'uses' => 'InfoController@getManageView',
+    ]);
+
+    Route::get('/view/{id}', [
+        'as'   => 'info.view',
+        'uses' => 'InfoController@getArticleView',
     ]);
 });

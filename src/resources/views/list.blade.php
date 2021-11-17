@@ -5,37 +5,26 @@
 
 @section('full')
 
-<!-- Instructions -->
-<div class="row w-100">
-  <div class="col">
-    <div class="card-deck">
+    <!-- Instructions -->
+    <div class="row w-100">
+        <div class="col">
+            <div class="card-column">
 
-      <div class="card">
-        <div class="card-header" >Articles</div>
-        <div class="card-body">
+                <div class="card">
+                    <div class="card-header">Articles</div>
+                    <div class="card-body">
 
-          <table id="pages" class="table table table-bordered table-striped">
-            <thead>
-            <tr>
-              <th>Name</th>
-              <th>Text</th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach ($articles as $article)
-              <tr>
-                <td>{{ $article->name }}</td>
-                <td>{{ substr(preg_replace( "/\r|\n/", "", $article->text), 0, 60) }}</td>
-              </tr>
-            @endforeach
-            </tbody>
-          </table>
+                        <div class="list-group">
+                            @foreach ($articles as $article)
+                                <a class="list-group-item list-group-item-action"
+                                   href="{{ route("info.view", $article->id) }}">{{ $article->name }}</a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
 
+            </div>
         </div>
-      </div>
-
     </div>
-  </div>
-</div>
 
 @stop
