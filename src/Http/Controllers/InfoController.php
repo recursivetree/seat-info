@@ -3,7 +3,7 @@
 namespace RecursiveTree\Seat\InfoPlugin\Http\Controllers;
 
 use RecursiveTree\Seat\InfoPlugin\Model\Article;
-use RecursiveTree\Seat\InfoPlugin\Validation\CommonModifyArticleRequest;
+use RecursiveTree\Seat\InfoPlugin\Validation\GenericModifyArticleRequest;
 use RecursiveTree\Seat\InfoPlugin\Validation\SaveArticle;
 use Seat\Web\Http\Controllers\Controller;
 use Illuminate\Database\QueryException;
@@ -12,47 +12,35 @@ use Illuminate\Database\QueryException;
 class InfoController extends Controller
 {
     public function getHomeView(){
-        try {
-            $article = Article::where("home_entry",true)->first();
 
-            if ($article===null){
-                return view("info::view", [
-                    'error_message' => "No home page configured!",
-                ]);
-            }
+        $article = Article::where("home_entry",true)->first();
 
-            return view("info::view", [
-                "title" => $article->name,
-                "content" => $article->text
-            ]);
-        } catch (QueryException $e){
-            return view("info::view", [
-                'error_message' => "Could not fetch article!",
+        if ($article===null){
+            return view("info::view")->with('message', [
+                'title' => "Error",
+                'message' => 'There is no home article configured. Please contact the administrator about this.'
             ]);
         }
+
+
+        return view("info::view", [
+            "title" => $article->name,
+            "content" => $article->text
+        ]);
+
     }
 
-    public function getSetHomeArticleInterface(CommonModifyArticleRequest $request){
-        try {
-            Article::query()->update(['home_entry' => false]);
+    public function getSetHomeArticleInterface(GenericModifyArticleRequest $request){
+        Article::query()->update(['home_entry' => false]);
 
-            $article = Article::find($request->id);
-            $article->home_entry = true;
-            $article->save();
+        $article = Article::find($request->id);
+        $article->home_entry = true;
+        $article->save();
 
-            $articles = Article::all();
-
-            return view("info::manage", [
-                'articles' => $articles
-            ]);
-        } catch (QueryException $e){
-            $articles = Article::all();
-
-            return view("info::manage", [
-                'error_message' => "Could not delete article!",
-                'articles' => $articles
-            ]);
-        }
+        return redirect()->route('info.manage')->with('message', [
+            'title' => "Success",
+            'message' => 'Successfully changed home article'
+        ]);
     }
 
     public function getCreateView(){
@@ -64,68 +52,51 @@ class InfoController extends Controller
     }
 
     public function getSaveInterface(SaveArticle $request){
-        try {
+        $article = Article::find($request->id);
 
-            $article = Article::find($request->id);
-
-            if ($article===null){
-                $article = new Article();
-            }
-
-
-            $article->name = $request->name;
-            $article->text = $request->text;
-
-            $article->save();
-            $articles = Article::all();
-
-            return view("info::manage", [
-                'article_saved' => [
-                    'name' => $request->name
-                ],
-                'articles' => $articles
-            ]);
-        } catch (QueryException $e){
-            $articles = Article::all();
-
-            return view("info::manage", [
-                'error_message' => "Could not save article!",
-                'articles' => $articles
-            ]);
+        if ($article===null){
+            $article = new Article();
         }
+
+
+        $article->name = $request->name;
+        $article->text = $request->text;
+
+        $article->save();
+
+        return redirect()->route('info.manage')->with('message', [
+            'title' => "Success",
+            'message' => "Successfully saved article '$article->name'"
+        ]);
     }
 
-    public function getDeleteInterface(CommonModifyArticleRequest $request){
-        try {
-            $name = $article = Article::find($request->id)->name;
+    public function getDeleteInterface(GenericModifyArticleRequest $request){
+        $article = Article::find($request->id);
+
+        if ($article !== null) {
             Article::destroy($request->id);
-            $articles = Article::all();
 
-            return view("info::manage", [
-                'article_deleted' => [
-                    'name' => $name
-                ],
-                'articles' => $articles
+            return redirect()->route('info.manage')->with('message', [
+                'title' => "Success",
+                'message' => "Successfully deleted article '$article->name'"
             ]);
-        } catch (QueryException $e){
-            $articles = Article::all();
-
-            return view("info::manage", [
-                'error_message' => "Could not delete article!",
-                'articles' => $articles
+        } else {
+            return redirect()->route('info.manage')->with('message', [
+                'title' => "Error",
+                'message' => "Could not find the requested article! Try to reload the management page."
             ]);
         }
     }
 
-    public function getEditView(CommonModifyArticleRequest $request){
+    public function getEditView(GenericModifyArticleRequest $request){
         $article = Article::find($request->id);
 
         if ($article===null){
             $articles = Article::all();
 
-            return view("info::manage", [
-                'error_message' => "Could not open article!",
-                'articles' => $articles
+            return redirect()->route('info.manage')->with('message', [
+                'title' => "Error",
+                'message' => 'Could not find the requested article!'
             ]);
         }
 
@@ -147,23 +118,18 @@ class InfoController extends Controller
     }
 
     public function getArticleView($id){
-        try {
-            $article = Article::find($id);
+        $article = Article::find($id);
 
-            if ($article===null){
-                return view("info::view", [
-                    'error_message' => "Could not find article!",
-                ]);
-            }
-
-            return view("info::view", [
-                "title" => $article->name,
-                "content" => $article->text
-            ]);
-        } catch (QueryException $e){
-            return view("info::view", [
-                'error_message' => "Could not fetch article!",
+        if ($article===null){
+            return view("info::view")->with('message', [
+                'title' => "Error",
+                'message' => 'Could not find the requested article!'
             ]);
         }
+
+        return view("info::view", [
+            "title" => $article->name,
+            "content" => $article->text
+        ]);
     }
 }

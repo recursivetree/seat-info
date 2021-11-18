@@ -10,16 +10,16 @@
         <div class="col">
             <div class="card-column">
 
-                @isset($error_message)
+                @if (session()->has('message'))
                     <div class="card">
                         <div class="card-header">
-                            <span>Error</span>
+                            <span>{{ session()->get('message')['title'] }}</span>
                         </div>
                         <div class="card-body">
-                            <p class="card-text">{{ $error_message}}</p>
+                            <p class="card-text">{{ session()->get('message')['message'] }}</p>
                         </div>
                     </div>
-                @endisset
+                @endif
 
                 @isset($title, $content)
                     <div class="card">

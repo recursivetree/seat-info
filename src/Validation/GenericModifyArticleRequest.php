@@ -4,7 +4,7 @@ namespace RecursiveTree\Seat\InfoPlugin\Validation;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CommonModifyArticleRequest extends FormRequest
+class GenericModifyArticleRequest extends FormRequest
 {
 
     public function authorize()

@@ -10,6 +10,17 @@
         <div class="col">
             <div class="card-column">
 
+                @if (session()->has('message'))
+                    <div class="card">
+                        <div class="card-header">
+                            <span>{{ session()->get('message')['title'] }}</span>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">{{ session()->get('message')['message'] }}</p>
+                        </div>
+                    </div>
+                @endif
+
                 <div class="card">
                     <div class="card-header">Step 1</div>
                     <div class="card-body">

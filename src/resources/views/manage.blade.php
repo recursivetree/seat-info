@@ -10,42 +10,16 @@
         <div class="col">
             <div class="card-column">
 
-                @isset($article_saved)
+                @if (session()->has('message'))
                     <div class="card">
                         <div class="card-header">
-                            <span>Success</span>
+                            <span>{{ session()->get('message')['title'] }}</span>
                         </div>
                         <div class="card-body">
-                            <p class="card-text">
-                                The article '{{ $article_saved['name'] }}' has been saved.
-                            </p>
+                            <p class="card-text">{{ session()->get('message')['message'] }}</p>
                         </div>
                     </div>
-                @endisset
-
-                @isset($article_deleted)
-                    <div class="card">
-                        <div class="card-header">
-                            <span>Success</span>
-                        </div>
-                        <div class="card-body">
-                            <p class="card-text">
-                                The article '{{ $article_deleted['name'] }}' has been deleted.
-                            </p>
-                        </div>
-                    </div>
-                @endisset
-
-                @isset($error_message)
-                    <div class="card">
-                        <div class="card-header">
-                            <span>Error</span>
-                        </div>
-                        <div class="card-body">
-                            <p class="card-text">{{ $error_message}}</p>
-                        </div>
-                    </div>
-                @endisset
+                @endif
 
                 <div class="card">
                     <div class="card-header">
