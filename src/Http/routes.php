@@ -49,4 +49,19 @@ Route::group([
         'as'   => 'info.view',
         'uses' => 'InfoController@getArticleView',
     ]);
+
+    Route::post('/upload_resource', [
+        'as'   => 'info.upload_resource',
+        'uses' => 'InfoController@uploadResource',
+    ]);
+
+    Route::get('/resource/{id}', [
+        'as'   => 'info.view_resource',
+        'uses' => 'InfoController@viewResource',
+    ]);
+
+    Route::post('/deleteResource', [
+        'as'   => 'info.delete_resource',
+        'uses' => 'InfoController@deleteResource',
+    ]);
 });

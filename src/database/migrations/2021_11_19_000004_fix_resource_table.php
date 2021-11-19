@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddHomeEntry extends Migration
+class FixResourceTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,10 @@ class AddHomeEntry extends Migration
      */
     public function up()
     {
-        Schema::table('recursive_tree_seat_info_articles', function (Blueprint $table) {
-            $table->boolean("home_entry")->default(false);
+        Schema::table('recursive_tree_seat_info_resources', function (Blueprint $table) {
+            $table->dropColumn('image_data');
+
+            $table->text("path");
         });
     }
 
@@ -25,8 +27,9 @@ class AddHomeEntry extends Migration
      */
     public function down()
     {
-        Schema::table('recursive_tree_seat_info_articles', function (Blueprint $table) {
-            $table->dropColumn("home_entry");
+        Schema::table('recursive_tree_seat_info_resources', function (Blueprint $table) {
+            $table->binary('image_data');
+            $table->dropColumn('path');
         });
     }
 }

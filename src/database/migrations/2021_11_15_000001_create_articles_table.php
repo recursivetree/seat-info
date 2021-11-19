@@ -27,7 +27,7 @@ class CreateArticlesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('crypta_seat_text');
+        Schema::dropIfExists('recursive_tree_seat_info_articles');
     }
 }
 

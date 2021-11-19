@@ -4,7 +4,7 @@ namespace RecursiveTree\Seat\InfoPlugin\Validation;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class GenericModifyArticleRequest extends FormRequest
+class UploadResource extends FormRequest
 {
 
     public function authorize()
@@ -15,7 +15,7 @@ class GenericModifyArticleRequest extends FormRequest
     public function rules()
     {
         return [
-            'id' => 'required|int',
+            'file' => 'required|file',
         ];
     }
 }

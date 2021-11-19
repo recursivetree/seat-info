@@ -3,10 +3,14 @@
 namespace RecursiveTree\Seat\InfoPlugin\Http\Controllers;
 
 use RecursiveTree\Seat\InfoPlugin\Model\Article;
-use RecursiveTree\Seat\InfoPlugin\Validation\GenericModifyArticleRequest;
+use RecursiveTree\Seat\InfoPlugin\Model\Resource;
+use RecursiveTree\Seat\InfoPlugin\Validation\GenericRequestWithID;
 use RecursiveTree\Seat\InfoPlugin\Validation\SaveArticle;
+use RecursiveTree\Seat\InfoPlugin\Validation\UploadResource;
 use Seat\Web\Http\Controllers\Controller;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 
 class InfoController extends Controller
@@ -30,7 +34,7 @@ class InfoController extends Controller
 
     }
 
-    public function getSetHomeArticleInterface(GenericModifyArticleRequest $request){
+    public function getSetHomeArticleInterface(GenericRequestWithID $request){
         Article::query()->update(['home_entry' => false]);
 
         $article = Article::find($request->id);
@@ -70,7 +74,7 @@ class InfoController extends Controller
         ]);
     }
 
-    public function getDeleteInterface(GenericModifyArticleRequest $request){
+    public function getDeleteInterface(GenericRequestWithID $request){
         $article = Article::find($request->id);
 
         if ($article !== null) {
@@ -88,7 +92,7 @@ class InfoController extends Controller
         }
     }
 
-    public function getEditView(GenericModifyArticleRequest $request){
+    public function getEditView(GenericRequestWithID $request){
         $article = Article::find($request->id);
 
         if ($article===null){
@@ -114,7 +118,8 @@ class InfoController extends Controller
 
     public function getManageView(){
         $articles = Article::all();
-        return view("info::manage", compact('articles'));
+        $resources = Resource::all();
+        return view("info::manage", compact('articles','resources'));
     }
 
     public function getArticleView($id){
@@ -130,6 +135,54 @@ class InfoController extends Controller
         return view("info::view", [
             "title" => $article->name,
             "content" => $article->text
+        ]);
+    }
+
+    public function uploadResource(UploadResource $request){
+        $file = $request->file;
+        $mime_type = $file->getMimeType();
+
+        $path = $file->store('recursive_tree_info_module_resources');
+
+        $resource = new Resource();
+        $resource->mime = $mime_type;
+        $resource->path = $path;
+        $resource->save();
+
+        return redirect()->route('info.manage')->with('message', [
+            'title' => "Success",
+            'message' => 'Successfully uploaded file!'
+        ]);
+    }
+
+    public function viewResource($id){
+        $db_entry = Resource::find($id);
+
+        if ($db_entry==null){
+            return abort(404);
+        }
+
+        $content = Storage::get($db_entry->path);
+        $type = $db_entry->mime;
+
+        return response($content)->header('Content-Type', $type);
+    }
+
+    public function deleteResource(GenericRequestWithID $request){
+        $resource = Resource::find($request->id);
+        if ($resource===null){
+            return redirect()->route('info.manage')->with('message', [
+                'title' => "Error",
+                'message' => 'Could not find requested resource!'
+            ]);
+        }
+
+        Storage::delete($resource->path);
+        Resource::destroy($request->id);
+
+        return redirect()->route('info.manage')->with('message', [
+            'title' => "Success",
+            'message' => 'Successfully deleted file!'
         ]);
     }
 }
