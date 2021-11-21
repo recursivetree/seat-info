@@ -76,7 +76,7 @@
                 //console.log(content)
 
                 let preview_target = document.getElementById("editor-preview-target")
-                preview_target.textContent=""
+                preview_target.textContent=""// lazy thing to clear the dom
 
                 render_article(content, document.getElementById("editor-preview-target"), function (e) {
                     //console.log(e)

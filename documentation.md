@@ -1,12 +1,20 @@
+# The syntax 
+The syntax of the editor is quite similar to html, but it's not exactely the same. It only supports a small subset of html listed in this documentation
+
 ## Links
 `<a href="http://example.com">Click me</a>`
 
 `<a href="http://example.com" newtab>Click me</a>` Opens it in a new tab
 
-`<a href="seatinof:article/id">Click me</a>` Opens the article with id
+`<a href="seatinfo:article/id">Click me</a>` Opens the article with id. You can find the whole url in the managment tab.
 
-`<a href="seatinof:resource/id">Click me</a>` Opens a resource uploaded to seat
+`<a href="seatinfo:resource/id">Click me</a>` Opens a resource uploaded to seat
 
+
+## Links within the page
+You can create links within the article to for example have a table of contents full of links that jump you to the right 
+section. To create such a link, add this to jump destination: `<pagelink id="your_id">`. To actually create the link to 
+the target, use a normal link like this: `<a href="#your_id">jump down</a>`.
 
 ## Bold
 `<b>bold text</b>`
