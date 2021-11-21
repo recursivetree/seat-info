@@ -13,6 +13,11 @@ class InfoServiceProvider extends AbstractSeatPlugin
      * @return void
      */
     public function boot(){
+
+        $this->publishes([
+            __DIR__ . '/resources/js' => public_path('info/js')
+        ]);
+
         if (! $this->app->routesAreCached()) {
             include __DIR__ . '/Http/routes.php';
         }

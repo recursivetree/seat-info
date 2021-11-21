@@ -20,9 +20,9 @@ class InfoController extends Controller
         $article = Article::where("home_entry",true)->first();
 
         if ($article===null){
-            return view("info::view")->with('message', [
+            return redirect()->route('info.list')->with('message', [
                 'title' => "Error",
-                'message' => 'There is no home article configured. Please contact the administrator about this.'
+                'message' => 'There is no start article configured, forwarding to the article list. Please contact the administrator about this.'
             ]);
         }
 

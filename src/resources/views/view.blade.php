@@ -26,9 +26,7 @@
                         <div class="card-header"><b>{{$title}}</b><span><a class="btn btn-secondary float-right" href="{{ route("info.list") }}">Back</a></span></div>
                         <div class="card-body">
 
-                            <p class="card-text">
-                                {{ $content }}
-                            </p>
+                            <p class="card-text" id="info-content-target"></p>
 
                         </div>
                     </div>
@@ -39,3 +37,12 @@
     </div>
 
 @stop
+
+@push('javascript')
+    <script src="{{ asset('info/js/render_article.js') }}"></script>
+    <script>
+        window.addEventListener('load', (event) => {
+            render_article({!! json_encode( $content) !!}, document.getElementById("info-content-target"));
+        });
+    </script>
+@endpush
