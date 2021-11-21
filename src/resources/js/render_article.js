@@ -62,13 +62,29 @@ class DOMBuilder {
 }
 
 function render_article(src, target) {
-    function redirect_resource_url(base) {
-        
+    function redirect_resource_url(url, allow_article=false) {
+        let result = url.match(/^seatinfo:resource\/([0-9]+)$/)
+        if (result){
+            const id = result[1]
+            return `/info/resource/${id}`
+        }
+        if (allow_article){
+            let result = url.match(/^seatinfo:article\/([0-9]+)$/)
+            if (result){
+                const id = result[1]
+                return `/info/view/${id}`
+            }
+        }
+        return url
     }
 
     const tag_handlers = {
         "br": function(builder, arguments) {
             let brNode = document.createElement("br")
+            builder.addNode(brNode)
+        },
+        "hr": function(builder, arguments) {
+            let brNode = document.createElement("hr")
             builder.addNode(brNode)
         },
         "b": function (builder, arguments) {
@@ -79,37 +95,88 @@ function render_article(src, target) {
             let bNode = document.createElement("a")
 
             if (arguments.href){
-                bNode.setAttribute("href", arguments.href)
+                bNode.setAttribute("href", redirect_resource_url(arguments.href, true))
             }
 
             if (arguments.newtab){
                 bNode.setAttribute("target", "_blank")
             }
 
-            builder.pushNode(bNode)
-        },
-        "download": function (builder, arguments) {
-            let bNode = document.createElement("a")
-
-            if (arguments.href){
-                bNode.setAttribute("href", arguments.href)
+            if (arguments.download){
+                bNode.setAttribute("download", "")
             }
 
-            bNode.setAttribute("download", "")
-
             builder.pushNode(bNode)
-        }
+        },
+        "h1": function (builder, arguments) {
+            let bNode = document.createElement("h1")
+            builder.pushNode(bNode)
+        },
+        "h2": function (builder, arguments) {
+            let bNode = document.createElement("h2")
+            builder.pushNode(bNode)
+        },
+        "h3": function (builder, arguments) {
+            let bNode = document.createElement("h3")
+            builder.pushNode(bNode)
+        },
+        "h4": function (builder, arguments) {
+            let bNode = document.createElement("h4")
+            builder.pushNode(bNode)
+        },
+        "h5": function (builder, arguments) {
+            let bNode = document.createElement("h5")
+            builder.pushNode(bNode)
+        },
+        "h6": function (builder, arguments) {
+            let bNode = document.createElement("h6")
+            builder.pushNode(bNode)
+        },
+        "ul": function (builder, arguments) {
+            let bNode = document.createElement("ul")
+            builder.pushNode(bNode)
+        },
+        "ol": function (builder, arguments) {
+            let bNode = document.createElement("ol")
+            builder.pushNode(bNode)
+        },
+        "li": function (builder, arguments) {
+            let bNode = document.createElement("li")
+            builder.pushNode(bNode)
+        },
+        "p": function (builder, arguments) {
+            let bNode = document.createElement("p")
+            builder.pushNode(bNode)
+        },
+        "i": function (builder, arguments) {
+            let bNode = document.createElement("i")
+            builder.pushNode(bNode)
+        },
+        "s": function (builder, arguments) {
+            let bNode = document.createElement("s")
+            builder.pushNode(bNode)
+        },
+        "img": function (builder, arguments) {
+            let bNode = document.createElement("img")
+            if (arguments.src){
+                bNode.setAttribute("src",redirect_resource_url(arguments.src))
+            }
+            if (arguments.alt){
+                bNode.setAttribute("alt",arguments.alt)
+            }
+            bNode.classList.add("mw-100")
+            builder.addNode(bNode)
+        },
     }
 
     let reader = new CharReader(src)
-    let textNodeStart = reader.position()
+    let textNodeStart = null
 
     let builder = new DOMBuilder(target)
 
     function finish_text_node(start, end) {
-        //return nothing if both are equal
-        if (start===end){
-            return
+        if (start==null){
+            return;
         }
         let text = reader.range(start, end)
         if (text.length === 0) {
@@ -122,17 +189,8 @@ function render_article(src, target) {
     while (reader.hasNext()) {
         let c = reader.next()
 
-        //newline
-        if (c === "\r" && reader.hasNext() && reader.next() === "\n") {
-            finish_text_node(textNodeStart, reader.position(-2))
-
-            let brNode = document.createElement("br")
-            builder.addNode(brNode)
-
-            textNodeStart = reader.position()
-        }
         //tags
-        else if (c === "<") {
+        if (c === "<") {
             finish_text_node(textNodeStart, reader.position(-2)) // next advances by one and we want to go back by one, so -1+-1=2
 
             let closing
@@ -243,7 +301,12 @@ function render_article(src, target) {
                 }
             }
 
-            textNodeStart = reader.position()
+            textNodeStart = null
+        } else {
+            //nothing special, jut a text node
+            if (textNodeStart==null){
+                textNodeStart = reader.position(-1)
+            }
         }
     }
 
