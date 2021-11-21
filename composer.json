@@ -1,0 +1,30 @@
+{
+  "name": "recursivetree/seat-info",
+  "description": "A SeAT module that adds a small article systems for example as a corporation bulletin",
+  "type": "seat-plugin",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "recursive_tree",
+      "email": "recursivetreemail@gmail.com"
+    }
+  ],
+  "minimum-stability": "stable",
+  "autoload": {
+    "psr-4": {
+      "RecursiveTree\\Seat\\InfoPlugin\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "RecursiveTree\\Seat\\InfoPlugin\\InfoServiceProvider"
+      ]
+    }
+  },
+  "require": {
+    "eveseat/services": "^4.1",
+    "eveseat/eveapi": "^4.0",
+    "eveseat/web": "^4.0"
+  }
+}
