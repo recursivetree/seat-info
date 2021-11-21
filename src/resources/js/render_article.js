@@ -69,7 +69,7 @@ function render_article(src, target) {
             return `/info/resource/${id}`
         }
         if (allow_article){
-            let result = url.match(/^seatinfo:article\/([0-9]+)$/)
+            let result = url.match(/^seatinfo:article\/([0-9]+)/)
             if (result){
                 const id = result[1]
                 return `/info/view/${id}`
@@ -166,6 +166,40 @@ function render_article(src, target) {
             }
             bNode.classList.add("mw-100")
             builder.addNode(bNode)
+        },
+        "table": function (builder, arguments) {
+            let bNode = document.createElement("table")
+            bNode.classList.add("table")
+            if(arguments.stripes){
+                bNode.classList.add("table-striped")
+            }
+            if(arguments.border){
+                bNode.classList.add("table-bordered")
+            }
+            builder.pushNode(bNode)
+        },
+        "tr": function (builder, arguments) {
+            let bNode = document.createElement("tr")
+            builder.pushNode(bNode)
+        },
+        "td": function (builder, arguments) {
+            let bNode = document.createElement("td")
+            builder.pushNode(bNode)
+        },
+        "thead": function (builder, arguments) {
+            let bNode = document.createElement("thead")
+            builder.pushNode(bNode)
+        },
+        "tbody": function (builder, arguments) {
+            let bNode = document.createElement("tbody")
+            builder.pushNode(bNode)
+        },
+        "pagelink": function (builder, arguments) {
+            if(arguments.id) {
+                let bNode = document.createElement("div")
+                bNode.setAttribute("id", arguments.id);
+                builder.addNode(bNode)
+            }
         },
     }
 

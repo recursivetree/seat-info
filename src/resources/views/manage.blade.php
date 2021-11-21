@@ -34,7 +34,7 @@
                             <thead>
                             <tr>
                                 <th>Name</th>
-                                <th>Text</th>
+                                <th>Labels</th>
                                 <th><span class="float-right">Actions</span></th>
                             </tr>
                             </thead>
@@ -43,29 +43,30 @@
                                 <tr>
                                     <td>
                                         <a href="{{ route("info.view", $article->id) }}">{{ $article->name }}</a>
+                                    </td>
+                                    <td>
                                         @if($article->home_entry)
                                             <span class="badge badge-info">Home Article</span>
                                         @endif
                                     </td>
-                                    <td>{{ substr(preg_replace( "/\r|\n/", "", $article->text), 0, 60) }}</td>
                                     <td>
-                                        <div class="float-right row">
+                                        <div class="float-right row btn-toolbar">
                                             @if(!$article->home_entry)
                                                 <form method="post" action="{{ route("info.set_home_article") }}">
                                                     @csrf
-                                                    <button class="btn btn-secondary">Set Home Article</button>
+                                                    <button class="btn btn-secondary" style="margin:0.1rem">Set Home Article</button>
                                                     <input type="hidden" value="{{ $article->id }}" name="id">
                                                 </form>
                                             @endif
 
                                             <form method="post" action="{{ route("info.edit_article") }}">
                                                 @csrf
-                                                <button class="btn btn-secondary">Edit</button>
+                                                <button class="btn btn-secondary" style="margin:0.1rem">Edit</button>
                                                 <input type="hidden" value="{{ $article->id }}" name="id">
                                             </form>
                                             <form method="post" action="{{ route("info.delete_article") }}">
                                                 @csrf
-                                                <button class="btn btn-danger">Delete</button>
+                                                <button class="btn btn-danger" style="margin:0.1rem">Delete</button>
                                                 <input type="hidden" value="{{ $article->id }}" name="id">
                                             </form>
                                         </div>
@@ -121,7 +122,7 @@
                                         <div class="float-right row">
                                             <form method="post" action="{{ route("info.delete_resource") }}">
                                                 @csrf
-                                                <button class="btn btn-danger">Delete</button>
+                                                <button class="btn btn-danger" style="margin:0.1rem">Delete</button>
                                                 <input type="hidden" value="{{ $resource->id }}" name="id">
                                             </form>
                                         </div>

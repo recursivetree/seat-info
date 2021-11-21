@@ -33,6 +33,7 @@ class InfoServiceProvider extends AbstractSeatPlugin
      */
     public function register(){
         $this->mergeConfigFrom(__DIR__ . '/Config/info.sidebar.php','package.sidebar');
+        $this->registerPermissions(__DIR__ . '/Config/Permissions/info.permissions.php', 'info');
     }
 
 

@@ -60,3 +60,40 @@ It's also possible to make a newline by pressing enter
 
 ## Crossed Text
 `<s>crossed text</s>`
+
+## Tables
+```
+<table stripes border>
+    <thead>
+        <tr>
+            <th>Column1</th>
+            <th>Column2</th>
+            <th>Column3</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+        </tr>
+    </tbody>
+</table>
+```
+Add the argument `stripes` and `borders` to the table to add stripes and borders
+
+## Images
+`<img src="link-to-image.png" alt="image description">`
+
+You can specify a file uploaded to resources: `<img src="seatinfo:resource/id" alt="image description">`
+To get the id, go to the management page.
