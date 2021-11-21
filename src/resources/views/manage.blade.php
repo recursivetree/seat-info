@@ -34,6 +34,7 @@
                             <thead>
                             <tr>
                                 <th>Name</th>
+                                <th>ID-Link</th>
                                 <th>Labels</th>
                                 <th><span class="float-right">Actions</span></th>
                             </tr>
@@ -43,6 +44,9 @@
                                 <tr>
                                     <td>
                                         <a href="{{ route("info.view", $article->id) }}">{{ $article->name }}</a>
+                                    </td>
+                                    <td>
+                                        {{ "seatinfo:article/{$article->id}" }}
                                     </td>
                                     <td>
                                         @if($article->home_entry)
@@ -85,23 +89,30 @@
 
                 <div class="card">
                     <div class="card-header">
-                        <span>Images</span>
+                        <span>Resources</span>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <form action="{{ route("info.upload_resource") }}" method="POST"
-                                  enctype="multipart/form-data">
+                        <div>
+                            <form action="{{ route("info.upload_resource") }}" method="POST" enctype="multipart/form-data">
                                 @csrf
-                                <input type="file" name="file">
-                                <button class="btn btn-primary" type="submit">Upload</button>
+                                <div class="form-group">
+                                    <label for="customFile">File Upload</label>
+                                    <div class="custom-file">
+                                        <input type="file" name="file" class="custom-file-input" id="customFile">
+                                        <label class="custom-file-label" for="customFile">Choose file</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <button class="btn btn-primary" type="submit">Upload</button>
+                                </div>
                             </form>
                         </div>
 
                         <table id="pages" class="table table table-striped">
                             <thead>
                             <tr>
-                                <th>Link</th>
-                                <th>ID</th>
+                                <th>Name</th>
+                                <th>ID-Link</th>
                                 <th>Type</th>
                                 <th><span class="float-right">Actions</span></th>
                             </tr>
@@ -110,10 +121,10 @@
                             @foreach ($resources as $resource)
                                 <tr>
                                     <td>
-                                        <a href="{{ route("info.view_resource",$resource->id) }}">Link</a>
+                                        <a href="{{ route("info.view_resource",$resource->id) }}">{{ $resource->name }}</a>
                                     </td>
                                     <td>
-                                        {{ $resource->id }}
+                                        {{ "seatinfo:resource/{$resource->id}"}}
                                     </td>
                                     <td>
                                         {{ $resource->mime }}
@@ -143,3 +154,13 @@
     </div>
 
 @stop
+
+@push('javascript')
+<script>
+    // Add the following code if you want the name of the file appear on select
+    $(".custom-file-input").on("change", function() {
+        let fileName = $(this).val().split("\\").pop();
+        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+    });
+</script>
+@endpush

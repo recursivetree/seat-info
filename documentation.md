@@ -3,6 +3,10 @@
 
 `<a href="http://example.com" newtab>Click me</a>` Opens it in a new tab
 
+`<a href="seatinof:article/id">Click me</a>` Opens the article with id
+
+`<a href="seatinof:resource/id">Click me</a>` Opens a resource uploaded to seat
+
 
 ## Bold
 `<b>bold text</b>`

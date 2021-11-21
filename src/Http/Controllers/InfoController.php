@@ -140,6 +140,7 @@ class InfoController extends Controller
 
     public function uploadResource(UploadResource $request){
         $file = $request->file;
+
         $mime_type = $file->getMimeType();
 
         $path = $file->store('recursive_tree_info_module_resources');
@@ -147,6 +148,7 @@ class InfoController extends Controller
         $resource = new Resource();
         $resource->mime = $mime_type;
         $resource->path = $path;
+        $resource->name = $file->getClientOriginalName();;
         $resource->save();
 
         return redirect()->route('info.manage')->with('message', [

@@ -11,6 +11,6 @@ class Resource extends Model
     protected $table = 'recursive_tree_seat_info_resources';
 
     protected $fillable = [
-        'id', 'path', 'mime'
+        'id', 'path', 'mime', "name"
     ];
 }
