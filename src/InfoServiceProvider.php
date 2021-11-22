@@ -83,6 +83,6 @@ class InfoServiceProvider extends AbstractSeatPlugin
      */
     public function getPackagistVendorName(): string
     {
-        return 'recursive_tree';
+        return 'recursivetree';
     }
 }
