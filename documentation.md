@@ -1,5 +1,10 @@
 # The syntax 
-The syntax of the editor is quite similar to html, but it's not exactely the same. It only supports a small subset of html listed in this documentation
+The syntax of the editor is quite similar to html, but it's not exactely the same. It only supports a small subset of 
+html listed in this documentation.
+
+Currently, the parser is relatively
+strict, and for example you can't have spaces in the tags where there doesn't need to be one. E.g. `<a></a>` is valid,
+but `< a ></ a>` isn't.
 
 ## Links
 `<a href="http://example.com">Click me</a>`

@@ -2,6 +2,8 @@
 SeAT-Info is a SeAT module that adds a small article systems for example as a corporation bulletin, or for explanations
 on how to use seat.
 
+![screenshot of the seat-info plugin](screenshot.png)
+
 ## Usage
 ### Roles
 #### View Role
@@ -21,6 +23,8 @@ Currrently there are a lot of features missing that might be useful, and it coul
 specific needs, open an issue or pull request.
 
 ## Installation
+I can also recommend reading through the [official seat documentation](https://eveseat.github.io/docs/community_packages/).
+
 ### Docker Install
 
 Open your .env file and edit the SEAT_PLUGINS variable to include the package.
@@ -32,7 +36,7 @@ SEAT_PLUGINS=recursivetree/seat-info
 
 Now run
 ```
-docker-compose uo
+docker-compose up
 ```
 and the plugin should be installed
 
@@ -49,7 +53,7 @@ sudo -H -u www-data bash -c 'php artisan seat:cache:clear'
 sudo -H -u www-data bash -c 'php artisan up'
 ```
 
-This should do it according to the official documentation, but I had to run the following too to get it working:
+This should do it according to the official documentation, but I had to run the following after `sudo -H -u www-data bash -c 'php artisan seat:cache:clear` to get it working:
 ```
 sudo -H -u www-data bash -c 'php artisan config:cache'
 sudo -H -u www-data bash -c 'php artisan route:cache'

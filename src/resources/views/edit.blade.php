@@ -43,6 +43,10 @@
                             </div>
 
                             <div class="form-group">
+                                <p>For the documentation on the styling syntax, take a look <a href="https://github.com/recursivetree/seat-info/blob/master/documentation.md">here</a>.</p>
+                            </div>
+
+                            <div class="form-group">
                                 <input type="submit" class="btn btn-primary" id="save" value="Save"/>
                             </div>
 
