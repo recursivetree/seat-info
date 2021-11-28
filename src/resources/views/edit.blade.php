@@ -3,6 +3,14 @@
 @section('title', trans('info::info.module_title'))
 @section('page_header', trans('info::info.module_title'))
 
+@push('head')
+    <style>
+        .monospace-font{
+            font-family: monospace;
+        }
+    </style>
+@endpush
+
 @section('full')
 
     <!-- Instructions -->
@@ -39,7 +47,7 @@
 
                             <div class="form-group">
                                 <label for="name">{{ trans('info::info.article_content') }}</label>
-                                <textarea name="text" class="form-control" id="text" placeholder="{{ trans('info::info.article_content_placeholder') }}" rows="15" required>{{ $text }}</textarea>
+                                <textarea name="text" class="form-control monospace-font text-sm" id="text" placeholder="{{ trans('info::info.article_content_placeholder') }}" rows="15" required>{{ $text }}</textarea>
                             </div>
 
                             <div class="form-group">
@@ -58,9 +66,17 @@
                 <div class="card">
                     <div class="card-header">Preview</div>
                     <div class="card-body">
-                        <p id="editor-preview-target">
 
-                        </p>
+                        <div id="editor-preview-status">
+                            <h2>Warnings</h2>
+                            <ul id="editor-preview-warnings" class="pl-0">
+
+                            </ul>
+                        </div>
+
+                        <div class="border rounded p-4"id="editor-preview-target">
+
+                        </div>
                     </div>
                 </div>
 
@@ -84,10 +100,39 @@
                 let preview_target = document.getElementById("editor-preview-target")
                 preview_target.textContent=""// lazy thing to clear the dom
 
+                if (content.length == 0){
+                    preview_target.textContent="This is an empty article, nothing to show"
+                }
+
                 render_article(content, document.getElementById("editor-preview-target"), function (e) {
-                    console.log(e)
-                    let preview_target = document.getElementById("editor-preview-target")
-                    preview_target.textContent = "There are syntax errors in your article! "+e
+                    let status_container = document.getElementById("editor-preview-status")
+                    if(e.error || e.warnings.length>0){
+                        status_container.style.display="block"
+                    } else {
+                        status_container.style.display="none"
+                    }
+
+                    let warnings_list = document.getElementById("editor-preview-warnings")
+                    warnings_list.textContent="" // clear all entries
+
+                    if (e.error){
+                        console.error(e)
+                        //document.getElementById("editor-preview-error").textContent = "The renderer couldn't render the article: "+e
+
+                        let liElement = document.createElement("li")
+                        liElement.textContent = `Could not render the whole page: Error: ${e.error.message}`
+                        liElement.classList.add("list-group-item-danger")
+                        liElement.classList.add("list-group-item")
+                        warnings_list.appendChild(liElement)
+                    }
+
+                    for(const warning of e.warnings){
+                        let liElement = document.createElement("li")
+                        liElement.textContent = warning
+                        liElement.classList.add("list-group-item-warning")
+                        liElement.classList.add("list-group-item")
+                        warnings_list.appendChild(liElement)
+                    }
                 });
             }
 

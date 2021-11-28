@@ -1,136 +1,7 @@
-// const tag_handlers = {
-//     "br": function (builder, arguments) {
-//         let brNode = document.createElement("br")
-//         builder.addNode(brNode)
-//     },
-//     "hr": function (builder, arguments) {
-//         let brNode = document.createElement("hr")
-//         builder.addNode(brNode)
-//     },
-//     "b": function (builder, arguments) {
-//         let bNode = document.createElement("b")
-//         builder.pushNode(bNode)
-//     },
-//     "a": function (builder, arguments) {
-//         let bNode = document.createElement("a")
-//
-//         if (arguments.href) {
-//             bNode.setAttribute("href", redirect_resource_url(arguments.href, true))
-//         }
-//
-//         if (arguments.newtab) {
-//             bNode.setAttribute("target", "_blank")
-//         }
-//
-//         if (arguments.download) {
-//             bNode.setAttribute("download", "")
-//         }
-//
-//         builder.pushNode(bNode)
-//     },
-//     "h1": function (builder, arguments) {
-//         let bNode = document.createElement("h1")
-//         builder.pushNode(bNode)
-//     },
-//     "h2": function (builder, arguments) {
-//         let bNode = document.createElement("h2")
-//         builder.pushNode(bNode)
-//     },
-//     "h3": function (builder, arguments) {
-//         let bNode = document.createElement("h3")
-//         builder.pushNode(bNode)
-//     },
-//     "h4": function (builder, arguments) {
-//         let bNode = document.createElement("h4")
-//         builder.pushNode(bNode)
-//     },
-//     "h5": function (builder, arguments) {
-//         let bNode = document.createElement("h5")
-//         builder.pushNode(bNode)
-//     },
-//     "h6": function (builder, arguments) {
-//         let bNode = document.createElement("h6")
-//         builder.pushNode(bNode)
-//     },
-//     "ul": function (builder, arguments) {
-//         let bNode = document.createElement("ul")
-//         builder.pushNode(bNode)
-//     },
-//     "ol": function (builder, arguments) {
-//         let bNode = document.createElement("ol")
-//         builder.pushNode(bNode)
-//     },
-//     "li": function (builder, arguments) {
-//         let bNode = document.createElement("li")
-//         builder.pushNode(bNode)
-//     },
-//     "p": function (builder, arguments) {
-//         let bNode = document.createElement("p")
-//         builder.pushNode(bNode)
-//     },
-//     "i": function (builder, arguments) {
-//         let bNode = document.createElement("i")
-//         builder.pushNode(bNode)
-//     },
-//     "s": function (builder, arguments) {
-//         let bNode = document.createElement("s")
-//         builder.pushNode(bNode)
-//     },
-//     "img": function (builder, arguments) {
-//         let bNode = document.createElement("img")
-//         if (arguments.src) {
-//             bNode.setAttribute("src", redirect_resource_url(arguments.src))
-//         }
-//         if (arguments.alt) {
-//             bNode.setAttribute("alt", arguments.alt)
-//         }
-//         bNode.classList.add("mw-100")
-//         builder.addNode(bNode)
-//     },
-//     "table": function (builder, arguments) {
-//         let bNode = document.createElement("table")
-//         bNode.classList.add("table")
-//         if (arguments.stripes) {
-//             bNode.classList.add("table-striped")
-//         }
-//         if (arguments.border) {
-//             bNode.classList.add("table-bordered")
-//         }
-//         builder.pushNode(bNode)
-//     },
-//     "tr": function (builder, arguments) {
-//         let bNode = document.createElement("tr")
-//         builder.pushNode(bNode)
-//     },
-//     "th": function (builder, arguments) {
-//         let bNode = document.createElement("th")
-//         builder.pushNode(bNode)
-//     },
-//     "td": function (builder, arguments) {
-//         let bNode = document.createElement("td")
-//         builder.pushNode(bNode)
-//     },
-//     "thead": function (builder, arguments) {
-//         let bNode = document.createElement("thead")
-//         builder.pushNode(bNode)
-//     },
-//     "tbody": function (builder, arguments) {
-//         let bNode = document.createElement("tbody")
-//         builder.pushNode(bNode)
-//     },
-//     "pagelink": function (builder, arguments) {
-//         if (arguments.id) {
-//             let bNode = document.createElement("div")
-//             bNode.setAttribute("id", arguments.id);
-//             builder.addNode(bNode)
-//         }
-//     },
-// }
-
 function registerSimpleTextContainingMarkupTag(tagName){
     class TempTag extends MarkupTag{
-        constructor() {
-            super(tagName);
+        constructor(renderer) {
+            super(renderer,tagName);
         }
     }
     MARKUP_TAG_REGISTRY[tagName] = TempTag
@@ -139,18 +10,18 @@ function registerSimpleTextContainingMarkupTag(tagName){
 
 function registerSimpleNoContentMarkupTag(tagName){
     class TempTag extends MarkupTag{
-        constructor() {
-            super(tagName);
+        constructor(renderer) {
+            super(renderer,tagName);
         }
         onChild(child) {
             //do nothing
             //allowsContent should not even allow this to be called, but you never know
-            //TODO warning
+            super.warn(`${tagName} tags don't allow children elements.`)
         }
         onTextContent(text) {
             //do nothing
             //allowsContent should not even allow this to be called, but you never know
-            //TODO warning
+            super.warn(`${tagName} tags don't allow text content.`)
         }
         allowsContent(){
             return false
@@ -162,8 +33,8 @@ function registerSimpleNoContentMarkupTag(tagName){
 
 function registerRestrainedChildrenMarkupTag(tagName,allowed_children, allow_text=false){
     class TempTag extends MarkupTag{
-        constructor() {
-            super(tagName);
+        constructor(renderer) {
+            super(renderer,tagName);
         }
         onChild(child) {
             for(const allowed of allowed_children){
@@ -172,10 +43,15 @@ function registerRestrainedChildrenMarkupTag(tagName,allowed_children, allow_tex
                     return
                 }
             }
+            super.warn(`Illegal children types in elements of type ${tagName}.`)
         }
         onTextContent(text) {
             if(allow_text){
                 super.addTextNode(text)
+            }
+            //check if it is just whitespace
+            else if (!/^\s*$/.test(text)) {
+                super.warn(`${tagName} tags don't allow text content.`)
             }
         }
     }
@@ -202,8 +78,8 @@ registerSimpleNoContentMarkupTag("br")
 registerSimpleNoContentMarkupTag("hr")
 
 class LinkMarkupTag extends MarkupTag{
-    constructor() {
-        super("a");
+    constructor(renderer) {
+        super(renderer,"a");
     }
 
     onOpen(attributes) {
@@ -239,8 +115,8 @@ const tBodyTag = registerRestrainedChildrenMarkupTag("tbody",[trTag])
 const tHeadTag = registerRestrainedChildrenMarkupTag("thead",[trTag])
 
 class TableMarkupTag extends MarkupTag{
-    constructor() {
-        super("table");
+    constructor(renderer) {
+        super(renderer,"table");
     }
     onOpen(attributes) {
         super.onOpen(attributes)
@@ -265,8 +141,8 @@ class TableMarkupTag extends MarkupTag{
 registerMarkupTag("table",TableMarkupTag)
 
 class ImgMarkupTag extends MarkupTag{
-    constructor() {
-        super("img");
+    constructor(renderer) {
+        super(renderer,"img");
     }
 
     onOpen(attributes) {
@@ -288,12 +164,12 @@ class ImgMarkupTag extends MarkupTag{
     onChild(child) {
         //do nothing
         //allowsContent should not even allow this to be called, but you never know
-        //TODO warning
+        super.warn("Image tags don't allow children elements.")
     }
     onTextContent(text) {
         //do nothing
         //allowsContent should not even allow this to be called, but you never know
-        //TODO warning
+        super.warn("Image tags don't allow text content.")
     }
 }
 registerMarkupTag("img",ImgMarkupTag)

@@ -42,8 +42,13 @@ class CharReader {
 }
 
 class MarkupTag{
-    constructor(container="div") {
+    constructor(renderer,container="div") {
         this._stack = [document.createElement(container)]
+        this._renderer = renderer
+    }
+
+    warn(message){
+        this._renderer.warn(message)
     }
 
     //opens a new html tag and sets it to the html tag we are currently working on
@@ -86,7 +91,7 @@ class MarkupTag{
         if (this._stack-length>1) {
             this._stack.pop()
         } else {
-            //TODO error handling
+            this.warn(`There is a a relatively unimportant bug in the code for the tags ${tagNames}, the editor should continue working fine. Error: HTML element stack underflow.`)
         }
     }
 
@@ -129,8 +134,8 @@ class MarkupTag{
 }
 
 class MarkupRootElement extends MarkupTag{
-    constructor(target) {
-        super();
+    constructor(renderer,target) {
+        super(renderer);
         //hacky hacky
         this._stack = [target]
     }
@@ -163,6 +168,12 @@ class MarkupRenderer{
         this.tag_name_stack = []
         this.textNodeStart = null
         this.src_reader = null
+
+        this.warnings = []
+    }
+
+    warn(message){
+        this.warnings.push(message)
     }
 
     read_text_node(){
@@ -295,7 +306,7 @@ class MarkupRenderer{
             // handle opening tag
             let tagType = this.tag_registry[name]
             if (tagType) {
-                let tag = new tagType()
+                let tag = new tagType(this)
                 tag.onOpen(arguments)
                 if (tag.allowsContent()) {
                     this.markup_tag_stack.push(tag)
@@ -306,8 +317,7 @@ class MarkupRenderer{
                     this.markup_tag_stack[this.markup_tag_stack.length - 1].onChild(tag)
                 }
             } else {
-                throw Error("unknown tag: " + name)
-                //TODO error handling
+                this.warn(`Unknown tag: '${name}', ignoring it`)
             }
         }
 
@@ -315,14 +325,14 @@ class MarkupRenderer{
             if (this.tag_name_stack.length>0){
                 if (!this.tag_name_stack.includes(name)){
                     //ignore it
-                    //TODO warning
+                    this.warn(`You are trying to close a '${name}' tag that wasn't opened, ignoring it.`)
                     return
                 } else {
                     while (true) {
                         //safe, as we only execute this when the name is in the stack
                         let expected_name = this.tag_name_stack.pop()
                         if (expected_name !== name) {
-                            //TODO error handling
+                            this.warn(`You are trying to close an '${name}' tag at an hierarchy level where it wasn't expected, but the tag was found on lower levels, closing all tags until the tag at the lower level.`)
 
                             //close tag
                             let toClose = this.markup_tag_stack.pop()
@@ -347,7 +357,7 @@ class MarkupRenderer{
     render(src, target){
         this.src_reader = new CharReader(src)
         this.textNodeStart = null
-        this.markup_tag_stack = [new MarkupRootElement(target)]
+        this.markup_tag_stack = [new MarkupRootElement(this,target)]
 
         //main parsing loop
         while (this.src_reader.hasNext()) {
@@ -371,7 +381,7 @@ class MarkupRenderer{
         this.finish_text_node(this.src_reader.position())
 
         if(this.markup_tag_stack.length>1){
-            //TODO warn because of unclosed tags
+            this.warn("There are unclosed tags at the end of the article!")
         }
 
         //close all unclose tags
@@ -388,8 +398,15 @@ function render_article(src, target, error_cb) {
     try {
         renderer.render(src, target)
     } catch (e) {
-        error_cb(e)
+        error_cb({
+            error: e,
+            warnings: renderer.warnings
+        })
+        return
     }
+    error_cb({
+        warnings: renderer.warnings
+    })
 }
 
 const MARKUP_TAG_REGISTRY = {

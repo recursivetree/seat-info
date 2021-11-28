@@ -26,7 +26,7 @@
                         <b>Error</b>
                     </div>
                     <div class="card-body">
-                        <p>The article contains syntax errors and might not be rendered correct! Consider contact your administrator about this.</p>
+                        <p>The article contains errors and might not be rendered correct! Consider contact your administrator about this.</p>
                     </div>
                 </div>
 
@@ -53,8 +53,10 @@
     <script>
         window.addEventListener('load', (event) => {
             render_article({!! json_encode( $content) !!}, document.getElementById("info-content-target"), function (e) {
-                console.log(e)
-                document.getElementById("rendering-error").style.display="block"
+                if(e.error) {
+                    console.log(e)
+                    document.getElementById("rendering-error").style.display = "block"
+                }
             });
         });
     </script>
