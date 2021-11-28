@@ -156,182 +156,214 @@ function process_seat_url(url) {
     return url
 }
 
+class MarkupRenderer{
+    constructor(tag_registry) {
+        this.tag_registry = tag_registry
+        this.markup_tag_stack = []
+        this.tag_name_stack = []
+        this.textNodeStart = null
+        this.src_reader = null
+    }
 
-function render_article(src, target, error_cb) {
-    try {
-        let tag_handlers = MARKUP_TAG_REGISTRY
+    read_text_node(){
+        //if the node hasn't started, start it now
+        if (this.textNodeStart == null) {
+            this.textNodeStart = this.src_reader.position(-1)
+        }
+    }
 
-        let reader = new CharReader(src)
-        let textNodeStart = null
-
-        let markupTagStack = [new MarkupRootElement(target)]
-
-        function finish_text_node(start, end) {
-            if (start == null) {
-                return;
-            }
-            let text = reader.range(start, end)
-            if (text.length === 0) {
-                return
-            }
-
-            let markupTagStackTop = markupTagStack[markupTagStack.length-1]
-            markupTagStackTop.onTextContent(text)
+    read_tag(){
+        //check if it is opening or closing
+        let isClosingTag
+        this.src_reader.ensureNext()
+        if (this.src_reader.next() === "/") {
+            //closing tag
+            isClosingTag = true
+        } else {
+            // opening tag, skip back for reading the tag name
+            this.src_reader.back()
+            isClosingTag = false
         }
 
+        //read tag name
+        let tagNameStart = this.src_reader.position()
+        while (true) {
+            this.src_reader.ensureNext()
+            let n = this.src_reader.next()
+            //tag end or argument start
+            if (n === ">" || n === " ") {
+                this.src_reader.back() // not part of the name anymore
+                break
+            }
+        }
+        let tagNameEnd = this.src_reader.position(-1) // we need to go one back, because the ending character shouldn't be counted
+        let tagName = this.src_reader.range(tagNameStart, tagNameEnd)
+
+        //read arguments
+        let attributes = {}
+        while (true) {
+            // read spaces util the argument starts
+            this.src_reader.ensureNext()
+            let n = this.src_reader.next()
+
+            // tag end
+            if (n === ">") {
+                break
+            }
+
+            // check for a space between arguments
+            if (n !== " ") {
+                throw Error("Expected a space")
+            }
+
+            let argNameStart = this.src_reader.position()
+            while (true) {
+                this.src_reader.ensureNext()
+                let a = this.src_reader.next()
+                // check if the arg name is finished. Cases: without parameter + more arguments follow, with parameter, without parameter+tag end
+                if (a === " " || a === "=" || a === ">") {
+                    this.src_reader.back()
+                    break
+                }
+            }
+            let argNameEnd = this.src_reader.position(-1)
+            let argName = this.src_reader.range(argNameStart, argNameEnd)
+
+            this.src_reader.ensureNext()
+            let t = this.src_reader.next()
+            if (t === " ") {
+                attributes[argName] = true
+                this.src_reader.back() // in order to continue, we need to go back, as we check for a single space at the beginning of the loop
+            } else if (t === ">") {
+                attributes[argName] = true
+                break // end of argument list
+            } else if (t === "=") {
+                this.src_reader.ensureNext()
+                let stringChar = this.src_reader.next()
+                if (!(stringChar === '"' || stringChar === "'")) {
+                    throw Error('expected character " after argument with parameter')
+                    //TODO error handling
+                }
+                let parameterStart = this.src_reader.position()
+                while (true) {
+                    this.src_reader.ensureNext()
+                    let p = this.src_reader.next()
+                    if (p === stringChar) {
+                        this.src_reader.back()
+                        break
+                    }
+                }
+                let parameterEnd = this.src_reader.position(-1)
+                attributes[argName] = this.src_reader.range(parameterStart, parameterEnd)
+
+                // check how to continue after argument
+                this.src_reader.ensureNext()
+                let t = this.src_reader.next()
+                if (t === " ") {
+                    this.src_reader.back() // in order to continue, we need to go back, as we check for a single space at the beginning of the loop
+                } else if (t === ">") {
+                    break // end of argument list
+                }
+            }
+        }
+
+        return {
+            name: tagName,
+            attributes: attributes,
+            opening: !isClosingTag,
+            closing: isClosingTag
+        }
+    }
+
+    finish_text_node(end) {
+        let start = this.textNodeStart
+
+        if (start == null) {
+            return;
+        }
+        let text = this.src_reader.range(start, end)
+        if (text.length === 0) {
+            return
+        }
+
+        let markupTagStackTop = this.markup_tag_stack[this.markup_tag_stack.length-1]
+        markupTagStackTop.onTextContent(text)
+    }
+
+    build_tag(name,attributes,opening,closing) {
+        if (opening) {
+            // handle opening tag
+            let tagType = this.tag_registry[name]
+            if (tagType) {
+                let tag = new tagType()
+                tag.onOpen(arguments)
+                if (tag.allowsContent()) {
+                    this.markup_tag_stack.push(tag)
+                } else {
+                    //no content allowed, close the tag now
+                    tag.onClose()
+                    this.markup_tag_stack[this.markup_tag_stack.length - 1].onChild(tag)
+                }
+            } else {
+                throw Error("unknown tag: " + name)
+                //TODO error handling
+            }
+        }
+
+        if (closing) {
+            // handle closing tag
+            if (this.markup_tag_stack.length > 1) { // never remove the last element, as it is the container
+                let toClose = this.markup_tag_stack.pop()
+                toClose.onClose()
+                this.markup_tag_stack[this.markup_tag_stack.length - 1].onChild(toClose)
+            }
+        }
+    }
+
+
+    render(src, target){
+        this.src_reader = new CharReader(src)
+        this.textNodeStart = null
+        this.markup_tag_stack = [new MarkupRootElement(target)]
+
         //main parsing loop
-        while (reader.hasNext()) {
+        while (this.src_reader.hasNext()) {
             // read first character to determine the type of token
-            let c = reader.next()
+            let c = this.src_reader.next()
 
             //parse text
             if (c !== "<"){
-                //if the node hasn't started, start it now
-                if (textNodeStart == null) {
-                    textNodeStart = reader.position(-1)
-                }
+                this.read_text_node()
             }
             //parse tags
             else {
-                // if there is a text node that hasn't finished, finish it now
-                finish_text_node(textNodeStart, reader.position(-2)) // next advances by one and we want to go back by one, so -1+-1=2
-                
-
-                //check if it is opening or closing
-                let isClosingTag
-                reader.ensureNext()
-                if (reader.next() === "/") {
-                    //closing tag
-                    isClosingTag = true
-                } else {
-                    // opening tag, skip back for reading the tag name
-                    reader.back()
-                    isClosingTag = false
-                }
-
-                //read tag name
-                let tagNameStart = reader.position()
-                while (true) {
-                    reader.ensureNext()
-                    let n = reader.next()
-                    //tag end or argument start
-                    if (n === ">" || n === " ") {
-                        reader.back() // not part of the name anymore
-                        break
-                    }
-                }
-                let tagNameEnd = reader.position(-1) // we need to go one back, because the ending character shouldn't be counted
-                let tagName = reader.range(tagNameStart, tagNameEnd)
-
-                //read arguments
-                let arguments = {}
-                while (true) {
-                    // read spaces util the argument starts
-                    reader.ensureNext()
-                    let n = reader.next()
-
-                    // tag end
-                    if (n === ">") {
-                        break
-                    }
-
-                    // check for a space between arguments
-                    if (n !== " ") {
-                        throw Error("Expected a space")
-                    }
-
-                    let argNameStart = reader.position()
-                    while (true) {
-                        reader.ensureNext()
-                        let a = reader.next()
-                        // check if the arg name is finished. Cases: without parameter + more arguments follow, with parameter, without parameter+tag end
-                        if (a === " " || a === "=" || a === ">") {
-                            reader.back()
-                            break
-                        }
-                    }
-                    let argNameEnd = reader.position(-1)
-                    let argName = reader.range(argNameStart, argNameEnd)
-
-                    reader.ensureNext()
-                    let t = reader.next()
-                    if (t === " ") {
-                        arguments[argName] = true
-                        reader.back() // in order to continue, we need to go back, as we check for a single space at the beginning of the loop
-                    } else if (t === ">") {
-                        arguments[argName] = true
-                        break // end of argument list
-                    } else if (t === "=") {
-                        reader.ensureNext()
-                        let stringChar = reader.next()
-                        if (!(stringChar === '"' || stringChar === "'")) {
-                            throw Error('expected character " after argument with parameter')
-                            //TODO error handling
-                        }
-                        let parameterStart = reader.position()
-                        while (true) {
-                            reader.ensureNext()
-                            let p = reader.next()
-                            if (p === stringChar) {
-                                reader.back()
-                                break
-                            }
-                        }
-                        let parameterEnd = reader.position(-1)
-                        arguments[argName] = reader.range(parameterStart, parameterEnd)
-
-                        // check how to continue after argument
-                        reader.ensureNext()
-                        let t = reader.next()
-                        if (t === " ") {
-                            reader.back() // in order to continue, we need to go back, as we check for a single space at the beginning of the loop
-                        } else if (t === ">") {
-                            break // end of argument list
-                        }
-                    }
-                }
-
-                // build DOM
-                if (isClosingTag) {
-                    // handle closing tag
-                    if (markupTagStack.length>1){ // never remove the last element, as it is the container
-                        let toClose = markupTagStack.pop()
-                        toClose.onClose()
-                        markupTagStack[markupTagStack.length-1].onChild(toClose)
-                    }
-
-                } else {
-                    // handle opening tag
-                    let tagType = tag_handlers[tagName]
-                    if (tagType) {
-                        let tag = new tagType()
-                        tag.onOpen(arguments)
-                        if (tag.allowsContent()) {
-                            markupTagStack.push(tag)
-                        } else {
-                            //no content allowed, close the tag now
-                            tag.onClose()
-                            markupTagStack[markupTagStack.length-1].onChild(tag)
-                        }
-                    } else {
-                        throw Error("unknown tag: " + tagName)
-                        //TODO error handling
-                    }
-                }
-
-                textNodeStart = null
+                this.finish_text_node(this.src_reader.position(-2))// we read the starting tag and afterwards it advanced the index by one, so we have to revert that
+                let tag_data = this.read_tag()
+                this.build_tag(tag_data.name,tag_data.attributes,tag_data.opening,tag_data.closing)
+                this.textNodeStart = null // after tag, start a new text node
             }
         }
 
-        while(markupTagStack.length>1){ // do not remove the root element
-            let toClose = markupTagStack.pop()
-            toClose.onClose()
-            markupTagStack[markupTagStack.length-1].onChild(toClose)
+        //finish text token that was started
+        this.finish_text_node(this.src_reader.position())
+
+        if(this.markup_tag_stack.length>1){
+            //TODO warn because of unclosed tags
         }
 
-        finish_text_node(textNodeStart, reader.position())
+        //close all unclose tags
+        while(this.markup_tag_stack.length>1){ // do not remove the root element
+            let toClose = this.markup_tag_stack.pop()
+            toClose.onClose()
+            this.markup_tag_stack[this.markup_tag_stack.length-1].onChild(toClose)
+        }
+    }
+}
 
-        //target.textContent = src
+function render_article(src, target, error_cb) {
+    let renderer = new MarkupRenderer(MARKUP_TAG_REGISTRY)
+    try {
+        renderer.render(src, target)
     } catch (e) {
         error_cb(e)
     }
