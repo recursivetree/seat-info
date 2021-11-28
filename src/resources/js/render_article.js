@@ -299,6 +299,7 @@ class MarkupRenderer{
                 tag.onOpen(arguments)
                 if (tag.allowsContent()) {
                     this.markup_tag_stack.push(tag)
+                    this.tag_name_stack.push(name)
                 } else {
                     //no content allowed, close the tag now
                     tag.onClose()
@@ -311,8 +312,30 @@ class MarkupRenderer{
         }
 
         if (closing) {
-            // handle closing tag
-            if (this.markup_tag_stack.length > 1) { // never remove the last element, as it is the container
+            if (this.tag_name_stack.length>0){
+                if (!this.tag_name_stack.includes(name)){
+                    //ignore it
+                    //TODO warning
+                    return
+                } else {
+                    while (true) {
+                        //safe, as we only execute this when the name is in the stack
+                        let expected_name = this.tag_name_stack.pop()
+                        if (expected_name !== name) {
+                            //TODO error handling
+
+                            //close tag
+                            let toClose = this.markup_tag_stack.pop()
+                            toClose.onClose()
+                            this.markup_tag_stack[this.markup_tag_stack.length - 1].onChild(toClose)
+                        } else {
+                            // we reached our target tag
+                            break
+                        }
+                    }
+                }
+
+                //close requested tag
                 let toClose = this.markup_tag_stack.pop()
                 toClose.onClose()
                 this.markup_tag_stack[this.markup_tag_stack.length - 1].onChild(toClose)
