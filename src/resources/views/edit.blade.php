@@ -72,23 +72,27 @@
 
 @push('javascript')
     <script src="{{ asset('info/js/render_article.js') }}"></script>
+    <script src="{{ asset('info/js/markup_tags.js') }}"></script>
     <script>
         window.addEventListener('load', (event) => {
-            setInterval(function (){
+            const textarea = document.getElementById("text")
 
-                const content = document.getElementById("text").value
+            function render_preview() {
+                const content = textarea.value
                 //console.log(content)
 
                 let preview_target = document.getElementById("editor-preview-target")
                 preview_target.textContent=""// lazy thing to clear the dom
 
                 render_article(content, document.getElementById("editor-preview-target"), function (e) {
-                    //console.log(e)
+                    console.log(e)
                     let preview_target = document.getElementById("editor-preview-target")
                     preview_target.textContent = "There are syntax errors in your article! "+e
                 });
+            }
 
-            }, 1000)
+            textarea.addEventListener("input",render_preview)
+            render_preview()
         });
     </script>
 @endpush

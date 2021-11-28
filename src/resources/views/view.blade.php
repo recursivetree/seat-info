@@ -49,6 +49,7 @@
 
 @push('javascript')
     <script src="{{ asset('info/js/render_article.js') }}"></script>
+    <script src="{{ asset('info/js/markup_tags.js') }}"></script>
     <script>
         window.addEventListener('load', (event) => {
             render_article({!! json_encode( $content) !!}, document.getElementById("info-content-target"), function (e) {

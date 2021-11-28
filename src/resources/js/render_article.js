@@ -41,178 +41,130 @@ class CharReader {
     }
 }
 
-class DOMBuilder {
-    constructor(target) {
-        this.stack = [target]
+class MarkupTag{
+    constructor(container="div") {
+        this._stack = [document.createElement(container)]
     }
 
-    addNode(node) {
-        let element = this.stack[this.stack.length - 1]
-        element.appendChild(node)
+    //opens a new html tag and sets it to the html tag we are currently working on
+    openHTMLTag(name){
+        let top = this._stackTop()
+        let element = document.createElement(name)
+        top.appendChild(element)
+        this._stack.push(element)
     }
 
-    pushNode(node) {
-        this.addNode(node)
-        this.stack.push(node)
+    // adds another markup tag instance. Intended for use in the onChild function
+    addMarkupTag(tag){
+        let top = this._stackTop()
+        top.appendChild(tag.build())
     }
 
-    dropNode() {
-        this.stack.pop()
+    //private function, please ignore
+    _stackTop(){
+        return this._stack[this._stack.length-1]
+    }
+
+    //adds a text node to the element we are currently working on
+    addTextNode(text){
+        let top = this._stackTop()
+        top.appendChild(document.createTextNode(text))
+    }
+
+    setAttribute(name, value){
+        let top = this._stackTop()
+        top.setAttribute(name,value)
+    }
+
+    addClass(name){
+        let top = this._stackTop()
+        top.classList.add(name)
+    }
+
+    //closes the element we are currently working on and go back to the last one we were working on
+    closeHTMLTag(){
+        if (this._stack-length>1) {
+            this._stack.pop()
+        } else {
+            //TODO error handling
+        }
+    }
+
+    //returns this tag as a html dom element
+    build(){
+        return this._stack[0]
+    }
+
+    //handles standard attributes like id and adds it to the current element, or wrapper, if none was created
+    handleStandardAttributes(attributes){
+        if(attributes.id){
+            console.log("hi")
+            this.setAttribute("id",attributes.id)
+        }
+    }
+
+    allowsContent(){
+        return true
+    }
+
+    // called when the tag is opened
+    onOpen(attributes){
+        this.handleStandardAttributes(attributes)
+    }
+
+    //called when the tag is closed
+    onClose(){
+        //nothing
+    }
+
+    //called when the tag contains text
+    onTextContent(text){
+        this.addTextNode(text)
+    }
+
+    //called when a tag contains another tag
+    onChild(child){
+        this.addMarkupTag(child)
     }
 }
 
+class MarkupRootElement extends MarkupTag{
+    constructor(target) {
+        super();
+        //hacky hacky
+        this._stack = [target]
+    }
+
+    onOpen(attributes) {
+        //do nothing
+    }
+}
+
+function process_seat_url(url) {
+    let result = url.match(/^seatinfo:resource\/([0-9]+)$/)
+    if (result) {
+        const id = result[1]
+        return `/info/resource/${id}`
+    }
+
+    result = url.match(/^seatinfo:article\/([0-9]+)/)
+    if (result) {
+        const id = result[1]
+        return `/info/view/${id}`
+    }
+
+    return url
+}
+
+
 function render_article(src, target, error_cb) {
-
-    function render_main(src, target) {
-        function redirect_resource_url(url, allow_article = false) {
-            let result = url.match(/^seatinfo:resource\/([0-9]+)$/)
-            if (result) {
-                const id = result[1]
-                return `/info/resource/${id}`
-            }
-            if (allow_article) {
-                let result = url.match(/^seatinfo:article\/([0-9]+)/)
-                if (result) {
-                    const id = result[1]
-                    return `/info/view/${id}`
-                }
-            }
-            return url
-        }
-
-        const tag_handlers = {
-            "br": function (builder, arguments) {
-                let brNode = document.createElement("br")
-                builder.addNode(brNode)
-            },
-            "hr": function (builder, arguments) {
-                let brNode = document.createElement("hr")
-                builder.addNode(brNode)
-            },
-            "b": function (builder, arguments) {
-                let bNode = document.createElement("b")
-                builder.pushNode(bNode)
-            },
-            "a": function (builder, arguments) {
-                let bNode = document.createElement("a")
-
-                if (arguments.href) {
-                    bNode.setAttribute("href", redirect_resource_url(arguments.href, true))
-                }
-
-                if (arguments.newtab) {
-                    bNode.setAttribute("target", "_blank")
-                }
-
-                if (arguments.download) {
-                    bNode.setAttribute("download", "")
-                }
-
-                builder.pushNode(bNode)
-            },
-            "h1": function (builder, arguments) {
-                let bNode = document.createElement("h1")
-                builder.pushNode(bNode)
-            },
-            "h2": function (builder, arguments) {
-                let bNode = document.createElement("h2")
-                builder.pushNode(bNode)
-            },
-            "h3": function (builder, arguments) {
-                let bNode = document.createElement("h3")
-                builder.pushNode(bNode)
-            },
-            "h4": function (builder, arguments) {
-                let bNode = document.createElement("h4")
-                builder.pushNode(bNode)
-            },
-            "h5": function (builder, arguments) {
-                let bNode = document.createElement("h5")
-                builder.pushNode(bNode)
-            },
-            "h6": function (builder, arguments) {
-                let bNode = document.createElement("h6")
-                builder.pushNode(bNode)
-            },
-            "ul": function (builder, arguments) {
-                let bNode = document.createElement("ul")
-                builder.pushNode(bNode)
-            },
-            "ol": function (builder, arguments) {
-                let bNode = document.createElement("ol")
-                builder.pushNode(bNode)
-            },
-            "li": function (builder, arguments) {
-                let bNode = document.createElement("li")
-                builder.pushNode(bNode)
-            },
-            "p": function (builder, arguments) {
-                let bNode = document.createElement("p")
-                builder.pushNode(bNode)
-            },
-            "i": function (builder, arguments) {
-                let bNode = document.createElement("i")
-                builder.pushNode(bNode)
-            },
-            "s": function (builder, arguments) {
-                let bNode = document.createElement("s")
-                builder.pushNode(bNode)
-            },
-            "img": function (builder, arguments) {
-                let bNode = document.createElement("img")
-                if (arguments.src) {
-                    bNode.setAttribute("src", redirect_resource_url(arguments.src))
-                }
-                if (arguments.alt) {
-                    bNode.setAttribute("alt", arguments.alt)
-                }
-                bNode.classList.add("mw-100")
-                builder.addNode(bNode)
-            },
-            "table": function (builder, arguments) {
-                let bNode = document.createElement("table")
-                bNode.classList.add("table")
-                if (arguments.stripes) {
-                    bNode.classList.add("table-striped")
-                }
-                if (arguments.border) {
-                    bNode.classList.add("table-bordered")
-                }
-                builder.pushNode(bNode)
-            },
-            "tr": function (builder, arguments) {
-                let bNode = document.createElement("tr")
-                builder.pushNode(bNode)
-            },
-            "th": function (builder, arguments) {
-                let bNode = document.createElement("th")
-                builder.pushNode(bNode)
-            },
-            "td": function (builder, arguments) {
-                let bNode = document.createElement("td")
-                builder.pushNode(bNode)
-            },
-            "thead": function (builder, arguments) {
-                let bNode = document.createElement("thead")
-                builder.pushNode(bNode)
-            },
-            "tbody": function (builder, arguments) {
-                let bNode = document.createElement("tbody")
-                builder.pushNode(bNode)
-            },
-            "pagelink": function (builder, arguments) {
-                if (arguments.id) {
-                    let bNode = document.createElement("div")
-                    bNode.setAttribute("id", arguments.id);
-                    builder.addNode(bNode)
-                }
-            },
-        }
+    try {
+        let tag_handlers = MARKUP_TAG_REGISTRY
 
         let reader = new CharReader(src)
         let textNodeStart = null
 
-        let builder = new DOMBuilder(target)
+        let markupTagStack = [new MarkupRootElement(target)]
 
         function finish_text_node(start, end) {
             if (start == null) {
@@ -222,28 +174,39 @@ function render_article(src, target, error_cb) {
             if (text.length === 0) {
                 return
             }
-            let node = document.createTextNode(text)
-            builder.addNode(node)
+
+            let markupTagStackTop = markupTagStack[markupTagStack.length-1]
+            markupTagStackTop.onTextContent(text)
         }
 
+        //main parsing loop
         while (reader.hasNext()) {
+            // read first character to determine the type of token
             let c = reader.next()
 
-            //tags
-            if (c === "<") {
+            //parse text
+            if (c !== "<"){
+                //if the node hasn't started, start it now
+                if (textNodeStart == null) {
+                    textNodeStart = reader.position(-1)
+                }
+            }
+            //parse tags
+            else {
+                // if there is a text node that hasn't finished, finish it now
                 finish_text_node(textNodeStart, reader.position(-2)) // next advances by one and we want to go back by one, so -1+-1=2
-
-                let closing
+                
 
                 //check if it is opening or closing
+                let isClosingTag
                 reader.ensureNext()
                 if (reader.next() === "/") {
                     //closing tag
-                    closing = true
+                    isClosingTag = true
                 } else {
                     // opening tag, skip back for reading the tag name
                     reader.back()
-                    closing = false
+                    isClosingTag = false
                 }
 
                 //read tag name
@@ -303,6 +266,7 @@ function render_article(src, target, error_cb) {
                         let stringChar = reader.next()
                         if (!(stringChar === '"' || stringChar === "'")) {
                             throw Error('expected character " after argument with parameter')
+                            //TODO error handling
                         }
                         let parameterStart = reader.position()
                         while (true) {
@@ -328,36 +292,51 @@ function render_article(src, target, error_cb) {
                 }
 
                 // build DOM
-                if (closing) {
+                if (isClosingTag) {
                     // handle closing tag
-                    builder.dropNode()
+                    if (markupTagStack.length>1){ // never remove the last element, as it is the container
+                        let toClose = markupTagStack.pop()
+                        toClose.onClose()
+                        markupTagStack[markupTagStack.length-1].onChild(toClose)
+                    }
+
                 } else {
                     // handle opening tag
-                    let handler = tag_handlers[tagName]
-                    if (handler) {
-                        handler(builder, arguments)
+                    let tagType = tag_handlers[tagName]
+                    if (tagType) {
+                        let tag = new tagType()
+                        tag.onOpen(arguments)
+                        if (tag.allowsContent()) {
+                            markupTagStack.push(tag)
+                        } else {
+                            //no content allowed, close the tag now
+                            tag.onClose()
+                            markupTagStack[markupTagStack.length-1].onChild(tag)
+                        }
                     } else {
                         throw Error("unknown tag: " + tagName)
+                        //TODO error handling
                     }
                 }
 
                 textNodeStart = null
-            } else {
-                //nothing special, jut a text node
-                if (textNodeStart == null) {
-                    textNodeStart = reader.position(-1)
-                }
             }
+        }
+
+        while(markupTagStack.length>1){ // do not remove the root element
+            let toClose = markupTagStack.pop()
+            toClose.onClose()
+            markupTagStack[markupTagStack.length-1].onChild(toClose)
         }
 
         finish_text_node(textNodeStart, reader.position())
 
         //target.textContent = src
-    }
-
-    try {
-        render_main(src,target)
     } catch (e) {
         error_cb(e)
     }
+}
+
+const MARKUP_TAG_REGISTRY = {
+
 }
