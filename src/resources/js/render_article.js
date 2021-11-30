@@ -307,7 +307,7 @@ class MarkupRenderer{
             let tagType = this.tag_registry[name]
             if (tagType) {
                 let tag = new tagType(this)
-                tag.onOpen(arguments)
+                tag.onOpen(attributes)
                 if (tag.allowsContent()) {
                     this.markup_tag_stack.push(tag)
                     this.tag_name_stack.push(name)
