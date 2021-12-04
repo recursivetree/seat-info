@@ -26,13 +26,13 @@
                         <b>Error</b>
                     </div>
                     <div class="card-body">
-                        <p>The article contains errors and might not be rendered correct! Consider contact your administrator about this.</p>
+                        <p>{{ trans("info::info.view_render_errors_message") }}</p>
                     </div>
                 </div>
 
                 @isset($title, $content)
                     <div class="card">
-                        <div class="card-header"><b>{{$title}}</b><span><a class="btn btn-secondary float-right" href="{{ route("info.list") }}">Back</a></span>
+                        <div class="card-header"><b>{{$title}}</b><span><a class="btn btn-secondary float-right" href="{{ url()->previous() }}">{{ trans("info::info.view_back_button") }}</a></span>
                         </div>
                         <div class="card-body">
                             <p class="card-text" id="info-content-target"></p>

@@ -30,7 +30,7 @@
                                 <div class="list-group-item list-group-item-action">
                                     <a href="{{ route("info.view", $article->id) }}">{{ $article->name }}</a>
                                     @if(!$article->public)
-                                        <span class="badge badge-info">Private</span>
+                                        <span class="badge badge-info">{{ trans('info::info.list_private_article') }}</span>
                                     @endif
                                 </div>
                             @endforeach

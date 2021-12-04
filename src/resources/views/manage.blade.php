@@ -10,21 +10,19 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="confirmModalLabel">Confirmation</h5>
+                    <h5 class="modal-title" id="confirmModalLabel">{{ trans("info::info.manage_confirm_title") }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body" id="confirmModalWarningText">
-                    Do you really want to perform this action?
-                </div>
+                <div class="modal-body" id="confirmModalWarningText"></div>
                 <div class="modal-footer">
                     <form method="POST" action="" id="confirmModalForm">
                         @csrf
-                        <button type="submit" class="btn btn-danger" id="confirmModalConfirm">Confirm</button>
+                        <button type="submit" class="btn btn-danger" id="confirmModalConfirm">{{ trans("info::info.manage_confirm_confirm") }}</button>
                         <input type="hidden" id="confirmModalData" name="data">
                     </form>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ trans("info::info.manage_confirm_cancel") }}</button>
                 </div>
             </div>
         </div>
@@ -48,23 +46,23 @@
 
                 <div class="card">
                     <div class="card-header">
-                        <b>Manage Articles</b>
-                        <a href="{{ route("info.create") }}" class="float-right btn btn-primary">New</a>
+                        {{ trans("info::info.manage_article_title") }}
+                        <a href="{{ route("info.create") }}" class="float-right btn btn-primary">{{ trans("info::info.manage_article_new") }}</a>
                     </div>
                     <div class="card-body">
 
                         @if($noHomeArticle)
                             <div class="alert alert-warning" role="alert">
-                                You don't have any home article! Set one by selecting an article and Options->Set Home Article. The home article appears in the start section of the info module.
+                                {{ trans("info::info.manage_article_no_home_article") }}
                             </div>
                         @endif
                         <table id="pages" class="table table table-striped">
                             <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>ID-Link</th>
-                                <th>Labels</th>
-                                <th><span class="float-right">Actions</span></th>
+                                <th>{{ trans("info::info.manage_article_table_name") }}</th>
+                                <th>{{ trans("info::info.manage_article_table_idlink") }}</th>
+                                <th>{{ trans("info::info.manage_article_table_labels") }}</th>
+                                <th><span class="float-right">{{ trans("info::info.manage_article_table_actions") }}</span></th>
                             </tr>
                             </thead>
                             <tbody>
@@ -78,21 +76,22 @@
                                     </td>
                                     <td>
                                         @if($article->public)
-                                            <span class="badge badge-success">Public</span>
+                                            <span class="badge badge-success">{{ trans("info::info.manage_article_public") }}</span>
                                         @else
-                                            <span class="badge badge-warning">Private</span>
+                                            <span class="badge badge-warning">{{ trans("info::info.manage_article_private") }}</span>
                                         @endif
                                         @if($article->home_entry)
-                                            <span class="badge badge-info">Home Article</span>
+                                            <span class="badge badge-info">{{ trans("info::info.manage_article_home_article") }}</span>
                                         @endif
                                     </td>
                                     <td>
                                         <div class="btn-group float-right" role="group">
                                             <a href="{{ route("info.edit_article", $article->id) }}"
-                                               class="btn btn-primary mr-auto">Edit</a>
+                                               class="btn btn-primary mr-auto">{{ trans("info::info.manage_article_edit") }}</a>
                                             <button id="btnGroupDropArticles{{ $article->id }}" type="button"
                                                     class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
-                                                    aria-haspopup="true" aria-expanded="false">Options
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                {{ trans("info::info.manage_article_options") }}
                                             </button>
                                             <div class="dropdown-menu p-0"
                                                  aria-labelledby="btnGroupDropArticles{{ $article->id }}">
@@ -100,44 +99,39 @@
                                                     @if($article->home_entry)
                                                         <button
                                                                 class="btn btn-warning confirm-action"
-                                                                data-confirm-warning="Do you really want to unset your home article?"
+                                                                data-confirm-warning="{{ trans("info::info.manage_article_unset_home_article_confirmation") }}"
                                                                 data-url="{{ route("info.unset_home_article") }}"
-                                                        >Unset Home Article
-                                                        </button>
+                                                        >{{ trans("info::info.manage_article_unset_home_article") }}</button>
                                                     @else
                                                         <button
                                                                 class="btn btn-warning confirm-action"
-                                                                data-confirm-warning="Do you really want to change your home article?"
+                                                                data-confirm-warning="{{ trans("info::info.manage_article_set_home_article_confirmation") }}"
                                                                 data-url="{{ route("info.set_home_article") }}"
                                                                 data-data="{{ $article->id }}"
-                                                        >Set Home Article
-                                                        </button>
+                                                        >{{ trans("info::info.manage_article_set_home_article") }}</button>
                                                     @endif
 
                                                     @if(!$article->public)
                                                         <button
                                                                 class="btn btn-warning confirm-action"
-                                                                data-confirm-warning="Do you really want to make this article public?"
+                                                                data-confirm-warning="{{ trans("info::info.manage_article_set_public_confirmation") }}"
                                                                 data-url="{{ route("info.set_article_public") }}"
                                                                 data-data="{{ $article->id }}"
-                                                        >Make Public
-                                                        </button>
+                                                        >{{ trans("info::info.manage_article_set_public") }}</button>
                                                     @else
                                                         <button
                                                                 class="btn btn-warning confirm-action"
-                                                                data-confirm-warning="Do you really want to make this article private?"
+                                                                data-confirm-warning="{{ trans("info::info.manage_article_set_private_confirmation") }}"
                                                                 data-url="{{ route("info.set_article_private") }}"
                                                                 data-data="{{ $article->id }}"
-                                                        >Make Private
-                                                        </button>
+                                                        >{{ trans("info::info.manage_article_set_private") }}</button>
                                                     @endif
                                                     <button
                                                             class="btn btn-danger confirm-action"
-                                                            data-confirm-warning="Do you really want to delete this article?"
+                                                            data-confirm-warning="{{ trans("info::info.manage_article_delete_confirmation") }}"
                                                             data-url="{{ route("info.delete_article") }}"
                                                             data-data="{{ $article->id }}"
-                                                    >Delete
-                                                    </button>
+                                                    >{{ trans("info::info.manage_article_delete") }}</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -148,7 +142,7 @@
                         </table>
 
                         @if($articles->isEmpty())
-                            <p class="text-center">There are no articles</p>
+                            <p class="text-center">{{ trans("info::info.manage_article_no_articles") }}</p>
                         @endif
 
                     </div>
@@ -156,7 +150,7 @@
 
                 <div class="card">
                     <div class="card-header">
-                        <span>Resources</span>
+                        <span>{{ trans("info::info.manage_resources_title") }}</span>
                     </div>
                     <div class="card-body">
                         <div class="border rounded p-4">
@@ -164,19 +158,19 @@
                                   enctype="multipart/form-data">
                                 @csrf
                                 <div class="form-group">
-                                    <label for="resourceFileUpload">File Upload (max: {{ ini_get("upload_max_filesize") }})</label>
+                                    <label for="resourceFileUpload"> {{ trans("info::info.manage_resources_upload_label",['max'=>ini_get("upload_max_filesize")]) }}</label>
                                     <div class="custom-file">
                                         <input type="file" name="file" class="custom-file-input"
                                                id="resourceFileUpload">
-                                        <label class="custom-file-label" for="resourceFileUpload">Choose file</label>
+                                        <label class="custom-file-label" for="resourceFileUpload">{{ trans("info::info.manage_resources_upload_choose") }}</label>
                                     </div>
                                 </div>
                                 <div class="form-check form-group">
                                     <input type="checkbox" class="form-check-input" id="mime-src" name="mime_src_client">
-                                    <label class="form-check-label" for="mime-src">Get the file type from the client. This might be useful if the server can't determine the file type correctly.</label>
+                                    <label class="form-check-label" for="mime-src">{{ trans("info::info.manage_resources_mime_client_label") }}</label>
                                 </div>
                                 <div class="form-group mb-0">
-                                    <button class="btn btn-primary" type="submit">Upload</button>
+                                    <button class="btn btn-primary" type="submit">{{ trans("info::info.manage_resources_upload") }}</button>
                                 </div>
                             </form>
                         </div>
@@ -184,10 +178,10 @@
                         <table id="pages" class="table table table-striped">
                             <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>ID-Link</th>
-                                <th>Type</th>
-                                <th><span class="float-right">Actions</span></th>
+                                <th>{{ trans("info::info.manage_resources_table_name") }}</th>
+                                <th>{{ trans("info::info.manage_resources_table_idlink") }}</th>
+                                <th>{{ trans("info::info.manage_resources_table_type") }}</th>
+                                <th><span class="float-right">{{ trans("info::info.manage_resources_table_actions") }}</span></th>
                             </tr>
                             </thead>
                             <tbody>
@@ -206,17 +200,17 @@
                                         <div class="float-right row">
                                             <button id="btnGroupDropResources{{ $resource->id }}" type="button"
                                                     class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
-                                                    aria-haspopup="true" aria-expanded="false">Options
-                                            </button>
+                                                    aria-haspopup="true" aria-expanded="false"
+                                            >{{ trans("info::info.manage_resources_table_options") }}</button>
                                             <div class="dropdown-menu p-0"
                                                  aria-labelledby="btnGroupDropArticles{{ $resource->id }}">
                                                 <div class="btn-group-vertical dropdown-item p-0">
                                                     <button
                                                             class="btn btn-danger confirm-action"
-                                                            data-confirm-warning="Do you really want to delete this file?"
+                                                            data-confirm-warning="{{ trans("info::info.manage_resources_table_delete_confirm") }}"
                                                             data-url="{{ route("info.delete_resource") }}"
                                                             data-data="{{ $resource->id }}"
-                                                    >Delete</button>
+                                                    >{{ trans("info::info.manage_resources_table_delete") }}</button>
                                                 </div>
                                             </div>
 
@@ -230,7 +224,7 @@
                         </table>
 
                         @if($resources->isEmpty())
-                            <p class="text-center">There are no resources</p>
+                            <p class="text-center">{{ trans("info::info.manage_resources_no_resources") }}</p>
                         @endif
                     </div>
                 </div>

@@ -51,16 +51,16 @@
                             </div>
 
                             <div class="form-group">
-                                <p>For the documentation on the styling syntax, take a look <a href="https://github.com/recursivetree/seat-info/blob/master/documentation.md">here</a>.</p>
+                                <p>{{ trans('info::info.editor_syntax_documentation_link') }} <a href="https://github.com/recursivetree/seat-info/blob/master/documentation.md">{{ trans('info::info.link') }}</a></p>
                             </div>
 
                             <div class="form-check form-group">
                                 <input type="checkbox" class="form-check-input" id="public" name="public">
-                                <label class="form-check-label" for="public">Make this article public</label>
+                                <label class="form-check-label" for="public">{{ trans('info::info.editor_public_checkbox') }}</label>
                             </div>
 
                             <div class="form-group">
-                                <input type="submit" class="btn btn-primary" id="save" value="Save"/>
+                                <button type="submit" class="btn btn-primary" id="save">{{ trans('info::info.editor_save_button') }}</button>
                             </div>
 
                         </form>
@@ -69,11 +69,11 @@
                 </div>
 
                 <div class="card">
-                    <div class="card-header">Preview</div>
+                    <div class="card-header">{{ trans('info::info.editor_preview_title') }}</div>
                     <div class="card-body">
 
                         <div id="editor-preview-status">
-                            <h2>Warnings</h2>
+                            <h2>{{ trans('info::info.editor_preview_warnings_title') }}</h2>
                             <ul id="editor-preview-warnings" class="pl-0">
 
                             </ul>
@@ -106,7 +106,7 @@
                 preview_target.textContent=""// lazy thing to clear the dom
 
                 if (content.length == 0){
-                    preview_target.textContent="This is an empty article, nothing to show"
+                    preview_target.textContent= {!! json_encode(trans('info::info.editor_preview_empty_article')) !!}
                 }
 
                 render_article(content, document.getElementById("editor-preview-target"), function (e) {
@@ -122,10 +122,9 @@
 
                     if (e.error){
                         console.error(e)
-                        //document.getElementById("editor-preview-error").textContent = "The renderer couldn't render the article: "+e
 
                         let liElement = document.createElement("li")
-                        liElement.textContent = `Could not render the whole page: Error: ${e.error.message}`
+                        liElement.textContent = `{!! trans('info::info.editor_preview_error') !!} ${e.error.message}`
                         liElement.classList.add("list-group-item-danger")
                         liElement.classList.add("list-group-item")
                         warnings_list.appendChild(liElement)
