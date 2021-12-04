@@ -79,7 +79,7 @@
                             </ul>
                         </div>
 
-                        <div class="border rounded p-4"id="editor-preview-target">
+                        <div class="border rounded p-4" id="editor-preview-target">
 
                         </div>
                     </div>

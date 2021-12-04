@@ -218,6 +218,7 @@ class InfoController extends Controller
         $articles = Article::all();
         $resources = Resource::all();
         $noHomeArticle = !Article::where("home_entry",true)->exists();
+
         return view("info::manage", compact('articles','resources','noHomeArticle'));
     }
 
@@ -249,7 +250,11 @@ class InfoController extends Controller
     public function uploadResource(UploadResource $request){
         $file = $request->file;
 
-        $mime_type = $file->getMimeType();
+        if($request->mime_src_client){
+            $mime_type = $file->getClientMimeType();
+        } else {
+            $mime_type = $file->getMimeType();
+        }
 
         $path = $file->store('recursive_tree_info_module_resources');
 
@@ -273,14 +278,18 @@ class InfoController extends Controller
             return abort(404);
         }
 
+        if(!Storage::exists($db_entry->path)){
+            abort(500);
+        }
+
         $content = Storage::get($db_entry->path);
         $type = $db_entry->mime;
 
         return response($content)->header('Content-Type', $type);
     }
 
-    public function deleteResource(GenericRequestWithID $request){
-        $resource = Resource::find($request->id);
+    public function deleteResource(ConfirmModalRequest $request){
+        $resource = Resource::find($request->data);
         if ($resource===null){
             $request->session()->flash('message', [
                 'title' => "Error",
@@ -290,7 +299,7 @@ class InfoController extends Controller
         }
 
         Storage::delete($resource->path);
-        Resource::destroy($request->id);
+        Resource::destroy($request->data);
 
         $request->session()->flash('message', [
             'title' => "Success",

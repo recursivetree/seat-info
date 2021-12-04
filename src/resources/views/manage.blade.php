@@ -159,19 +159,23 @@
                         <span>Resources</span>
                     </div>
                     <div class="card-body">
-                        <div>
+                        <div class="border rounded p-4">
                             <form action="{{ route("info.upload_resource") }}" method="POST"
                                   enctype="multipart/form-data">
                                 @csrf
                                 <div class="form-group">
-                                    <label for="resourceFileUpload">File Upload</label>
+                                    <label for="resourceFileUpload">File Upload (max: {{ ini_get("upload_max_filesize") }})</label>
                                     <div class="custom-file">
                                         <input type="file" name="file" class="custom-file-input"
                                                id="resourceFileUpload">
                                         <label class="custom-file-label" for="resourceFileUpload">Choose file</label>
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-check form-group">
+                                    <input type="checkbox" class="form-check-input" id="mime-src" name="mime_src_client">
+                                    <label class="form-check-label" for="mime-src">Get the file type from the client. This might be useful if the server can't determine the file type correctly.</label>
+                                </div>
+                                <div class="form-group mb-0">
                                     <button class="btn btn-primary" type="submit">Upload</button>
                                 </div>
                             </form>
@@ -200,11 +204,24 @@
                                     </td>
                                     <td>
                                         <div class="float-right row">
-                                            <form method="post" action="{{ route("info.delete_resource") }}">
-                                                @csrf
-                                                <button class="btn btn-danger" style="margin:0.1rem">Delete</button>
-                                                <input type="hidden" value="{{ $resource->id }}" name="id">
-                                            </form>
+                                            <button id="btnGroupDropResources{{ $resource->id }}" type="button"
+                                                    class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">Options
+                                            </button>
+                                            <div class="dropdown-menu p-0"
+                                                 aria-labelledby="btnGroupDropArticles{{ $resource->id }}">
+                                                <div class="btn-group-vertical dropdown-item p-0">
+                                                    <button
+                                                            class="btn btn-danger confirm-action"
+                                                            data-confirm-warning="Do you really want to delete this file?"
+                                                            data-url="{{ route("info.delete_resource") }}"
+                                                            data-data="{{ $resource->id }}"
+                                                    >Delete</button>
+                                                </div>
+                                            </div>
+
+
+
                                         </div>
                                     </td>
                                 </tr>

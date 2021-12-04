@@ -16,6 +16,7 @@ class UploadResource extends FormRequest
     {
         return [
             'file' => 'required|file',
+            'mime_src_client' => ''
         ];
     }
 }
