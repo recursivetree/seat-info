@@ -4,6 +4,7 @@ namespace RecursiveTree\Seat\InfoPlugin\Http\Controllers;
 
 use RecursiveTree\Seat\InfoPlugin\Model\Article;
 use RecursiveTree\Seat\InfoPlugin\Model\Resource;
+use RecursiveTree\Seat\InfoPlugin\Validation\ConfirmModalRequest;
 use RecursiveTree\Seat\InfoPlugin\Validation\GenericRequestWithID;
 use RecursiveTree\Seat\InfoPlugin\Validation\SaveArticle;
 use RecursiveTree\Seat\InfoPlugin\Validation\UploadResource;
@@ -15,15 +16,24 @@ use Illuminate\Support\Facades\Storage;
 
 class InfoController extends Controller
 {
-    public function getHomeView(){
+    public function getHomeView(Request $request){
 
         $article = Article::where("home_entry",true)->first();
 
         if ($article===null){
-            return redirect()->route('info.list')->with('message', [
+            $request->session()->flash('message', [
                 'title' => "Error",
                 'message' => 'There is no start article configured, forwarding to the article list. Please contact the administrator about this.'
             ]);
+            return redirect()->route('info.list');
+        }
+
+        if(!$article->public){
+            $request->session()->flash('message', [
+                'title' => "Error",
+                'message' => 'You are not allowed to see this article, forwarding to the article list. Please contact the administrator about this.'
+            ]);
+            return redirect()->route('info.list');
         }
 
 
@@ -34,17 +44,118 @@ class InfoController extends Controller
 
     }
 
-    public function getSetHomeArticleInterface(GenericRequestWithID $request){
+    public function setHomeArticle(ConfirmModalRequest $request){
         Article::query()->update(['home_entry' => false]);
 
-        $article = Article::find($request->id);
+        $article = Article::find($request->data);
+
+        if($article == null){
+            $request->session()->flash('message', [
+                'title' => "Error",
+                'message' => 'Could not find home article home article'
+            ]);
+            return redirect()->route('info.manage');
+        }
+
+        if(!$article->public){
+            $request->session()->flash('message', [
+                'title' => "Error",
+                'message' => 'You can only set public articles as your home article!'
+            ]);
+            return redirect()->route('info.manage');
+        }
+
         $article->home_entry = true;
         $article->save();
 
-        return redirect()->route('info.manage')->with('message', [
+        $request->session()->flash('message', [
             'title' => "Success",
             'message' => 'Successfully changed home article'
         ]);
+        return redirect()->route('info.manage');
+    }
+
+    public function unsetHomeArticle(ConfirmModalRequest $request){
+        Article::query()->update(['home_entry' => false]);
+
+        $request->session()->flash('message', [
+            'title' => "Success",
+            'message' => 'Successfully removed home article'
+        ]);
+        return redirect()->route('info.manage');
+    }
+
+    public function deleteArticle(ConfirmModalRequest $request){
+        $article = Article::find($request->data);
+
+        if ($article !== null) {
+            Article::destroy($request->data);
+
+            $request->session()->flash('message', [
+                'title' => "Success",
+                'message' => "Successfully deleted article '$article->name'"
+            ]);
+
+            return redirect()->route('info.manage');
+        } else {
+            $request->session()->flash('message', [
+                'title' => "Error",
+                'message' => "Could not find the requested article! Try to reload the management page."
+            ]);
+
+            return redirect()->route('info.manage');
+        }
+    }
+
+    public function setArticlePublic(ConfirmModalRequest $request){
+        $article = Article::find($request->data);
+
+        if ($article !== null) {
+            $article->public = true;
+            $article->save();
+
+            $request->session()->flash('message', [
+                'title' => "Success",
+                'message' => "Successfully published article '$article->name'"
+            ]);
+
+            return redirect()->route('info.manage');
+        } else {
+            $request->session()->flash('message', [
+                'title' => "Error",
+                'message' => "Could not find the requested article! Try to reload the management page."
+            ]);
+
+            return redirect()->route('info.manage');
+        }
+    }
+
+    public function setArticlePrivate(ConfirmModalRequest $request){
+        $article = Article::find($request->data);
+
+        if ($article !== null) {
+
+            if($article->home_entry){
+                $article->home_entry = false;
+            }
+
+            $article->public = false;
+            $article->save();
+
+            $request->session()->flash('message', [
+                'title' => "Success",
+                'message' => "Successfully made article private article '$article->name'"
+            ]);
+
+            return redirect()->route('info.manage');
+        } else {
+            $request->session()->flash('message', [
+                'title' => "Error",
+                'message' => "Could not find the requested article! Try to reload the management page."
+            ]);
+
+            return redirect()->route('info.manage');
+        }
     }
 
     public function getCreateView(){
@@ -65,43 +176,26 @@ class InfoController extends Controller
 
         $article->name = $request->name;
         $article->text = $request->text;
+        $article->public = isset($request->public);
 
         $article->save();
 
-        return redirect()->route('info.manage')->with('message', [
+        $request->session()->flash('message', [
             'title' => "Success",
             'message' => "Successfully saved article '$article->name'"
         ]);
+        return redirect()->route('info.manage');
     }
 
-    public function getDeleteInterface(GenericRequestWithID $request){
-        $article = Article::find($request->id);
-
-        if ($article !== null) {
-            Article::destroy($request->id);
-
-            return redirect()->route('info.manage')->with('message', [
-                'title' => "Success",
-                'message' => "Successfully deleted article '$article->name'"
-            ]);
-        } else {
-            return redirect()->route('info.manage')->with('message', [
-                'title' => "Error",
-                'message' => "Could not find the requested article! Try to reload the management page."
-            ]);
-        }
-    }
-
-    public function getEditView(GenericRequestWithID $request){
-        $article = Article::find($request->id);
+    public function getEditView(Request $request,$id){
+        $article = Article::find($id);
 
         if ($article===null){
-            $articles = Article::all();
-
-            return redirect()->route('info.manage')->with('message', [
+            $request->session()->flash('message', [
                 'title' => "Error",
                 'message' => 'Could not find the requested article!'
             ]);
+            return redirect()->route('info.manage');
         }
 
         return view("info::edit", [
@@ -112,24 +206,38 @@ class InfoController extends Controller
     }
 
     public function getListView(){
-        $articles = Article::all();
+        if (auth()->user()->can("info.edit_article")){
+            $articles = Article::all();
+        } else {
+            $articles = Article::where("public", true)->get();
+        }
         return view("info::list", compact('articles'));
     }
 
     public function getManageView(){
         $articles = Article::all();
         $resources = Resource::all();
-        return view("info::manage", compact('articles','resources'));
+        $noHomeArticle = !Article::where("home_entry",true)->exists();
+        return view("info::manage", compact('articles','resources','noHomeArticle'));
     }
 
-    public function getArticleView($id){
+    public function getArticleView(Request $request,$id){
         $article = Article::find($id);
 
         if ($article===null){
-            return view("info::view")->with('message', [
+            $request->session()->flash('message', [
                 'title' => "Error",
                 'message' => 'Could not find the requested article!'
             ]);
+            return view("info::view");
+        }
+
+        if(!$article->public && !auth()->user()->can("info.edit_article")){
+            $request->session()->flash('message', [
+                'title' => "Error",
+                'message' => 'This article is private!'
+            ]);
+            return view("info::view");
         }
 
         return view("info::view", [
@@ -151,10 +259,11 @@ class InfoController extends Controller
         $resource->name = $file->getClientOriginalName();;
         $resource->save();
 
-        return redirect()->route('info.manage')->with('message', [
+        $request->session()->flash('message', [
             'title' => "Success",
             'message' => 'Successfully uploaded file!'
         ]);
+        return redirect()->route('info.manage');
     }
 
     public function viewResource($id){
@@ -173,18 +282,20 @@ class InfoController extends Controller
     public function deleteResource(GenericRequestWithID $request){
         $resource = Resource::find($request->id);
         if ($resource===null){
-            return redirect()->route('info.manage')->with('message', [
+            $request->session()->flash('message', [
                 'title' => "Error",
                 'message' => 'Could not find requested resource!'
             ]);
+            return redirect()->route('info.manage');
         }
 
         Storage::delete($resource->path);
         Resource::destroy($request->id);
 
-        return redirect()->route('info.manage')->with('message', [
+        $request->session()->flash('message', [
             'title' => "Success",
             'message' => 'Successfully deleted file!'
         ]);
+        return redirect()->route('info.manage');
     }
 }

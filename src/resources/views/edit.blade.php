@@ -46,12 +46,17 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="name">{{ trans('info::info.article_content') }}</label>
+                                <label for="text">{{ trans('info::info.article_content') }}</label>
                                 <textarea name="text" class="form-control monospace-font text-sm" id="text" placeholder="{{ trans('info::info.article_content_placeholder') }}" rows="15" required>{{ $text }}</textarea>
                             </div>
 
                             <div class="form-group">
                                 <p>For the documentation on the styling syntax, take a look <a href="https://github.com/recursivetree/seat-info/blob/master/documentation.md">here</a>.</p>
+                            </div>
+
+                            <div class="form-check form-group">
+                                <input type="checkbox" class="form-check-input" id="public" name="public">
+                                <label class="form-check-label" for="public">Make this article public</label>
                             </div>
 
                             <div class="form-group">

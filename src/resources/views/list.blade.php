@@ -27,8 +27,12 @@
 
                         <div class="list-group">
                             @foreach ($articles as $article)
-                                <a class="list-group-item list-group-item-action"
-                                   href="{{ route("info.view", $article->id) }}">{{ $article->name }}</a>
+                                <div class="list-group-item list-group-item-action">
+                                    <a href="{{ route("info.view", $article->id) }}">{{ $article->name }}</a>
+                                    @if(!$article->public)
+                                        <span class="badge badge-info">Private</span>
+                                    @endif
+                                </div>
                             @endforeach
                         </div>
                     </div>
@@ -37,5 +41,4 @@
             </div>
         </div>
     </div>
-
 @stop

@@ -4,7 +4,7 @@ namespace RecursiveTree\Seat\InfoPlugin\Validation;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class SaveArticle extends FormRequest
+class ConfirmModalRequest extends FormRequest
 {
 
     public function authorize()
@@ -15,10 +15,7 @@ class SaveArticle extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string',
-            'text' => 'required|string',
-            'id' => 'required|int',
-            'public' => ''
+            'data' => '',
         ];
     }
 }

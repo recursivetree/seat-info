@@ -32,8 +32,7 @@
 
                 @isset($title, $content)
                     <div class="card">
-                        <div class="card-header"><b>{{$title}}</b><span><a class="btn btn-secondary float-right"
-                                                                           href="{{ route("info.list") }}">Back</a></span>
+                        <div class="card-header"><b>{{$title}}</b><span><a class="btn btn-secondary float-right" href="{{ route("info.list") }}">Back</a></span>
                         </div>
                         <div class="card-body">
                             <p class="card-text" id="info-content-target"></p>
@@ -47,17 +46,19 @@
 
 @stop
 
-@push('javascript')
-    <script src="{{ asset('info/js/render_article.js') }}"></script>
-    <script src="{{ asset('info/js/markup_tags.js') }}"></script>
-    <script>
-        window.addEventListener('load', (event) => {
-            render_article({!! json_encode( $content) !!}, document.getElementById("info-content-target"), function (e) {
-                if(e.error) {
-                    console.log(e)
-                    document.getElementById("rendering-error").style.display = "block"
-                }
+@isset($title, $content)
+    @push('javascript')
+        <script src="{{ asset('info/js/render_article.js') }}"></script>
+        <script src="{{ asset('info/js/markup_tags.js') }}"></script>
+        <script>
+            window.addEventListener('load', (event) => {
+                render_article({!! json_encode( $content) !!}, document.getElementById("info-content-target"), function (e) {
+                    if(e.error) {
+                        console.log(e)
+                        document.getElementById("rendering-error").style.display = "block"
+                    }
+                });
             });
-        });
-    </script>
-@endpush
+        </script>
+    @endpush
+@endisset

@@ -155,7 +155,7 @@ function process_seat_url(url) {
     result = url.match(/^seatinfo:article\/([0-9]+)/)
     if (result) {
         const id = result[1]
-        return `/info/view/${id}`
+        return `/info/article/view/${id}`
     }
 
     return url
