@@ -3,6 +3,7 @@
 namespace RecursiveTree\Seat\InfoPlugin;
 
 use Seat\Services\AbstractSeatPlugin;
+use Illuminate\Support\Facades\Blade;
 
 
 class InfoServiceProvider extends AbstractSeatPlugin
@@ -24,6 +25,12 @@ class InfoServiceProvider extends AbstractSeatPlugin
         $this->loadTranslationsFrom(__DIR__ . '/lang', 'info');
         $this->loadViewsFrom(__DIR__ . '/resources/views', 'info');
         $this->loadMigrationsFrom(__DIR__ . '/database/migrations/');
+
+        $version = $this->getVersion();
+
+        Blade::directive('versionedAsset', function($path) use ($version) {
+            return "<?php echo asset({$path}) . '?v=$version'; ?>";
+        });
     }
 
     /**

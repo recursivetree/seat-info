@@ -92,8 +92,8 @@
 @stop
 
 @push('javascript')
-    <script src="{{ asset('info/js/render_article.js') }}"></script>
-    <script src="{{ asset('info/js/markup_tags.js') }}"></script>
+    <script src="@versionedAsset('info/js/render_article.js')"></script>
+    <script src="@versionedAsset('info/js/markup_tags.js')"></script>
     <script>
         window.addEventListener('load', (event) => {
             const textarea = document.getElementById("text")
