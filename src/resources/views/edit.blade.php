@@ -36,18 +36,18 @@
                         <form method="post" action="{{ route('info.save') }}">
                             @csrf
 
-                            <input type="hidden" name="id" value="{{ $id }}">
+                            <input type="hidden" name="id" value="{{ $article->id }}">
 
                             <div class="form-group">
                                 <label for="name">{{ trans('info::info.article_name') }}</label>
                                 <input type="text" name="name" class="form-control" id="name"
                                        placeholder="{{ trans('info::info.article_name') }}" required
-                                       value="{{ $name }}">
+                                       value="{{ $article->name }}">
                             </div>
 
                             <div class="form-group">
                                 <label for="text">{{ trans('info::info.article_content') }}</label>
-                                <textarea name="text" class="form-control monospace-font text-sm" id="text" placeholder="{{ trans('info::info.article_content_placeholder') }}" rows="15" required>{{ $text }}</textarea>
+                                <textarea name="text" class="form-control monospace-font text-sm" id="text" placeholder="{{ trans('info::info.article_content_placeholder') }}" rows="15" required>{{ $article->text }}</textarea>
                             </div>
 
                             <div class="form-group">
@@ -55,7 +55,11 @@
                             </div>
 
                             <div class="form-check form-group">
-                                <input type="checkbox" class="form-check-input" id="public" name="public">
+                                @if($article->public)
+                                    <input type="checkbox" class="form-check-input" id="public" name="public" checked>
+                                @else
+                                    <input type="checkbox" class="form-check-input" id="public" name="public">
+                                @endif
                                 <label class="form-check-label" for="public">{{ trans('info::info.editor_public_checkbox') }}</label>
                             </div>
 

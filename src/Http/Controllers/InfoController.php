@@ -159,11 +159,8 @@ class InfoController extends Controller
     }
 
     public function getCreateView(){
-        return view("info::edit", [
-            "id" => 0,
-            "name" => "",
-            "text" => ""
-        ]);
+        $article = new Article();
+        return view("info::edit", compact('article'));
     }
 
     public function getSaveInterface(SaveArticle $request){
@@ -198,11 +195,7 @@ class InfoController extends Controller
             return redirect()->route('info.manage');
         }
 
-        return view("info::edit", [
-            "id" => $article->id,
-            "name" => $article->name,
-            "text" => $article->text
-        ]);
+        return view("info::edit", compact('article'));
     }
 
     public function getListView(){
