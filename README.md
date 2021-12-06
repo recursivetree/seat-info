@@ -55,6 +55,33 @@ sudo -H -u www-data bash -c 'php artisan route:cache'
 sudo -H -u www-data bash -c 'php artisan up'
 ```
 
+## Increase the upload file size
+Per default, the configuration for the max allowed file size of php is rather low, meaning you can't upload big files in
+the resources tab. if you use a barebone install, you can fix it like this:
+
+1. Open the `/etc/php/7.3/fpm/php.ini ` file, for example with nano:
+    ```
+    nano /etc/php/7.3/fpm/php.ini 
+    ```
+2. Change this line
+    ```
+    upload_max_filesize = 2M
+    ```
+    to 
+    ```
+    upload_max_filesize = [the max size you want in megabytes]M
+    ```
+3. Do the same for `post_max_size` The value should be slightly larger than the value of`upload_max_filesize`.
+4. Save and exit
+5. Reload the config with:
+    ```
+    service php7.3-fpm reload
+    service nginx reload
+    ```
+6. Reload the management page and it should state a higher value as the limit.
+
+I haven't looked into how to do this in docker, but it should be similar.
+
 ## Donations
 Donations are always welcome, although not required. If you end up using this module a lot, I'd appreciate a donation. 
 You can give ISK or contract PLEX and Ships to `recursivetree`.
