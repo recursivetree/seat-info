@@ -18,7 +18,7 @@ return [
     'editor_preview_empty_article' => 'This is an empty article. Type something and a preview will show up here.',
     'editor_preview_error' => 'Could not render the whole page: Error:',
     'list_private_article' => 'Private',
-    'view_render_errors_message' => 'The article contains errors and might not be rendered correct! Consider contact your administrator about this.',
+    'view_render_errors_message' => 'The article contains errors and might not be rendered correct!',
     'view_back_button' => 'Back',
     'manage_confirm_title' => 'Confirmation',
     'manage_confirm_confirm' => 'Confirm',

@@ -23,16 +23,16 @@ class InfoController extends Controller
 
         if ($article===null){
             $request->session()->flash('message', [
-                'title' => "Error",
-                'message' => 'There is no start article configured, forwarding to the article list. Please contact the administrator about this.'
+                'message' => 'There is no start article configured, forwarding to the article list. Please contact the administrator about this.',
+                'type' => 'warning'
             ]);
             return redirect()->route('info.list');
         }
 
         if(!$article->public && !$can_edit){
             $request->session()->flash('message', [
-                'title' => "Error",
-                'message' => 'You are not allowed to see this article, forwarding to the article list. Please contact the administrator about this.'
+                'message' => 'You are not allowed to see this article, forwarding to the article list. Please contact the administrator about this.',
+                'type' => 'warning'
             ]);
             return redirect()->route('info.list');
         }
@@ -48,16 +48,16 @@ class InfoController extends Controller
 
         if($article == null){
             $request->session()->flash('message', [
-                'title' => "Error",
-                'message' => 'Could not find home article home article'
+                'message' => 'Could not find the requester article',
+                'type' => 'error'
             ]);
             return redirect()->route('info.manage');
         }
 
         if(!$article->public){
             $request->session()->flash('message', [
-                'title' => "Error",
-                'message' => 'You can only set public articles as your home article!'
+                'message' => 'You can only set public articles as your home article!',
+                'type' => 'error'
             ]);
             return redirect()->route('info.manage');
         }
@@ -66,8 +66,8 @@ class InfoController extends Controller
         $article->save();
 
         $request->session()->flash('message', [
-            'title' => "Success",
-            'message' => 'Successfully changed home article'
+            'message' => 'Successfully changed home article',
+            'type' => 'success'
         ]);
         return redirect()->route('info.manage');
     }
@@ -76,8 +76,8 @@ class InfoController extends Controller
         Article::query()->update(['home_entry' => false]);
 
         $request->session()->flash('message', [
-            'title' => "Success",
-            'message' => 'Successfully removed home article'
+            'message' => 'Successfully removed home article',
+            'type' => 'success'
         ]);
         return redirect()->route('info.manage');
     }
@@ -89,15 +89,15 @@ class InfoController extends Controller
             Article::destroy($request->data);
 
             $request->session()->flash('message', [
-                'title' => "Success",
-                'message' => "Successfully deleted article '$article->name'"
+                'message' => "Successfully deleted article '$article->name'",
+                'type' => 'success'
             ]);
 
             return redirect()->route('info.manage');
         } else {
             $request->session()->flash('message', [
-                'title' => "Error",
-                'message' => "Could not find the requested article! Try to reload the management page."
+                'message' => "Could not find the requested article! Try to reload the management page.",
+                'type' => 'error'
             ]);
 
             return redirect()->route('info.manage');
@@ -112,15 +112,15 @@ class InfoController extends Controller
             $article->save();
 
             $request->session()->flash('message', [
-                'title' => "Success",
-                'message' => "Successfully published article '$article->name'"
+                'message' => "Successfully published article '$article->name'",
+                'type' => 'success'
             ]);
 
             return redirect()->route('info.manage');
         } else {
             $request->session()->flash('message', [
-                'title' => "Error",
-                'message' => "Could not find the requested article! Try to reload the management page."
+                'message' => "Could not find the requested article! Try to reload the management page.",
+                'type' => 'error'
             ]);
 
             return redirect()->route('info.manage');
@@ -140,15 +140,15 @@ class InfoController extends Controller
             $article->save();
 
             $request->session()->flash('message', [
-                'title' => "Success",
-                'message' => "Successfully made article private article '$article->name'"
+                'message' => "Successfully made article private article '$article->name'",
+                'type' => 'success'
             ]);
 
             return redirect()->route('info.manage');
         } else {
             $request->session()->flash('message', [
-                'title' => "Error",
-                'message' => "Could not find the requested article! Try to reload the management page."
+                'message' => "Could not find the requested article! Try to reload the management page.",
+                'type' => 'error'
             ]);
 
             return redirect()->route('info.manage');
@@ -175,8 +175,8 @@ class InfoController extends Controller
         $article->save();
 
         $request->session()->flash('message', [
-            'title' => "Success",
-            'message' => "Successfully saved article '$article->name'"
+            'message' => "Successfully saved article '$article->name'",
+            'type' => 'success'
         ]);
         return redirect()->route('info.manage');
     }
@@ -186,8 +186,8 @@ class InfoController extends Controller
 
         if ($article===null){
             $request->session()->flash('message', [
-                'title' => "Error",
-                'message' => 'Could not find the requested article!'
+                'message' => 'Could not find the requested article!',
+                'type' => 'error'
             ]);
             return redirect()->route('info.manage');
         }
@@ -216,16 +216,16 @@ class InfoController extends Controller
 
         if ($article===null){
             $request->session()->flash('message', [
-                'title' => "Error",
                 'message' => 'Could not find the requested article!',
+                'type' => 'error'
             ]);
             return view("info::view");
         }
 
         if(!$article->public && !$can_edit){
             $request->session()->flash('message', [
-                'title' => "Error",
                 'message' => 'This article is private!',
+                'type' => 'warning'
             ]);
             return view("info::view");
         }
@@ -251,8 +251,8 @@ class InfoController extends Controller
         $resource->save();
 
         $request->session()->flash('message', [
-            'title' => "Success",
-            'message' => 'Successfully uploaded file!'
+            'message' => 'Successfully uploaded file!',
+            'type' => 'success'
         ]);
         return redirect()->route('info.manage');
     }
@@ -278,8 +278,8 @@ class InfoController extends Controller
         $resource = Resource::find($request->data);
         if ($resource===null){
             $request->session()->flash('message', [
-                'title' => "Error",
-                'message' => 'Could not find requested resource!'
+                'message' => 'Could not find requested resource!',
+                'type' => 'error'
             ]);
             return redirect()->route('info.manage');
         }
@@ -288,8 +288,8 @@ class InfoController extends Controller
         Resource::destroy($request->data);
 
         $request->session()->flash('message', [
-            'title' => "Success",
-            'message' => 'Successfully deleted file!'
+            'message' => 'Successfully deleted file!',
+            'type' => 'success'
         ]);
         return redirect()->route('info.manage');
     }
