@@ -23,7 +23,7 @@ class InfoController extends Controller
 
         if ($article===null){
             $request->session()->flash('message', [
-                'message' => 'There is no start article configured, forwarding to the article list. Please contact the administrator about this.',
+                'message' => trans("info::info.home_no_article"),
                 'type' => 'warning'
             ]);
             return redirect()->route('info.list');
@@ -31,7 +31,7 @@ class InfoController extends Controller
 
         if(!$article->public && !$can_edit){
             $request->session()->flash('message', [
-                'message' => 'You are not allowed to see this article, forwarding to the article list. Please contact the administrator about this.',
+                'message' => trans("info::info.home_insufficient_permissions"),
                 'type' => 'warning'
             ]);
             return redirect()->route('info.list');
@@ -48,7 +48,7 @@ class InfoController extends Controller
 
         if($article == null){
             $request->session()->flash('message', [
-                'message' => 'Could not find the requester article',
+                'message' => trans("info::info.manage_article_not_found"),
                 'type' => 'error'
             ]);
             return redirect()->route('info.manage');
@@ -56,7 +56,7 @@ class InfoController extends Controller
 
         if(!$article->public){
             $request->session()->flash('message', [
-                'message' => 'You can only set public articles as your home article!',
+                'message' => trans("info::info.manage_only_public_home_article_error"),
                 'type' => 'error'
             ]);
             return redirect()->route('info.manage');
@@ -66,7 +66,7 @@ class InfoController extends Controller
         $article->save();
 
         $request->session()->flash('message', [
-            'message' => 'Successfully changed home article',
+            'message' => trans("info::info.manage_set_home_article_success"),
             'type' => 'success'
         ]);
         return redirect()->route('info.manage');
@@ -76,7 +76,7 @@ class InfoController extends Controller
         Article::query()->update(['home_entry' => false]);
 
         $request->session()->flash('message', [
-            'message' => 'Successfully removed home article',
+            'message' => trans("info::info.manage_unset_home_article_success"),
             'type' => 'success'
         ]);
         return redirect()->route('info.manage');
@@ -89,14 +89,14 @@ class InfoController extends Controller
             Article::destroy($request->data);
 
             $request->session()->flash('message', [
-                'message' => "Successfully deleted article '$article->name'",
+                'message' => trans("info::info.manage_delete_article_success"),
                 'type' => 'success'
             ]);
 
             return redirect()->route('info.manage');
         } else {
             $request->session()->flash('message', [
-                'message' => "Could not find the requested article! Try to reload the management page.",
+                'message' => trans("info::info.manage_article_not_found"),
                 'type' => 'error'
             ]);
 
@@ -112,14 +112,14 @@ class InfoController extends Controller
             $article->save();
 
             $request->session()->flash('message', [
-                'message' => "Successfully published article '$article->name'",
+                'message' => trans("info::info.manage_publish_article_success"),
                 'type' => 'success'
             ]);
 
             return redirect()->route('info.manage');
         } else {
             $request->session()->flash('message', [
-                'message' => "Could not find the requested article! Try to reload the management page.",
+                'message' => trans("info::info.manage_article_not_found"),
                 'type' => 'error'
             ]);
 
@@ -140,14 +140,14 @@ class InfoController extends Controller
             $article->save();
 
             $request->session()->flash('message', [
-                'message' => "Successfully made article private article '$article->name'",
+                'message' => trans("info::info.manage_set_article_private_success"),
                 'type' => 'success'
             ]);
 
             return redirect()->route('info.manage');
         } else {
             $request->session()->flash('message', [
-                'message' => "Could not find the requested article! Try to reload the management page.",
+                'message' => trans("info::info.manage_article_not_found"),
                 'type' => 'error'
             ]);
 
@@ -175,7 +175,7 @@ class InfoController extends Controller
         $article->save();
 
         $request->session()->flash('message', [
-            'message' => "Successfully saved article '$article->name'",
+            'message' => trans("info::info.manage_save_article_success"),
             'type' => 'success'
         ]);
         return redirect()->route('info.manage');
@@ -186,7 +186,7 @@ class InfoController extends Controller
 
         if ($article===null){
             $request->session()->flash('message', [
-                'message' => 'Could not find the requested article!',
+                'message' => trans("info::info.manage_article_not_found"),
                 'type' => 'error'
             ]);
             return redirect()->route('info.manage');
@@ -216,7 +216,7 @@ class InfoController extends Controller
 
         if ($article===null){
             $request->session()->flash('message', [
-                'message' => 'Could not find the requested article!',
+                'message' => trans("info::info.view_article_not_found"),
                 'type' => 'error'
             ]);
             return view("info::view");
@@ -224,7 +224,7 @@ class InfoController extends Controller
 
         if(!$article->public && !$can_edit){
             $request->session()->flash('message', [
-                'message' => 'This article is private!',
+                'message' => trans("info::info.view_article_insufficient_permissions"),
                 'type' => 'warning'
             ]);
             return view("info::view");
@@ -251,7 +251,7 @@ class InfoController extends Controller
         $resource->save();
 
         $request->session()->flash('message', [
-            'message' => 'Successfully uploaded file!',
+            'message' => trans("info::info.manage_resource_upload_success"),
             'type' => 'success'
         ]);
         return redirect()->route('info.manage');
@@ -278,7 +278,7 @@ class InfoController extends Controller
         $resource = Resource::find($request->data);
         if ($resource===null){
             $request->session()->flash('message', [
-                'message' => 'Could not find requested resource!',
+                'message' => trans("info::info.resource_not_found"),
                 'type' => 'error'
             ]);
             return redirect()->route('info.manage');
@@ -288,7 +288,7 @@ class InfoController extends Controller
         Resource::destroy($request->data);
 
         $request->session()->flash('message', [
-            'message' => 'Successfully deleted file!',
+            'message' => trans("info::info.manage_resource_delete_success"),
             'type' => 'success'
         ]);
         return redirect()->route('info.manage');
