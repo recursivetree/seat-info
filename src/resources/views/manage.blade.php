@@ -61,6 +61,12 @@
                                 {{ trans("info::info.manage_article_no_home_article") }}
                             </div>
                         @endif
+                        @if($articles->count()>=10)
+                            <div class="alert alert-info">
+                                {{ trans("info::info.manage_donation_info") }}
+                            </div>
+                        @endif
+
                         <table id="pages" class="table table table-striped">
                             <thead>
                             <tr>

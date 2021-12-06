@@ -50,12 +50,12 @@ sudo -H -u www-data bash -c 'composer require recursivetree/seat-info'
 sudo -H -u www-data bash -c 'php artisan vendor:publish --force --all'
 sudo -H -u www-data bash -c 'php artisan migrate'
 sudo -H -u www-data bash -c 'php artisan seat:cache:clear'
+sudo -H -u www-data bash -c 'php artisan config:cache'
+sudo -H -u www-data bash -c 'php artisan route:cache'
 sudo -H -u www-data bash -c 'php artisan up'
 ```
 
-This should do it according to the official documentation, but I had to run the following after `sudo -H -u www-data bash -c 'php artisan seat:cache:clear` to get it working:
-```
-sudo -H -u www-data bash -c 'php artisan config:cache'
-sudo -H -u www-data bash -c 'php artisan route:cache'
-```
+## Donations
+Donations are always welcome, although not required. If you end up using this module a lot, I'd appreciate a donation. 
+You can give ISK or contract PLEX and Ships to `recursivetree`.
 

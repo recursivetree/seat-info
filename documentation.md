@@ -21,6 +21,9 @@ You can create links within the article to for example have a table of contents 
 section. To create such a link, add this to jump destination: `<pagelink id="your_id">`. To actually create the link to 
 the target, use a normal link like this: `<a href="#your_id">jump down</a>`.
 
+You aren't restricted to the `pagelink` element anymore, `id` should work on any element. As of right now, it only 
+remains as a compatibility element and will be removed in future versions.
+
 ## Bold
 `<b>bold text</b>`
 
