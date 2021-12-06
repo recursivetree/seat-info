@@ -19,6 +19,7 @@ class InfoController extends Controller
     public function getHomeView(Request $request){
 
         $article = Article::where("home_entry",true)->first();
+        $can_edit = auth()->user()->can("info.edit_article");
 
         if ($article===null){
             $request->session()->flash('message', [
@@ -28,7 +29,7 @@ class InfoController extends Controller
             return redirect()->route('info.list');
         }
 
-        if(!$article->public){
+        if(!$article->public && !$can_edit){
             $request->session()->flash('message', [
                 'title' => "Error",
                 'message' => 'You are not allowed to see this article, forwarding to the article list. Please contact the administrator about this.'
@@ -36,11 +37,7 @@ class InfoController extends Controller
             return redirect()->route('info.list');
         }
 
-
-        return view("info::view", [
-            "title" => $article->name,
-            "content" => $article->text
-        ]);
+        return view("info::view", compact('can_edit','article'));
 
     }
 
@@ -199,12 +196,10 @@ class InfoController extends Controller
     }
 
     public function getListView(){
-        if (auth()->user()->can("info.edit_article")){
-            $articles = Article::all();
-        } else {
-            $articles = Article::where("public", true)->get();
-        }
-        return view("info::list", compact('articles'));
+
+        $articles = Article::all();
+        $can_edit = auth()->user()->can("info.edit_article");
+        return view("info::list", compact('articles','can_edit'));
     }
 
     public function getManageView(){
@@ -217,27 +212,25 @@ class InfoController extends Controller
 
     public function getArticleView(Request $request,$id){
         $article = Article::find($id);
+        $can_edit = auth()->user()->can("info.edit_article");
 
         if ($article===null){
             $request->session()->flash('message', [
                 'title' => "Error",
-                'message' => 'Could not find the requested article!'
+                'message' => 'Could not find the requested article!',
             ]);
             return view("info::view");
         }
 
-        if(!$article->public && !auth()->user()->can("info.edit_article")){
+        if(!$article->public && !$can_edit){
             $request->session()->flash('message', [
                 'title' => "Error",
-                'message' => 'This article is private!'
+                'message' => 'This article is private!',
             ]);
             return view("info::view");
         }
 
-        return view("info::view", [
-            "title" => $article->name,
-            "content" => $article->text
-        ]);
+        return view("info::view", compact('can_edit','article'));
     }
 
     public function uploadResource(UploadResource $request){

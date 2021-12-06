@@ -24,7 +24,7 @@ return [
     'manage_confirm_confirm' => 'Confirm',
     'manage_confirm_cancel' => 'Cancel',
     'manage_article_title' => 'Manage Articles',
-    'manage_article_new' => 'new',
+    'manage_article_new' => 'New',
     'manage_article_no_home_article' => "You don't have any home article! Set one by selecting an article and Options->Set Home Article. The home article appears in the start section of the info module.",
     'manage_article_table_name' => 'Name',
     'manage_article_table_idlink' => 'ID-Link',
@@ -59,4 +59,9 @@ return [
     'manage_resources_table_delete' => 'Delete',
     'manage_resources_table_delete_confirm' => 'Do you really want to delete this file?',
     'manage_resources_no_resources' => 'There are no resources',
+    'list_home_article' => 'Home Article',
+    'list_article_new' => 'New',
+    'list_article_manage' => 'Manage Articles',
+    'view_article_edit' => 'Edit',
+    'view_article_manage' => 'Manage Articles',
 ];
