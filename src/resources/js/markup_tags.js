@@ -141,20 +141,22 @@ class TableMarkupTag extends MarkupTag{
 registerMarkupTag("table",TableMarkupTag)
 
 class ImgMarkupTag extends MarkupTag{
-    constructor(renderer) {
-        super(renderer,"img");
+    constructor(renderer,container="p") {
+        super(renderer,container);
     }
 
     onOpen(attributes) {
         super.onOpen(attributes);
-        let bNode = document.createElement("img")
+
+        super.openHTMLTag("img")
         if (attributes.src) {
             super.setAttribute("src", process_seat_url(attributes.src))
         }
         if (attributes.alt) {
-            bNode.setAttribute("alt", attributes.alt)
+            super.setAttribute("alt", attributes.alt)
         }
         super.addClass("mw-100")
+        super.closeHTMLTag()
     }
 
     allowsContent(){
@@ -173,5 +175,12 @@ class ImgMarkupTag extends MarkupTag{
     }
 }
 registerMarkupTag("img",ImgMarkupTag)
+
+class IconMarkupTag extends ImgMarkupTag{
+    constructor(renderer) {
+        super(renderer,"span");
+    }
+}
+registerMarkupTag("icon",IconMarkupTag)
 
 

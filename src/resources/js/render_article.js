@@ -88,10 +88,10 @@ class MarkupTag{
 
     //closes the element we are currently working on and go back to the last one we were working on
     closeHTMLTag(){
-        if (this._stack-length>1) {
+        if (this._stack.length>1) {
             this._stack.pop()
         } else {
-            this.warn(`There is a a relatively unimportant bug in the code for the tags ${tagNames}, the editor should continue working fine. Error: HTML element stack underflow.`)
+            this.warn(`There is a a relatively unimportant bug in the code for the tags, the editor should continue working fine. Error: HTML element stack underflow.`)
         }
     }
 

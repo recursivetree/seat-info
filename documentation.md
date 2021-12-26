@@ -116,4 +116,12 @@ Add the argument `stripes` and `borders` to the table to add stripes and borders
 `<img src="link-to-image.png" alt="image description">`
 
 You can specify a file uploaded to resources: `<img src="seatinfo:resource/id" alt="image description">`
-To get the id, go to the management page.
+To get the id, go to the management page. Images are put in a new paragraph. If you want the image to be inlined in the 
+text, use an icon instead.
+
+## Icons
+`<icon src="link-to-image.png" alt="icon description">`
+
+You can specify a file uploaded to resources: `<icon src="seatinfo:resource/id" alt="icon description">`
+To get the id, go to the management page. Icons are inlined in the text. If you want them to be on a new line instead, 
+use an image tag.
