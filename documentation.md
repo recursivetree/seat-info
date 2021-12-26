@@ -103,8 +103,7 @@ It's also possible to make a newline by pressing enter
             <td>3</td>
         </tr>
         <tr>
-            <td>1</td>
-            <td>2</td>
+            <td colspan="2">this thing spans two columns</td>
             <td>3</td>
         </tr>
     </tbody>
@@ -125,3 +124,9 @@ text, use an icon instead.
 You can specify a file uploaded to resources: `<icon src="seatinfo:resource/id" alt="icon description">`
 To get the id, go to the management page. Icons are inlined in the text. If you want them to be on a new line instead, 
 use an image tag.
+
+## Colors
+```
+<color color="#993399">pink</color>
+```
+Any css color should work.
