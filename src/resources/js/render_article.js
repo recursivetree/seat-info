@@ -81,6 +81,11 @@ class MarkupTag{
         top.setAttribute(name,value)
     }
 
+    setStyle(property,value){
+        let top = this._stackTop()
+        top.style.setProperty(property, value)
+    }
+
     addClass(name){
         let top = this._stackTop()
         top.classList.add(name)

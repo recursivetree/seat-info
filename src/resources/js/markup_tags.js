@@ -108,13 +108,38 @@ const liTag = registerSimpleTextContainingMarkupTag("li")
 registerRestrainedChildrenMarkupTag("ul",[liTag])
 registerRestrainedChildrenMarkupTag("ol",[liTag])
 
+function registerTableCellMarkupTag(tagName){
+    class TempTag extends MarkupTag{
+        constructor(renderer) {
+            super(renderer,tagName);
+        }
+
+        onOpen(attributes) {
+            super.onOpen(attributes);
+
+            if(attributes["colspan"]) {
+                let value
+                try{
+                    value = parseInt(attributes["colspan"])
+                    super.setAttribute("colspan",value)
+                } catch (e) {
+                    warn(`'${tagName}' elements with attribute 'colspan' is not an integer!"`)
+                }
+            }
+        }
+    }
+
+    MARKUP_TAG_REGISTRY[tagName] = TempTag
+    return TempTag
+}
+
 const thTag = registerSimpleTextContainingMarkupTag("th")
-const tdTag = registerSimpleTextContainingMarkupTag("td")
+const tdTag = registerTableCellMarkupTag("td")
 const trTag = registerRestrainedChildrenMarkupTag("tr",[thTag,tdTag])
 const tBodyTag = registerRestrainedChildrenMarkupTag("tbody",[trTag])
 const tHeadTag = registerRestrainedChildrenMarkupTag("thead",[trTag])
 
-class TableMarkupTag extends MarkupTag{
+class RootTableMarkupTag extends MarkupTag{
     constructor(renderer) {
         super(renderer,"table");
     }
@@ -138,7 +163,7 @@ class TableMarkupTag extends MarkupTag{
         }
     }
 }
-registerMarkupTag("table",TableMarkupTag)
+registerMarkupTag("table",RootTableMarkupTag)
 
 class ImgMarkupTag extends MarkupTag{
     constructor(renderer,container="p") {
@@ -182,5 +207,25 @@ class IconMarkupTag extends ImgMarkupTag{
     }
 }
 registerMarkupTag("icon",IconMarkupTag)
+
+class ColorTag extends MarkupTag{
+    constructor(renderer) {
+        super(renderer,"span");
+    }
+
+    onOpen(attributes) {
+        super.onOpen(attributes);
+
+        if(attributes["color"]){
+            super.setStyle("color",attributes["color"])
+        }
+
+        if(attributes["colour"]){
+            super.setStyle("color",attributes["colour"])
+        }
+    }
+}
+registerMarkupTag("color",ColorTag)
+registerMarkupTag("colour",ColorTag)
 
 
