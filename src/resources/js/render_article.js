@@ -59,6 +59,10 @@ class MarkupTag{
         this._stack.push(element)
     }
 
+    addEventListener(name, cb){
+        this._stackTop().addEventListener(name, cb)
+    }
+
     // adds another markup tag instance. Intended for use in the onChild function
     addMarkupTag(tag){
         let top = this._stackTop()
@@ -67,6 +71,7 @@ class MarkupTag{
 
     //private function, please ignore
     _stackTop(){
+        //there can't be an stack underflow, as the pop function blocks that
         return this._stack[this._stack.length-1]
     }
 
@@ -113,7 +118,7 @@ class MarkupTag{
         }
     }
 
-    allowsContent(){
+    allowChildren(){
         return true
     }
 
@@ -313,7 +318,7 @@ class MarkupRenderer{
             if (tagType) {
                 let tag = new tagType(this)
                 tag.onOpen(attributes)
-                if (tag.allowsContent()) {
+                if (tag.allowChildren()) {
                     this.markup_tag_stack.push(tag)
                     this.tag_name_stack.push(name)
                 } else {

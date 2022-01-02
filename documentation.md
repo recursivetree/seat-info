@@ -130,3 +130,11 @@ use an image tag.
 <color color="#993399">pink</color>
 ```
 Any css color should work.
+
+## Audio
+```
+<audio src="url">
+```
+Note that when playing files hosted in the info module resources, trying to change the position will change the position 
+back to the start of the file. External files normally work better. This is due to Laravel(the web framework which SEAT 
+bases on) not supporting certain features the browsers require.
