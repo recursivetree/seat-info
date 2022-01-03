@@ -162,10 +162,14 @@ function process_seat_url(url) {
         return `/info/resource/${id}`
     }
 
-    result = url.match(/^seatinfo:article\/([0-9]+)/)
+    result = url.match(/^seatinfo:article\/([0-9]+)(?:#([^ ]*))?$/)
     if (result) {
         const id = result[1]
-        return `/info/article/view/${id}`
+        if (result[2]) {
+            return `/info/article/view/${id}#${result[2]}`
+        } else {
+            return `/info/article/view/${id}`
+        }
     }
 
     return url
