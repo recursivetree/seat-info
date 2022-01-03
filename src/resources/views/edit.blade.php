@@ -56,7 +56,7 @@
                             </div>
 
                             <div class="form-group">
-                                <p>{{ trans('info::info.editor_syntax_documentation_link') }} <a href="https://github.com/recursivetree/seat-info/blob/master/documentation.md">{{ trans('info::info.link') }}</a></p>
+                                <p>{{ trans('info::info.editor_syntax_documentation_link') }} <a href="https://github.com/recursivetree/seat-info/blob/master/documentation.md" target="_blank">{{ trans('info::info.link') }}</a></p>
                             </div>
 
                             <div class="form-check form-group">
