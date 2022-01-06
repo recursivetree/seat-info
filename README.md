@@ -56,9 +56,12 @@ sudo -H -u www-data bash -c 'php artisan up'
 ```
 
 ## Increase the upload file size
-Per default, the configuration for the max allowed file size of php is rather low, meaning you can't upload big files in
-the resources tab. if you use a barebone install, you can fix it like this:
+This is optional and only required when you intend to upload files larger than 2MB.
 
+Per default, the configuration for the max allowed file size of php is rather low, meaning you can't upload big files in
+the resources tab. If you use a barebone install, you can fix it like this:
+
+### Barebone
 1. Open the `/etc/php/7.3/fpm/php.ini ` file, for example with nano:
     ```
     nano /etc/php/7.3/fpm/php.ini 
@@ -71,16 +74,45 @@ the resources tab. if you use a barebone install, you can fix it like this:
     ```
     upload_max_filesize = [the max size you want in megabytes]M
     ```
-3. Do the same for `post_max_size` The value should be slightly larger than the value of`upload_max_filesize`.
+3. Do the same for `post_max_size`, and if required for `memory_limit`. The value should be slightly larger than the value of`upload_max_filesize`.
 4. Save and exit
 5. Reload the config with:
     ```
     service php7.3-fpm reload
     service nginx reload
     ```
-6. Reload the management page and it should state a higher value as the limit.
+6. Reload the management page, and it should state a higher value as the limit.
 
-I haven't looked into how to do this in docker, but it should be similar.
+### Docker
+1. Go to the directory with your `docker-compose.yml` file.
+2. In this directory, create a new file `seat_info.ini`
+3. Put the following in the file:
+   ```
+   ; Increase the maximum file upload size for the seat-info plugin
+   upload_max_filesize = 40M ; increase this to a value larger than the largest file you intend to upload
+   post_max_size = 40M ; must be larger than upload_max_filesize
+   ;memory_limit = 512M ;you might need to increase this too if you have huge files
+   ```
+4. Adjust the values as you like
+5. Open the `docker-compose.yml` file and got to the `seat-web` section
+6. In there, add the following to the volumes section:
+   ```
+   - ./seat_info.ini:/usr/local/etc/php/conf.d/seat_info.ini:ro
+   ```
+   It should look something like this:
+   ```
+   seat-web:
+    image: eveseat/seat:4
+    restart: "no"
+    command: web
+    volumes:
+      - ./packages:/var/www/seat/packages:ro  # development only
+      - ./seat_info.ini:/usr/local/etc/php/conf.d/seat_info.ini:ro
+    env_file:
+      - .env
+    ...
+   ```
+7. Restart the container and reload the management page.
 
 ## Donations
 Donations are always welcome, although not required. If you end up using this module a lot, I'd appreciate a donation. 
