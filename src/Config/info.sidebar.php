@@ -4,6 +4,7 @@ return [
         'name'          => 'Info Module',
         'icon'          => 'fas fa-info',
         'route_segment' => 'info',
+        'permission' => 'info.view_article',
         'entries'       => [
             [   // List
                 'name'  => 'Start',

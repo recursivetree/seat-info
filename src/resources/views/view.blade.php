@@ -56,8 +56,8 @@
 @isset($article)
     @push('javascript')
 
-        <script src="@versionedAsset('info/js/render_article.js')"></script>
-        <script src="@versionedAsset('info/js/markup_tags.js')"></script>
+        <script src="@infoVersionedAsset('info/js/render_article.js')"></script>
+        <script src="@infoVersionedAsset('info/js/markup_tags.js')"></script>
 
         <script>
             window.addEventListener('load', (event) => {

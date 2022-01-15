@@ -28,7 +28,7 @@ class InfoServiceProvider extends AbstractSeatPlugin
 
         $version = $this->getVersion();
 
-        Blade::directive('versionedAsset', function($path) use ($version) {
+        Blade::directive('infoVersionedAsset', function($path) use ($version) {
             return "<?php echo asset({$path}) . '?v=$version'; ?>";
         });
     }
