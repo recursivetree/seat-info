@@ -6,6 +6,11 @@ Currently, the parser is relatively
 strict, and for example you can't have spaces in the tags where there doesn't need to be one. E.g. `<a></a>` is valid,
 but `< a ></ a>` isn't.
 
+## Attributes supported on all elements
+* You can give every element an `ìd` property.
+* Use `text-align="left"`, `text-align="center"` or `text-align="right"` to make the text left-bounded, right-bounded or
+centered.
+
 ## Links
 `<a href="http://example.com">Click me</a>`
 

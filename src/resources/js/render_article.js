@@ -112,9 +112,20 @@ class MarkupTag{
 
     //handles standard attributes like id and adds it to the current element, or wrapper, if none was created
     handleStandardAttributes(attributes){
-        if(attributes.id){
-            console.log("hi")
-            this.setAttribute("id",attributes.id)
+        if(attributes["id"]){
+            this.setAttribute("id",attributes["id"])
+        }
+        if(attributes["text-align"]){
+            let value = attributes["text-align"]
+            if (value === "right"){
+                this.setStyle("text-align","right")
+            } else if (value === "left"){
+                this.setStyle("text-align","left")
+            } else if (value === "center"){
+                this.setStyle("text-align","center")
+            } else {
+                this.warn(`Unsupported value '${value.substring(0,20)}' for attribute 'text-align'!`)
+            }
         }
     }
 
