@@ -13,8 +13,6 @@ return [
     'link' => 'Link',
     'editor_public_checkbox' => 'Make this article public',
     'editor_save_button' => 'Save',
-    'editor_preview_warnings_title' => 'Warnings',
-    'editor_preview_title' => 'Preview',
     'editor_preview_empty_article' => 'This is an empty article. Type something and a preview will show up here.',
     'editor_preview_error' => 'Could not render the whole page: Error:',
     'list_private_article' => 'Private',

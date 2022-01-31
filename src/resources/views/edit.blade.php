@@ -50,13 +50,29 @@
                                        value="{{ $article->name }}">
                             </div>
 
-                            <div class="form-group">
-                                <label for="text">{{ trans('info::info.article_content') }}</label>
-                                <textarea name="text" class="form-control monospace-font text-sm" id="text" placeholder="{{ trans('info::info.article_content_placeholder') }}" rows="15" required>{{ $article->text }}</textarea>
+                            <div class="d-flex w-100 form-group flex-column">
+                                <div>
+                                    <label for="text">{{ trans('info::info.article_content') }}</label>
+                                </div>
+                                <div class="d-flex w-100" style="max-height: 60vh; min-height: 20vh;">
+                                    <div class="w-50 m-1">
+                                        <textarea name="text" style="resize: none;" class="form-control monospace-font text-sm h-100" id="text" placeholder="{{ trans('info::info.article_content_placeholder') }}" required>{{ $article->text }}</textarea>
+                                    </div>
+                                    <div class="w-50 m-1">
+                                        <div class="form-control h-100 overflow-auto" id="editor-preview-target">
+
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="form-group">
                                 <p>{{ trans('info::info.editor_syntax_documentation_link') }} <a href="https://github.com/recursivetree/seat-info/blob/master/documentation.md" target="_blank">{{ trans('info::info.link') }}</a></p>
+                            </div>
+
+                            <div class="form-group" id="editor-preview-status">
+                                <ul id="editor-preview-warnings" class="list-group">
+                                </ul>
                             </div>
 
                             <div class="form-check form-group">
@@ -76,24 +92,6 @@
 
                     </div>
                 </div>
-
-                <div class="card">
-                    <div class="card-header">{{ trans('info::info.editor_preview_title') }}</div>
-                    <div class="card-body">
-
-                        <div id="editor-preview-status">
-                            <h2>{{ trans('info::info.editor_preview_warnings_title') }}</h2>
-                            <ul id="editor-preview-warnings" class="pl-0">
-
-                            </ul>
-                        </div>
-
-                        <div class="border rounded p-4" id="editor-preview-target">
-
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
     </div>
@@ -115,7 +113,10 @@
                 preview_target.textContent=""// lazy thing to clear the dom
 
                 if (content.length == 0){
+                    preview_target.classList.add("text-muted")
                     preview_target.textContent= {!! json_encode(trans('info::info.editor_preview_empty_article')) !!}
+                } else {
+                    preview_target.classList.remove("text-muted")
                 }
 
                 render_article(content, document.getElementById("editor-preview-target"), function (e) {
