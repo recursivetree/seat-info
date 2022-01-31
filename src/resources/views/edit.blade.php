@@ -100,7 +100,6 @@
                             <div class="form-group">
                                 <button type="submit" class="btn btn-primary" id="save">{{ trans('info::info.editor_save_button') }}</button>
                             </div>
-
                         </form>
 
                     </div>
@@ -160,7 +159,7 @@
                         liElement.classList.add("list-group-item")
                         warnings_list.appendChild(liElement)
                     }
-                });
+                })
             }
 
             textarea.addEventListener("input",render_preview)
@@ -169,8 +168,7 @@
             function update_textarea(selectionStart,selectionEnd,replace){
                 const startPos = textarea.selectionStart
                 const endPos = textarea.selectionEnd
-
-
+                const scrollPosition = textarea.scrollTop
                 const oldText = textarea.value
 
                 const startText = selectionStart ? selectionStart : ""
@@ -185,6 +183,7 @@
                 textarea.selectionStart = startPos
                 textarea.selectionEnd = startPos + startText.length + centerText.length + endText.length
 
+                textarea.scrollTop = scrollPosition
 
                 render_preview()
             }
