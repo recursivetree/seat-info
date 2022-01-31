@@ -173,7 +173,27 @@ class ImgMarkupTag extends MarkupTag{
     onOpen(attributes) {
         super.onOpen(attributes);
 
+        const container = super._stackTop() //hacky, but I plan to replace the component system to allow actually interactive components soon
+
         super.openHTMLTag("img")
+
+        super.addEventListener("error",function () {
+            while (container.firstChild){
+                container.removeChild(container.firstChild)
+            }
+            const div = document.createElement("div")
+            div.classList.add("alert")
+            div.classList.add("alert-warning")
+
+            const icon = document.createElement("i")
+            icon.classList.add("fas","fa-exclamation-triangle")
+
+            div.appendChild(icon)
+            div.appendChild(document.createTextNode(`Could not load image! Description: ${attributes.alt || "no description provided"}`))
+
+            container.appendChild(div)
+        })
+
         if (attributes.src) {
             super.setAttribute("src", process_seat_url(attributes.src))
         }
