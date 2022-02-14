@@ -111,11 +111,18 @@
 @stop
 
 @push('javascript')
+    <script src="@infoVersionedAsset('info/js/parser.js')"></script>
     <script src="@infoVersionedAsset('info/js/render_article.js')"></script>
     <script src="@infoVersionedAsset('info/js/markup_tags.js')"></script>
     <script>
         window.addEventListener('load', (event) => {
             const textarea = document.getElementById("text")
+
+            function selectArea(start, end) {
+                textarea.selectionStart = start
+                textarea.selectionEnd = end
+                textarea.focus()
+            }
 
             function render_preview() {
                 const content = textarea.value
@@ -154,11 +161,27 @@
 
                     for(const warning of e.warnings){
                         let liElement = document.createElement("li")
-                        liElement.textContent = warning
+                        liElement.textContent = warning.message
                         liElement.classList.add("list-group-item-warning")
                         liElement.classList.add("list-group-item")
                         warnings_list.appendChild(liElement)
                     }
+                }, function (elementAstRepresentation) {
+                    console.log(elementAstRepresentation)
+
+                    let start = Number.MAX_SAFE_INTEGER
+                    let end = Number.MIN_SAFE_INTEGER
+
+                    for (const token of elementAstRepresentation.tokens) {
+                        if(token.start < start){
+                            start = token.start
+                        }
+                        if(token.end > end){
+                            end = token.end
+                        }
+                    }
+
+                    selectArea(start,end+1)
                 })
             }
 

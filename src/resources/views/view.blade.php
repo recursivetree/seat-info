@@ -56,6 +56,7 @@
 @isset($article)
     @push('javascript')
 
+        <script src="@infoVersionedAsset('info/js/parser.js')"></script>
         <script src="@infoVersionedAsset('info/js/render_article.js')"></script>
         <script src="@infoVersionedAsset('info/js/markup_tags.js')"></script>
 

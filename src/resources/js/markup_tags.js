@@ -16,12 +16,12 @@ function registerSimpleNoContentMarkupTag(tagName){
         onChild(child) {
             //do nothing
             //allowsContent should not even allow this to be called, but you never know
-            super.warn(`${tagName} tags don't allow children elements.`)
+            super.warn(`${tagName} tags don't allow children elements. Make sure the correct syntax  <${tagName} /> instead of just <${tagName}> is used`)
         }
         onTextContent(text) {
             //do nothing
             //allowsContent should not even allow this to be called, but you never know
-            super.warn(`${tagName} tags don't allow text content.`)
+            super.warn(`${tagName} tags don't allow text content. Make sure the correct syntax the correct syntax <${tagName} /> instead of just <${tagName}> is used`)
         }
         allowChildren(){
             return false
@@ -211,12 +211,12 @@ class ImgMarkupTag extends MarkupTag{
     onChild(child) {
         //do nothing
         //allowsContent should not even allow this to be called, but you never know
-        super.warn("Image tags don't allow children elements.")
+        super.warn("Image tags don't allow children elements. Make sure the correct syntax <tagname /> instead of just <tagname> is used")
     }
     onTextContent(text) {
         //do nothing
         //allowsContent should not even allow this to be called, but you never know
-        super.warn("Image tags don't allow text content.")
+        super.warn("Image tags don't allow text content. Make sure the correct syntax <tagname /> instead of just <tagname> is used")
     }
 }
 registerMarkupTag("img",ImgMarkupTag)
