@@ -124,6 +124,22 @@
                 textarea.focus()
             }
 
+            function selectAreaFromTokenList(tokens) {
+                let start = Number.MAX_SAFE_INTEGER
+                let end = Number.MIN_SAFE_INTEGER
+
+                for (const token of tokens) {
+                    if(token.start < start){
+                        start = token.start
+                    }
+                    if(token.end > end){
+                        end = token.end
+                    }
+                }
+
+                selectArea(start,end+1)
+            }
+
             function render_preview() {
                 const content = textarea.value
                 //console.log(content)
@@ -162,26 +178,18 @@
                     for(const warning of e.warnings){
                         let liElement = document.createElement("li")
                         liElement.textContent = warning.message
+
+                        liElement.addEventListener("click",function () {
+                            selectAreaFromTokenList(warning.tokens)
+                        })
+
                         liElement.classList.add("list-group-item-warning")
+                        liElement.classList.add("list-group-item-action")
                         liElement.classList.add("list-group-item")
                         warnings_list.appendChild(liElement)
                     }
                 }, function (elementAstRepresentation) {
-                    console.log(elementAstRepresentation)
-
-                    let start = Number.MAX_SAFE_INTEGER
-                    let end = Number.MIN_SAFE_INTEGER
-
-                    for (const token of elementAstRepresentation.tokens) {
-                        if(token.start < start){
-                            start = token.start
-                        }
-                        if(token.end > end){
-                            end = token.end
-                        }
-                    }
-
-                    selectArea(start,end+1)
+                    selectAreaFromTokenList(elementAstRepresentation.tokens)
                 })
             }
 
