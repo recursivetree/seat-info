@@ -77,6 +77,14 @@ class TokenReader {
             }
         }
     }
+
+    tokenRange(start,end){
+        return this.tokens.slice(start,end)
+    }
+
+    position(offset=0){
+        return this.index+offset
+    }
 }
 
 class Stack {
@@ -194,6 +202,8 @@ const parse = (text) => {
         } else {
             //tag starts
 
+            let tagStartTokenIndex = tokenReader.position(-1)
+
             //finish previous text nodes
             if (textNodeTokens.length > 0) {
                 const astText = new ASTText(textNodeTokens)
@@ -308,7 +318,9 @@ const parse = (text) => {
                     }
                 }
 
-                const tag = new ASTTag([token], tagName, properties)
+                const tokens = tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position())
+
+                const tag = new ASTTag(tokens, tagName, properties)
 
                 const stackTop = elementStack.peek()
                 stackTop.appendNode(tag)
@@ -361,7 +373,10 @@ const parse = (text) => {
                 }
 
                 //actually close the tag
-                elementStack.pop()
+                const tokens = tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position())
+
+                const element = elementStack.pop()
+                element.tokens = element.tokens.concat(tokens)
 
             } else {
                 warnings.push(new MarkupWarning([token], "Unexpected token, expected text or '/'"))

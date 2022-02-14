@@ -179,9 +179,11 @@ class MarkupRenderer{
 
                         const child = new this.tag_registry[contentAst.tagName](this)
                         if(elementClickCallback){
-                            child.addEventListener("click",function () {
+                            child.addEventListener("click",function (e) {
+                                e.stopPropagation()
+                                e.preventDefault()
                                 elementClickCallback(contentAst)
-                            })
+                            }, true)
                         }
 
                         child.onOpen(contentAst.properties)
