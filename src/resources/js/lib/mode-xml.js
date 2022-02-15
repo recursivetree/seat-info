@@ -9,15 +9,9 @@ var XmlHighlightRules = function(normalize) {
 
     this.$rules = {
         start : [
-            {token : "string.cdata.xml", regex : "<\\!\\[CDATA\\[", next : "cdata"},
             {
                 token : ["punctuation.instruction.xml", "keyword.instruction.xml"],
                 regex : "(<\\?)(" + tagRegex + ")", next : "processing_instruction"
-            },
-            {token : "comment.start.xml", regex : "<\\!--", next : "comment"},
-            {
-                token : ["xml-pe.doctype.xml", "xml-pe.doctype.xml"],
-                regex : "(<\\!)(DOCTYPE)(?=[\\s])", next : "doctype", caseInsensitive: true
             },
             {include : "tag"},
             {token : "text.end-tag-open.xml", regex: "</"},
@@ -42,14 +36,6 @@ var XmlHighlightRules = function(normalize) {
             next : "start"
         }],
 
-        doctype : [
-            {include : "whitespace"},
-            {include : "string"},
-            {token : "xml-pe.doctype.xml", regex : ">", next : "start"},
-            {token : "xml-pe.xml", regex : "[-_a-zA-Z0-9:]+"},
-            {token : "punctuation.int-subset", regex : "\\[", push : "int_subset"}
-        ],
-
         int_subset : [{
             token : "text.xml",
             regex : "\\s+"
@@ -71,12 +57,6 @@ var XmlHighlightRules = function(normalize) {
             },
             {include : "string"}]
         }],
-
-        cdata : [
-            {token : "string.cdata.xml", regex : "\\]\\]>", next : "start"},
-            {token : "text.xml", regex : "\\s+"},
-            {token : "text.xml", regex : "(?:[^\\]]|\\](?!\\]>))+"}
-        ],
 
         comment : [
             {token : "comment.end.xml", regex : "-->", next : "start"},
@@ -185,12 +165,6 @@ var XmlHighlightRules = function(normalize) {
             token: ["meta.tag.punctuation.end-tag-open.xml", "meta.tag." + tag + ".tag-name.xml"],
             regex : "(</)(" + tag + "(?=\\s|>|$))",
             next: tag + "-end"
-        }, {
-            token: "string.cdata.xml",
-            regex : "<\\!\\[CDATA\\["
-        }, {
-            token: "string.cdata.xml",
-            regex : "\\]\\]>"
         }]);
     };
 
