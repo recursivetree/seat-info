@@ -392,10 +392,10 @@ const parse = (text) => {
         elementStack.peek().appendNode(astText)
     }
 
-    while (elementStack.size()>1){
-        warnings.push(new MarkupWarning([token], "Unclosed tags at the end!"))
-        elementStack.pop()
+    if(elementStack.size()>1){
+        warnings.push(new MarkupWarning([token], `Unclosed tags at the end! You might be able to fix this by adding '${elementStack.stack.slice(1).reduceRight((p,t)=>p+`</${t.tagName}>`,"")}'`))
     }
+
 
     return {
         warnings,
