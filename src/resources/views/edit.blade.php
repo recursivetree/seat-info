@@ -239,8 +239,9 @@
         }
 
         const editor = ace.edit("text");
-        editor.setTheme("ace/theme/github");
-        editor.session.setMode("ace/mode/html");
+        editor.setTheme("ace/theme/xcode");
+        editor.session.setMode("ace/mode/xml");
+        editor.session.setUseWrapMode(true)
 
         editor.setValue(document.getElementById("submitText").value)
         editor.clearSelection()
