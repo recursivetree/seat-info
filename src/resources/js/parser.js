@@ -309,7 +309,8 @@ const parse = (text) => {
 
                             continue propertyLoop
                         } else {
-                            throw Error
+                            warnings.push(new MarkupWarning([token], "Unexpected token!"))
+                            continue propertyLoop
                         }
 
                     } else {
