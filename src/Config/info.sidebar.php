@@ -29,6 +29,11 @@ return [
                 'icon'  => 'fas fa-cogs',
                 'route' => 'info.manage',
                 'permission' => 'info.edit_article',
+            ],
+            [   // Manage Pages
+                'name'  => 'About',
+                'icon'  => 'fas fa-info',
+                'route' => 'info.about',
             ]
         ]
     ]

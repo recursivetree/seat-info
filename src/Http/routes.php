@@ -94,4 +94,9 @@ Route::group([
         'uses' => 'InfoController@setArticlePrivate',
         'middleware' => 'can:info.edit_article'
     ]);
+
+    Route::get('/about', [
+        'as'   => 'info.about',
+        'uses' => 'InfoController@about',
+    ]);
 });

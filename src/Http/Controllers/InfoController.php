@@ -293,4 +293,8 @@ class InfoController extends Controller
         ]);
         return redirect()->route('info.manage');
     }
+
+    public function about(){
+        return view("info::about");
+    }
 }
