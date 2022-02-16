@@ -39,7 +39,8 @@ class Token {
         TEXT: 4,
         QUOTES: 5,
         SLASH: 6,
-        WHITESPACE: 7
+        WHITESPACE: 7,
+        ESCAPE_SEQUENCE: 8,
     }
 
     constructor(type, src, start, end) {
@@ -147,6 +148,8 @@ class ASTText extends ASTBase {
 }
 
 const parse = (text) => {
+    const warnings = []
+
     const reader = new CharReader(text)
     const tokens = []
 
@@ -167,7 +170,37 @@ const parse = (text) => {
     while (reader.hasNext()) {
         const c = reader.next()
 
-        if (singleCharacterMap[c]) {
+        let isEscaped = false
+
+        if(c === "\\"){
+            if(!reader.hasNext()){
+                warnings.push(new MarkupWarning([new Token(Token.TokenType.ESCAPE_SEQUENCE,c,reader.position(),reader.position())],
+                    "Expected another character following the escape character '\\', reading the '\\' as literal. For literal backslashes, please escape it as '\\\\'."))
+                continue
+            }
+
+            const n = reader.next()
+            if(singleCharacterMap[n]){
+                const type = singleCharacterMap[n]
+                if(type === Token.TokenType.WHITESPACE){
+                    warnings.push(new MarkupWarning([new Token(Token.TokenType.ESCAPE_SEQUENCE,c+n,reader.position(-1),reader.position())],
+                        "Whitespace shouldn't be escaped, reading the '\\' as literal. For literal backslashes, please escape it as '\\\\'."
+                    ))
+                    reader.back() // go back so the following character after the \ is handled normally
+                } else {
+                    isEscaped = true
+                }
+            } else if(n==="\\") {
+                isEscaped = true // escaping a \. \ is not in singleCharacterMap, but still escapable
+            } else {
+                warnings.push(new MarkupWarning([new Token(Token.TokenType.ESCAPE_SEQUENCE,c+n,reader.position(-1),reader.position())],
+                    `You don't need to escape the character '${n}', reading the '\\' as literal. For literal backslashes, please escape it as '\\\\'.`
+                ))
+                reader.back() // go back so the following character after the \ is handled normally
+            }
+        }
+
+        if (!isEscaped && singleCharacterMap[c]) {
             if (textTokenStart !== null) {
                 const content = reader.range(textTokenStart, reader.position(-1))
                 tokens.push(new Token(Token.TokenType.TEXT, content,textTokenStart,reader.position(-1)))
@@ -189,8 +222,6 @@ const parse = (text) => {
     const tokenReader = new TokenReader(tokens)
 
     const elementStack = new Stack([new ASTTag(null, null, {})])
-
-    const warnings = []
 
     var token
 
