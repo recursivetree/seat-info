@@ -213,7 +213,7 @@ const parse = (text) => {
 
             tokenReader.skipWhiteSpace()
             if (!tokenReader.hasNext()) {
-                warnings.push(new MarkupWarning([token], "Unexpected end of source!"))
+                warnings.push(new MarkupWarning([token], "Expected the tag name or a closing slash after an opening tag!"))
                 continue mainParserLoop
             }
 
@@ -232,7 +232,7 @@ const parse = (text) => {
                     tokenReader.skipWhiteSpace()
 
                     if (!tokenReader.hasNext()) {
-                        warnings.push(new MarkupWarning([token], "Expected a property name or closing '>' and not the source end!"))
+                        warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected a property name, self-closing slash or '>' after the tag name!"))
                         continue mainParserLoop
                     }
                     token = tokenReader.next()
@@ -246,13 +246,13 @@ const parse = (text) => {
                         tokenReader.skipWhiteSpace()
 
                         if (!tokenReader.hasNext()) {
-                            warnings.push(new MarkupWarning([token], "Unclosed tag at the source end"))
+                            warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected a '>' after a closing slash!"))
                             break
                         }
                         token = tokenReader.next()
 
                         if(token.type !== Token.TokenType.CLOSE_TAG){
-                            warnings.push(new MarkupWarning([token], "In a self-closing tag, after the '/' a '>' must follow immediately"))
+                            warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected a '>' after the closing slash of a self-closing element!"))
                             tokenReader.back()
                         }
 
@@ -264,12 +264,12 @@ const parse = (text) => {
                         tokenReader.skipWhiteSpace()
 
                         if (!tokenReader.hasNext()) {
-                            warnings.push(new MarkupWarning([token], "Unexpected end of source"))
+                            warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected the next property name, a closing '>' or the equals sign if the property has a value!"))
                             continue mainParserLoop
                         }
                         token = tokenReader.next()
 
-                        if (token.type === Token.TokenType.TEXT || token.type === Token.TokenType.CLOSE_TAG) {
+                        if (token.type === Token.TokenType.TEXT || token.type === Token.TokenType.CLOSE_TAG || token.type === Token.TokenType.SLASH) {
                             //property without value
                             tokenReader.back()
                             properties[propertyName] = true
@@ -279,21 +279,21 @@ const parse = (text) => {
 
                             //search opening quote
                             if (!tokenReader.hasNext()) {
-                                warnings.push(new MarkupWarning([token], "Expected a \" instead of source end!"))
+                                warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected a \" or ' to define a property with value!"))
                                 continue mainParserLoop
                             }
 
                             token = tokenReader.next()
 
                             if (token.type !== Token.TokenType.QUOTES) {
-                                warnings.push(new MarkupWarning([token], "Expected a \"!"))
+                                warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected a \" or ' to define a property with value!"))
                                 continue mainParserLoop
                             }
 
                             let argString = ""
                             while (true) {
                                 if (!tokenReader.hasNext()) {
-                                    warnings.push(new MarkupWarning([token], "Property value is not encapsulated with a \"!"))
+                                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Property value is not terminated with \" or '!"))
                                     continue mainParserLoop
                                 }
                                 token = tokenReader.next()
@@ -309,19 +309,17 @@ const parse = (text) => {
 
                             continue propertyLoop
                         } else {
-                            warnings.push(new MarkupWarning([token], "Unexpected token!"))
+                            warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected the next property name, a closing '>' or the equals sign if the property has a value!"))
                             continue propertyLoop
                         }
 
                     } else {
-                        warnings.push(new MarkupWarning([token], "Expected a property name or closing '>'!"))
+                        warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected a property name, self-closing slash or closing '>'!"))
                         continue mainParserLoop
                     }
                 }
 
-                const tokens = tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position())
-
-                const tag = new ASTTag(tokens, tagName, properties)
+                const tag = new ASTTag(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), tagName, properties)
 
                 const stackTop = elementStack.peek()
                 stackTop.appendNode(tag)
@@ -338,12 +336,12 @@ const parse = (text) => {
 
                 //check for tag name
                 if (!tokenReader.hasNext()) {
-                    warnings.push(new MarkupWarning([token], "Expected the tag name instead of source end!"))
+                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected the tag name after the slash of a closing tag!"))
                     continue mainParserLoop
                 }
                 token = tokenReader.next()
                 if (token.type !== Token.TokenType.TEXT) {
-                    warnings.push(new MarkupWarning([token], "Expected a text token!"))
+                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Tag names should only consist out of alphabetic characters!"))
                     continue mainParserLoop
                 }
                 let tagName = token.src
@@ -352,35 +350,28 @@ const parse = (text) => {
 
                 //check for closing >
                 if (!tokenReader.hasNext()) {
-                    warnings.push(new MarkupWarning([token], "Expected a '>' to close the tag instead of the source end"))
+                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected a '>' to end the tag!"))
                     continue mainParserLoop
                 }
                 token = tokenReader.next()
                 if (token.type !== Token.TokenType.CLOSE_TAG) {
-                    warnings.push(new MarkupWarning([token], "Expected a '>' to close the tag!"))
+                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected a '>' to end the tag!"))
                     continue mainParserLoop
                 }
 
                 let stackTop = elementStack.peek()
-                while (stackTop.tagName !== tagName) {//nn
-                    warnings.push(new MarkupWarning([token], "Unclosed tags!"))
+                if (stackTop.tagName !== tagName){
+                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Closing tag doesn't match last opened tag!"))
+                } else {
+                    //actually close the tag
+                    const tokens = tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position())
 
-                    if(elementStack.size()<=1){
-                        continue mainParserLoop
-                    }
-
-                    elementStack.pop()
-                    stackTop = elementStack.peek()
+                    const element = elementStack.pop()
+                    element.tokens = element.tokens.concat(tokens)
                 }
 
-                //actually close the tag
-                const tokens = tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position())
-
-                const element = elementStack.pop()
-                element.tokens = element.tokens.concat(tokens)
-
             } else {
-                warnings.push(new MarkupWarning([token], "Unexpected token, expected text or '/'"))
+                warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected a tag name or slash after an opening '<'!"))
                 continue mainParserLoop
             }
         }
