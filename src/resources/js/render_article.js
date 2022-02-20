@@ -123,6 +123,12 @@ class MarkupRootElement extends MarkupTag{
     }
 }
 
+class MarkupFakeWrapper extends MarkupTag {
+    constructor(renderer){
+        super(renderer,"span")
+    }
+}
+
 function process_seat_url(url) {
     let result = url.match(/^seatinfo:resource\/([0-9]+)$/)
     if (result) {
@@ -146,10 +152,7 @@ function process_seat_url(url) {
 class MarkupRenderer{
     constructor(tag_registry) {
         this.tag_registry = tag_registry
-        this.markup_tag_stack = []
-        this.tag_name_stack = []
         this.textNodeStart = null
-        this.src_reader = null
 
         this.warnings = []
     }
@@ -171,13 +174,21 @@ class MarkupRenderer{
                     markupElement.onTextContent(contentAst.text)
                 } else if (contentAst instanceof ASTTag){
                     if(markupElement.allowChildren()){
+
+                        //MarkupTag class used for the element
+                        let elementClass
+
                         if(!this.tag_registry[contentAst.tagName]){
+                            //tag not found, treating it like a <span>
                             warnings.push(new MarkupWarning(contentAst.tokens,`Unknown tag of type '${contentAst.tagName}'`))
-                            recursiveBuildMarkupElements(markupElement,contentAst.content)
-                            continue
+                            elementClass = MarkupFakeWrapper
+                        } else {
+                            //get markup tag class
+                            elementClass = this.tag_registry[contentAst.tagName]
                         }
 
-                        const child = new this.tag_registry[contentAst.tagName](this)
+                        const child = new elementClass(this)
+
                         if(elementClickCallback){
                             child.addEventListener("click",function (e) {
                                 e.stopPropagation()
@@ -193,10 +204,15 @@ class MarkupRenderer{
                         }
 
                         child.onClose()
+
+                        //append child to parent
                         markupElement.onChild(child)
 
+                        //e.g. when you have <br>text</br>, treat it as <br>
                         if(!child.allowChildren() && contentAst.content.length > 0){
                             warnings.push(new MarkupWarning(contentAst.tokens,`<${contentAst.tagName}> elements don't allow children. This can mean that you are using the old syntax <${contentAst.tagName}> instead of the new one with a closing slash: <${contentAst.tagName}/>`))
+
+
                             recursiveBuildMarkupElements(markupElement,contentAst.content)
                         }
 
@@ -210,13 +226,16 @@ class MarkupRenderer{
         recursiveBuildMarkupElements(root,ast.ast.content)
 
         this.warnings = this.warnings.concat(warnings)
+
+        return ast
     }
 }
 
 function render_article(src, target, done_cb,elementClickCallback=null) {
     let renderer = new MarkupRenderer(MARKUP_TAG_REGISTRY)
+    let ast
     try {
-        renderer.render(src, target, elementClickCallback)
+        ast = renderer.render(src, target, elementClickCallback)
     } catch (e) {
         console.log(e)
         done_cb({
@@ -226,7 +245,8 @@ function render_article(src, target, done_cb,elementClickCallback=null) {
         return
     }
     done_cb({
-        warnings: renderer.warnings
+        warnings: renderer.warnings,
+        renderData: {ast: ast}
     })
 }
 

@@ -57,8 +57,19 @@
                                 </div>
 
                                 <div class="btn-group mb-1 btn-group-sm">
-                                    <button type="button" class="btn btn-secondary" id="button-insert-heading"><i
+
+                                    <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"><i
                                                 class="fas fa-heading"></i></button>
+                                    <div class="dropdown-menu">
+                                        <button type="button" class="dropdown-item" id="button-insert-heading-1">H1</button>
+                                        <button type="button" class="dropdown-item" id="button-insert-heading-2">H2</button>
+                                        <button type="button" class="dropdown-item" id="button-insert-heading-3">H3</button>
+                                        <button type="button" class="dropdown-item" id="button-insert-heading-4">H4</button>
+                                        <button type="button" class="dropdown-item" id="button-insert-heading-5">H5</button>
+                                        <button type="button" class="dropdown-item" id="button-insert-heading-6">H6</button>
+                                    </div>
+
+
                                     <button type="button" class="btn btn-secondary" id="button-insert-paragraph"><i
                                                 class="fas fa-paragraph"></i></button>
                                     <button type="button" class="btn btn-secondary" id="button-insert-bold"><i
@@ -197,6 +208,10 @@
             }
 
             update_errors(e) {
+                if(e.renderData){
+                    this.astTree = e.renderData.ast
+                }
+
                 let status_container = document.getElementById("editor-preview-status")
                 if (e.error || e.warnings.length > 0) {
                     status_container.style.display = "block"
@@ -247,7 +262,10 @@
                     preview_target.classList.remove("text-muted")
                 }
 
-                render_article(content, document.getElementById("editor-preview-target"), this.update_errors.bind(this),
+                render_article(
+                    content,
+                    document.getElementById("editor-preview-target"),
+                    this.update_errors.bind(this),
                     (elementAstRepresentation) => {
                         this.selectAreaFromTokenList(elementAstRepresentation.tokens)
                     })
@@ -261,9 +279,26 @@
 
         const editor = new MarkupEditor()
 
-        document.getElementById("button-insert-heading").addEventListener("click", function () {
+        document.getElementById("button-insert-heading-1").addEventListener("click", function () {
             editor.update_editor("<h1>", "</h1>", null)
         })
+        document.getElementById("button-insert-heading-2").addEventListener("click", function () {
+            editor.update_editor("<h2>", "</h2>", null)
+        })
+        document.getElementById("button-insert-heading-3").addEventListener("click", function () {
+            editor.update_editor("<h3>", "</h3>", null)
+        })
+        document.getElementById("button-insert-heading-4").addEventListener("click", function () {
+            editor.update_editor("<h4>", "</h4>", null)
+        })
+        document.getElementById("button-insert-heading-5").addEventListener("click", function () {
+            editor.update_editor("<h5>", "</h5>", null)
+        })
+        document.getElementById("button-insert-heading-6").addEventListener("click", function () {
+            editor.update_editor("<h6>", "</h6>", null)
+        })
+
+
         document.getElementById("button-insert-paragraph").addEventListener("click", function () {
             editor.update_editor("<p>", "</p>", null)
         })
