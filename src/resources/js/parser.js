@@ -340,12 +340,12 @@ const parse = (text) => {
 
                             continue propertyLoop
                         } else {
-                            warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected the next property name, a closing '>' or the equals sign if the property has a value!"))
+                            warnings.push(new MarkupWarning([token], "Expected the next property name, a closing '>' or the equals sign if the property has a value!"))
                             continue propertyLoop
                         }
 
                     } else {
-                        warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected a property name, self-closing slash or closing '>'!"))
+                        warnings.push(new MarkupWarning([token], "Expected a property name, self-closing slash or closing '>'!"))
                         continue mainParserLoop
                     }
                 }
