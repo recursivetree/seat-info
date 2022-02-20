@@ -133,68 +133,70 @@
     <script src="@infoVersionedAsset('info/js/markup_tags.js')"></script>
     <script>
 
-        function getLineForIndex(index){
-            let lineIndex = 0
+        class MarkupEditor {
+            constructor() {
+                this.astTree = null
 
-            let lines = editor.session.getLines(0,editor.session.getLength())
+                this.editor = ace.edit("text");
+                this.editor.setTheme("ace/theme/xcode");
+                this.editor.session.setMode("ace/mode/xml");
+                this.editor.session.setUseWrapMode(true)
 
-            for (const line of lines) {
-                const length = line.length + 1
+                this.editor.setValue(document.getElementById("submitText").value)
+                this.editor.clearSelection()
 
-                if(index - length < 0){
-                    break
-                }
-
-                index -= length
-                lineIndex ++
+                this.editor.on("change",  (e) => {
+                    this.render_preview()
+                })
             }
 
-            return {
-                row: lineIndex,
-                column: index
-            }
-        }
+            getLineForIndex(index) {
+                let lineIndex = 0
 
-        function selectArea(start, end) {
+                let lines = this.editor.session.getLines(0, this.editor.session.getLength())
 
-            const startPos = getLineForIndex(start)
-            const endPos = getLineForIndex(end)
-            editor.selection.setRange(new ace.Range(startPos.row,startPos.column,endPos.row,endPos.column),true)
-            editor.scrollToLine(startPos.row)
-        }
+                for (const line of lines) {
+                    const length = line.length + 1
 
-        function selectAreaFromTokenList(tokens) {
-            let start = Number.MAX_SAFE_INTEGER
-            let end = Number.MIN_SAFE_INTEGER
+                    if (index - length < 0) {
+                        break
+                    }
 
-            for (const token of tokens) {
-                if (token.start < start) {
-                    start = token.start
+                    index -= length
+                    lineIndex++
                 }
-                if (token.end > end) {
-                    end = token.end
+
+                return {
+                    row: lineIndex,
+                    column: index
                 }
             }
 
-            selectArea(start, end + 1)
-        }
+            selectArea(start, end) {
 
-        function render_preview() {
-            const content = editor.getValue()
-
-            document.getElementById("submitText").value = content
-
-            let preview_target = document.getElementById("editor-preview-target")
-            preview_target.textContent = ""// lazy thing to clear the dom
-
-            if (content.length === 0) {
-                preview_target.classList.add("text-muted")
-                preview_target.textContent = {!! json_encode(trans('info::info.editor_preview_empty_article')) !!}
-            } else {
-                preview_target.classList.remove("text-muted")
+                const startPos = this.getLineForIndex(start)
+                const endPos = this.getLineForIndex(end)
+                this.editor.selection.setRange(new ace.Range(startPos.row, startPos.column, endPos.row, endPos.column), true)
+                this.editor.scrollToLine(startPos.row)
             }
 
-            render_article(content, document.getElementById("editor-preview-target"), function (e) {
+            selectAreaFromTokenList(tokens) {
+                let start = Number.MAX_SAFE_INTEGER
+                let end = Number.MIN_SAFE_INTEGER
+
+                for (const token of tokens) {
+                    if (token.start < start) {
+                        start = token.start
+                    }
+                    if (token.end > end) {
+                        end = token.end
+                    }
+                }
+
+                this.selectArea(start, end + 1)
+            }
+
+            update_errors(e) {
                 let status_container = document.getElementById("editor-preview-status")
                 if (e.error || e.warnings.length > 0) {
                     status_container.style.display = "block"
@@ -219,8 +221,8 @@
                     let liElement = document.createElement("li")
                     liElement.textContent = warning.message
 
-                    liElement.addEventListener("click", function () {
-                        selectAreaFromTokenList(warning.tokens)
+                    liElement.addEventListener("click", () => {
+                        this.selectAreaFromTokenList(warning.tokens)
                     })
 
                     liElement.classList.add("list-group-item-warning")
@@ -228,57 +230,63 @@
                     liElement.classList.add("list-group-item")
                     warnings_list.appendChild(liElement)
                 }
-            }, function (elementAstRepresentation) {
-                selectAreaFromTokenList(elementAstRepresentation.tokens)
-            })
+            }
+
+            render_preview() {
+                const content = this.editor.getValue()
+
+                document.getElementById("submitText").value = content
+
+                let preview_target = document.getElementById("editor-preview-target")
+                preview_target.textContent = ""// lazy thing to clear the dom
+
+                if (content.length === 0) {
+                    preview_target.classList.add("text-muted")
+                    preview_target.textContent = {!! json_encode(trans('info::info.editor_preview_empty_article')) !!}
+                } else {
+                    preview_target.classList.remove("text-muted")
+                }
+
+                render_article(content, document.getElementById("editor-preview-target"), this.update_errors.bind(this),
+                    (elementAstRepresentation) => {
+                        this.selectAreaFromTokenList(elementAstRepresentation.tokens)
+                    })
+            }
+
+            update_editor(selectionStart, selectionEnd, replace) {
+                const text = (selectionStart || "") + (replace || this.editor.getSelectedText()) + (selectionEnd || "")
+                this.editor.session.replace(this.editor.getSelectionRange(), text)
+            }
         }
 
-        function update_editor(selectionStart, selectionEnd, replace) {
-            const text = (selectionStart || "") + (replace || editor.getSelectedText()) + (selectionEnd || "")
-            editor.session.replace(editor.getSelectionRange(), text)
-        }
-
-        const editor = ace.edit("text");
-        editor.setTheme("ace/theme/xcode");
-        editor.session.setMode("ace/mode/xml");
-        editor.session.setUseWrapMode(true)
-
-        editor.setValue(document.getElementById("submitText").value)
-        editor.clearSelection()
-
-        editor.on("change", function (e) {
-            render_preview()
-        })
+        const editor = new MarkupEditor()
 
         document.getElementById("button-insert-heading").addEventListener("click", function () {
-            update_editor("<h1>", "</h1>", null)
+            editor.update_editor("<h1>", "</h1>", null)
         })
         document.getElementById("button-insert-paragraph").addEventListener("click", function () {
-            update_editor("<p>", "</p>", null)
+            editor.update_editor("<p>", "</p>", null)
         })
         document.getElementById("button-insert-bold").addEventListener("click", function () {
             update_editor("<b>", "</b>", null)
         })
         document.getElementById("button-insert-italic").addEventListener("click", function () {
-            update_editor("<i>", "</i>", null)
+            editor.update_editor("<i>", "</i>", null)
         })
         document.getElementById("button-insert-link").addEventListener("click", function () {
-            update_editor("<a href=\"seatinfo:article/\">", "</a>", null)
+            editor.update_editor("<a href=\"seatinfo:article/\">", "</a>", null)
         })
         document.getElementById("button-insert-image").addEventListener("click", function () {
-            update_editor(null, null, "<img src=\"seatinfo:resource/\" alt=\"description of the image\">")
+            editor.update_editor(null, null, "<img src=\"seatinfo:resource/\" alt=\"description of the image\">")
         })
         document.getElementById("button-insert-list").addEventListener("click", function () {
-            update_editor(null, null, "<ul>\n    <li>\n    </li>\n    <li>\n    </li>\n    <li>\n    </li>\n</ul>")
+            editor.update_editor(null, null, "<ul>\n    <li>\n    </li>\n    <li>\n    </li>\n    <li>\n    </li>\n</ul>")
         })
         document.getElementById("button-insert-list-ol").addEventListener("click", function () {
-            update_editor(null, null, "<ol>\n    <li>\n    </li>\n    <li>\n    </li>\n    <li>\n    </li>\n</ol>")
+            editor.update_editor(null, null, "<ol>\n    <li>\n    </li>\n    <li>\n    </li>\n    <li>\n    </li>\n</ol>")
         })
         document.getElementById("button-insert-color").addEventListener("click", function () {
-            update_editor("<color color=\"red\">", "</color>", null)
+            editor.update_editor("<color color=\"red\">", "</color>", null)
         })
-
-        //initial render
-        render_preview()
     </script>
 @endpush
