@@ -1,10 +1,6 @@
 # The syntax 
-The syntax of the editor is quite similar to html, but it's not exactely the same. It only supports a small subset of 
+The syntax of the editor is quite similar to html, but it's not exactly the same. It only supports a small subset of 
 html listed in this documentation.
-
-Currently, the parser is relatively
-strict, and for example you can't have spaces in the tags where there doesn't need to be one. E.g. `<a></a>` is valid,
-but `< a ></ a>` isn't.
 
 ## Attributes supported on all elements
 * You can give every element an `ìd` property.
@@ -34,13 +30,14 @@ remains as a compatibility element and will be removed in future versions.
 
 
 ## Content separation
-`<hr>` Same as the html element
+`<hr />` Same as the html element
 
+The old `<hr>` syntax still works for compatibility reasons, but is deprecated.
 
 ## Newline
-`<br>`
+`<br />`
 
-It's also possible to make a newline by pressing enter
+The old `<br>` syntax still works for compatibility reasons, but is deprecated.
 
 
 ## Titles and Subtitles
@@ -117,18 +114,22 @@ It's also possible to make a newline by pressing enter
 Add the argument `stripes` and `borders` to the table to add stripes and borders
 
 ## Images
-`<img src="link-to-image.png" alt="image description">`
+`<img src="link-to-image.png" alt="image description" />`
 
 You can specify a file uploaded to resources: `<img src="seatinfo:resource/id" alt="image description">`
 To get the id, go to the management page. Images are put in a new paragraph. If you want the image to be inlined in the 
 text, use an icon instead.
 
+The old `<img src="...">` syntax still works for compatibility reasons, but is deprecated.
+
 ## Icons
-`<icon src="link-to-image.png" alt="icon description">`
+`<icon src="link-to-image.png" alt="icon description" />`
 
 You can specify a file uploaded to resources: `<icon src="seatinfo:resource/id" alt="icon description">`
 To get the id, go to the management page. Icons are inlined in the text. If you want them to be on a new line instead, 
 use an image tag.
+
+The old `<icon src="...">` syntax still works for compatibility reasons, but is deprecated.
 
 ## Colors
 ```
@@ -138,8 +139,10 @@ Any css color should work.
 
 ## Audio
 ```
-<audio src="url">
+<audio src="url" />
 ```
 Note that when playing files hosted in the info module resources, trying to change the position will change the position 
 back to the start of the file. External files normally work better. This is due to Laravel(the web framework which SEAT 
 bases on) not supporting certain features the browsers require.
+
+The old `<audio src="...">` syntax still works for compatibility reasons, but is deprecated.
