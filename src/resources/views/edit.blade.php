@@ -155,6 +155,7 @@
 
                 this.editor.setValue(document.getElementById("submitText").value)
                 this.editor.clearSelection()
+                this.editor.focus()
 
                 this.editor.on("change",  (e) => {
                     this.render_preview()
@@ -271,45 +272,53 @@
                     })
             }
 
-            update_editor(selectionStart, selectionEnd, replace) {
+            update_editor(selectionStart, selectionEnd, replace, position_after_center_section=false) {
                 const text = (selectionStart || "") + (replace || this.editor.getSelectedText()) + (selectionEnd || "")
                 this.editor.session.replace(this.editor.getSelectionRange(), text)
+
+                if(position_after_center_section){
+                    let length = (selectionEnd || "").length
+                    console.log(length)
+                    this.editor.navigateLeft(length)
+                }
+
+                this.editor.focus()
             }
         }
 
         const editor = new MarkupEditor()
 
         document.getElementById("button-insert-heading-1").addEventListener("click", function () {
-            editor.update_editor("<h1>", "</h1>", null)
+            editor.update_editor("<h1>", "</h1>", null, position_after_center_section=true)
         })
         document.getElementById("button-insert-heading-2").addEventListener("click", function () {
-            editor.update_editor("<h2>", "</h2>", null)
+            editor.update_editor("<h2>", "</h2>", null, position_after_center_section=true)
         })
         document.getElementById("button-insert-heading-3").addEventListener("click", function () {
-            editor.update_editor("<h3>", "</h3>", null)
+            editor.update_editor("<h3>", "</h3>", null, position_after_center_section=true)
         })
         document.getElementById("button-insert-heading-4").addEventListener("click", function () {
-            editor.update_editor("<h4>", "</h4>", null)
+            editor.update_editor("<h4>", "</h4>", null, position_after_center_section=true)
         })
         document.getElementById("button-insert-heading-5").addEventListener("click", function () {
-            editor.update_editor("<h5>", "</h5>", null)
+            editor.update_editor("<h5>", "</h5>", null, position_after_center_section=true)
         })
         document.getElementById("button-insert-heading-6").addEventListener("click", function () {
-            editor.update_editor("<h6>", "</h6>", null)
+            editor.update_editor("<h6>", "</h6>", null, position_after_center_section=true)
         })
 
 
         document.getElementById("button-insert-paragraph").addEventListener("click", function () {
-            editor.update_editor("<p>", "</p>", null)
+            editor.update_editor("<p>", "</p>", null, position_after_center_section=true)
         })
         document.getElementById("button-insert-bold").addEventListener("click", function () {
-            update_editor("<b>", "</b>", null)
+            editor.update_editor("<b>", "</b>", null, position_after_center_section=true)
         })
         document.getElementById("button-insert-italic").addEventListener("click", function () {
-            editor.update_editor("<i>", "</i>", null)
+            editor.update_editor("<i>", "</i>", null, position_after_center_section=true)
         })
         document.getElementById("button-insert-link").addEventListener("click", function () {
-            editor.update_editor("<a href=\"seatinfo:article/\">", "</a>", null)
+            editor.update_editor("<a href=\"seatinfo:article/\">", "</a>", null, position_after_center_section=true)
         })
         document.getElementById("button-insert-image").addEventListener("click", function () {
             editor.update_editor(null, null, "<img src=\"seatinfo:resource/\" alt=\"description of the image\">")
@@ -321,7 +330,7 @@
             editor.update_editor(null, null, "<ol>\n    <li>\n    </li>\n    <li>\n    </li>\n    <li>\n    </li>\n</ol>")
         })
         document.getElementById("button-insert-color").addEventListener("click", function () {
-            editor.update_editor("<color color=\"red\">", "</color>", null)
+            editor.update_editor("<color color=\"red\">", "</color>", null, position_after_center_section=true)
         })
     </script>
 @endpush
