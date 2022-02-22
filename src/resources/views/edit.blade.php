@@ -167,9 +167,10 @@
             selectArea(start, end) {
                 this.editor.selection.setRange(new ace.Range(start.lineIndex, start.colIndex, end.lineIndex, end.colIndex+1), true)
                 this.editor.scrollToLine(start.lineIndex)
+                this.editor.focus()
             }
 
-            selectAreaFromTokenList(tokens) {
+            getSelectionRange(tokens){
                 let start = {
                     lineIndex: Number.MAX_SAFE_INTEGER,
                     colIndex: Number.MAX_SAFE_INTEGER
@@ -194,7 +195,16 @@
                     }
                 }
 
-                this.selectArea(start, end)
+                return {
+                    start,
+                    end
+                }
+            }
+
+            selectAreaFromTokenList(tokens) {
+                const selectionRange = this.getSelectionRange(tokens)
+
+                this.selectArea(selectionRange.start, selectionRange.end)
             }
 
             update_errors(e) {
@@ -223,11 +233,13 @@
                 }
 
                 for (const warning of e.warnings) {
+                    const warningTokenRange = this.getSelectionRange(warning.tokens)
+
                     let liElement = document.createElement("li")
-                    liElement.textContent = warning.message
+                    liElement.textContent = `L${warningTokenRange.start.lineIndex+1}:${warningTokenRange.start.colIndex}-L${warningTokenRange.end.lineIndex+1}:${warningTokenRange.end.colIndex+1}: ${warning.message}`
 
                     liElement.addEventListener("click", () => {
-                        this.selectAreaFromTokenList(warning.tokens)
+                        this.selectArea(warningTokenRange.start,warningTokenRange.end)
                     })
 
                     liElement.classList.add("list-group-item-warning")
