@@ -271,7 +271,10 @@ class InfoController extends Controller
         $content = Storage::get($db_entry->path);
         $type = $db_entry->mime;
 
-        return response($content)->header('Content-Type', $type);
+        return response($content)
+            ->header('Content-Type', $type)
+            ->header('Accept-Ranges','bytes')
+            ->header('Content-Length',strlen($content));
     }
 
     public function deleteResource(ConfirmModalRequest $request){
