@@ -160,6 +160,8 @@
                 this.editor.on("change",  (e) => {
                     this.render_preview()
                 })
+
+                this.render_preview()
             }
 
             getLineForIndex(index) {
