@@ -253,6 +253,27 @@ class AudioTag extends MarkupTag {
         super(renderer,"p");
     }
 
+    formatTimeStamp(position, length){
+        return `${this.formatSeconds(position)} / ${this.formatSeconds(length)}`
+    }
+
+    formatSeconds(duration){
+        const seconds = duration % 60
+        const minutes = Math.floor(duration / 60) % 60
+        const hours = Math.floor(duration / 3600)
+
+        const options = {
+            maximumFractionDigits: 0,
+            minimumIntegerDigits: 2,
+        }
+
+        if (hours>0){
+            return `${hours.toLocaleString(undefined, options)}:${minutes.toLocaleString(undefined, options)}:${seconds.toLocaleString(undefined, options)}`
+        }
+
+        return `${minutes.toLocaleString(undefined, options)}:${seconds.toLocaleString(undefined, options)}`
+    }
+
     onOpen(attributes) {
         super.onOpen(attributes);
 
@@ -262,6 +283,10 @@ class AudioTag extends MarkupTag {
             this.openHTMLTag("div")
             this.addClass("d-flex")
             this.addClass("align-items-center")
+
+            this.addClass("p-2")
+            this.setStyle("background-color","#BBBBBB")
+            this.setStyle("border-radius","5px")
 
             //button
             this.openHTMLTag("button")
@@ -284,23 +309,24 @@ class AudioTag extends MarkupTag {
             })
             this.closeHTMLTag()
 
+            this.openHTMLTag("span")
+            this.setStyle("white-space","nowrap")
+            this.addClass("m-1")
+            let label = this._stackTop()
+            this.closeHTMLTag()
+
             //bootstrap: outer progress bar
             this.openHTMLTag("div")
             this.addClass("progress")
             this.addClass("m-1") //margin
             this.addClass("w-100") // use full width
+            this.setStyle("min-width","50px")
 
             this.openHTMLTag("div")
             this.addClass("progress-bar")
-            this.addClass("text-left")
 
             //TODO remove hack fix
             let innerElement = this._stackTop()
-
-            this.openHTMLTag("span")
-            let label = this._stackTop()
-            this.addClass("p-2")
-            this.closeHTMLTag()
 
             //inner progress bar div
             this.closeHTMLTag()
@@ -311,9 +337,6 @@ class AudioTag extends MarkupTag {
             this.addEventListener("click",function (e) {
                 let progress = e.offsetX / outerElement.offsetWidth
                 audio.currentTime = progress * audio.duration
-                let w_prog = progress*100
-                console.log(progress, w_prog, progress * audio.duration)
-                //innerElement.style.setProperty("width",`${w_prog}%`)
             })
 
             //outer progress bar div
@@ -334,15 +357,15 @@ class AudioTag extends MarkupTag {
                 btnIcon.classList.remove("fa-pause")
                 btnIcon.classList.add("fa-play")
             })
-            audio.addEventListener("durationchange",function (){
+            audio.addEventListener("durationchange",() => {
                 let progress = audio.currentTime / audio.duration
                 innerElement.style.setProperty("width",`${progress*100}%`)
-                label.textContent = `${audio.currentTime.toFixed(1)}s of ${audio.duration.toFixed(1)}s ${(progress*100).toFixed(1)}%`
+                label.textContent = this.formatTimeStamp(audio.currentTime,audio.duration)
             })
-            audio.addEventListener("timeupdate",function (){
+            audio.addEventListener("timeupdate",() => {
                 let progress = audio.currentTime / audio.duration
                 innerElement.style.setProperty("width",`${progress*100}%`)
-                label.textContent = `${audio.currentTime.toFixed(1)}s of ${audio.duration.toFixed(1)}s ${(progress*100).toFixed(1)}%`
+                label.textContent = this.formatTimeStamp(audio.currentTime,audio.duration)
             })
 
         } else {
