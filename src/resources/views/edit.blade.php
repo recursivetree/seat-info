@@ -164,50 +164,37 @@
                 this.render_preview()
             }
 
-            getLineForIndex(index) {
-                let lineIndex = 0
-
-                let lines = this.editor.session.getLines(0, this.editor.session.getLength())
-
-                for (const line of lines) {
-                    const length = line.length + 1
-
-                    if (index - length < 0) {
-                        break
-                    }
-
-                    index -= length
-                    lineIndex++
-                }
-
-                return {
-                    row: lineIndex,
-                    column: index
-                }
-            }
-
             selectArea(start, end) {
-
-                const startPos = this.getLineForIndex(start)
-                const endPos = this.getLineForIndex(end)
-                this.editor.selection.setRange(new ace.Range(startPos.row, startPos.column, endPos.row, endPos.column), true)
-                this.editor.scrollToLine(startPos.row)
+                this.editor.selection.setRange(new ace.Range(start.lineIndex, start.colIndex, end.lineIndex, end.colIndex+1), true)
+                this.editor.scrollToLine(start.lineIndex)
             }
 
             selectAreaFromTokenList(tokens) {
-                let start = Number.MAX_SAFE_INTEGER
-                let end = Number.MIN_SAFE_INTEGER
+                let start = {
+                    lineIndex: Number.MAX_SAFE_INTEGER,
+                    colIndex: Number.MAX_SAFE_INTEGER
+                }
+                let end = {
+                    lineIndex: Number.MIN_SAFE_INTEGER,
+                    colIndex: Number.MIN_SAFE_INTEGER
+                }
 
                 for (const token of tokens) {
-                    if (token.start < start) {
-                        start = token.start
+                    if(token.start.lineIndex <= start.lineIndex){
+                        start.lineIndex = token.start.lineIndex
+                        if(token.start.colIndex <= start.colIndex){
+                            start.colIndex = token.start.colIndex
+                        }
                     }
-                    if (token.end > end) {
-                        end = token.end
+                    if(token.end.lineIndex >= end.lineIndex){
+                        end.lineIndex = token.end.lineIndex
+                        if(token.end.colIndex >= end.colIndex){
+                            end.colIndex = token.end.colIndex
+                        }
                     }
                 }
 
-                this.selectArea(start, end + 1)
+                this.selectArea(start, end)
             }
 
             update_errors(e) {
@@ -280,7 +267,6 @@
 
                 if(position_after_center_section){
                     let length = (selectionEnd || "").length
-                    console.log(length)
                     this.editor.navigateLeft(length)
                 }
 
