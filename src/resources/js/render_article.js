@@ -157,8 +157,8 @@ class MarkupRenderer{
         this.warnings = []
     }
 
-    render(src, target, elementClickCallback=null){
-        const ast = parse(src)
+    render(lines, target, elementClickCallback=null){
+        const ast = parse(lines)
 
         const warnings = ast.warnings
 
@@ -231,11 +231,11 @@ class MarkupRenderer{
     }
 }
 
-function render_article(src, target, done_cb,elementClickCallback=null) {
+function render_article(lines, target, done_cb,elementClickCallback=null) {
     let renderer = new MarkupRenderer(MARKUP_TAG_REGISTRY)
     let ast
     try {
-        ast = renderer.render(src, target, elementClickCallback)
+        ast = renderer.render(lines, target, elementClickCallback)
     } catch (e) {
         console.log(e)
         done_cb({

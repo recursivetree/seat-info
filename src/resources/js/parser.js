@@ -1,33 +1,102 @@
 class CharReader {
-    constructor(src) {
-        this.index = -1
-        this.src = src
+    constructor(lines) {
+        this.lineIndex = 0
+        this.colIndex = 0
+        this.lines = lines
+        this.end_reached = false
+    }
+
+    move(offset){
+        let lineIndex = this.lineIndex
+        let colIndex = this.colIndex
+
+        if(0<offset){
+            for (let i = 0; i < offset; i++) {
+                colIndex += 1
+                if (colIndex < this.lines[lineIndex].length){
+                    continue
+                }
+                while (true){
+                    lineIndex += 1
+                    if (!(lineIndex < this.lines.length)) return null
+                    if (this.lines[lineIndex].length>0) {
+                        colIndex = 0
+                        break
+                    }
+                }
+            }
+            return {
+                lineIndex,
+                colIndex
+            }
+        } else {
+            offset = -offset
+            for (let i = 0; i < offset; i++) {
+                colIndex -= 1
+                if (0 <= colIndex){
+                    continue
+                }
+                while (true){
+                    lineIndex -= 1
+                    if(lineIndex < 0){
+                        return null
+                    }
+                    if(this.lines[lineIndex].length > 0){
+                        colIndex = this.lines[lineIndex].length - 1
+                        break
+                    }
+                }
+            }
+            return {
+                lineIndex,
+                colIndex
+            }
+        }
     }
 
     next() {
-        return this.src.charAt(++this.index)
+        if(this.end_reached){
+            return null
+        }
+
+        const c = this.lines[this.lineIndex].charAt(this.colIndex)
+
+        const newPos = this.move(1)
+        if(newPos) {
+            this.lineIndex = newPos.lineIndex
+            this.colIndex = newPos.colIndex
+        } else {
+            this.end_reached = true
+            this.colIndex += 1 //in order for position() to work correctly
+        }
+
+        return c
     }
 
     back() {
-        this.index--
-        if (this.index < -1) {
-            throw Error("Reader can't go back out of string")
-        }
-    }
-
-    hasNext() {
-        return this.index < this.src.length - 1
+        const newPos = this.move(-1)
+        this.lineIndex = newPos.lineIndex
+        this.colIndex = newPos.colIndex
     }
 
     position(offset = 0) {
-        if (this.index < 0) {
-            return offset
-        }
-        return this.index + offset
+        return this.move(offset-1)
     }
 
     range(start, stop) {
-        return this.src.substring(start, stop + 1)
+        if(start.lineIndex===stop.lineIndex){
+            const text = this.lines[start.lineIndex]
+            return text.substring(start.colIndex,stop.colIndex+1)
+        } else {
+            let text = this.lines[start.lineIndex].substring(start.colIndex)
+
+            for (let i = start.lineIndex+1; i < stop.lineIndex; i++) {
+                text += this.lines[i]
+            }
+
+            text += this.lines[stop.lineIndex].substring(0,stop.colIndex+1)
+            return text
+        }
     }
 }
 
@@ -147,10 +216,10 @@ class ASTText extends ASTBase {
     }
 }
 
-const parse = (text) => {
+const parse = (lines) => {
     const warnings = []
 
-    const reader = new CharReader(text)
+    const reader = new CharReader(lines)
     const tokens = []
 
     const singleCharacterMap = {
@@ -167,19 +236,22 @@ const parse = (text) => {
 
     let textTokenStart = null
 
-    while (reader.hasNext()) {
+    while (true) {
         const c = reader.next()
+        if(c==null){
+            break
+        }
 
         let isEscaped = false
 
         if(c === "\\"){
-            if(!reader.hasNext()){
+            const n = reader.next()
+            if(!n){
                 warnings.push(new MarkupWarning([new Token(Token.TokenType.ESCAPE_SEQUENCE,c,reader.position(),reader.position())],
                     "Expected another character following the escape character '\\', reading the '\\' as literal. For literal backslashes, please escape it as '\\\\'."))
                 continue
             }
 
-            const n = reader.next()
             if(singleCharacterMap[n]){
                 const type = singleCharacterMap[n]
                 if(type === Token.TokenType.WHITESPACE){
@@ -202,8 +274,9 @@ const parse = (text) => {
 
         if (!isEscaped && singleCharacterMap[c]) {
             if (textTokenStart !== null) {
-                const content = reader.range(textTokenStart, reader.position(-1))
-                tokens.push(new Token(Token.TokenType.TEXT, content,textTokenStart,reader.position(-1)))
+                const end = reader.position(-1)
+                const content = reader.range(textTokenStart, end)
+                tokens.push(new Token(Token.TokenType.TEXT, content,textTokenStart,end))
                 textTokenStart = null
             }
 
@@ -425,7 +498,7 @@ const parse = (text) => {
     }
 }
 
-// console.time('doSomething')
-// const r = parse("<h1>asd</h1>dff/<p class='as'>This is a lot of    text</p>")
-// console.timeEnd('doSomething')
-// console.log(r)
+console.time('doSomething')
+const r = parse([""," <a>"])
+console.timeEnd('doSomething')
+console.log(r)

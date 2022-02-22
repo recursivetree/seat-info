@@ -249,14 +249,14 @@
             }
 
             render_preview() {
-                const content = this.editor.getValue()
+                document.getElementById("submitText").value = this.editor.getValue()
 
-                document.getElementById("submitText").value = content
+                const lines = this.editor.session.getLines(0,this.editor.session.getLength())
 
                 let preview_target = document.getElementById("editor-preview-target")
                 preview_target.textContent = ""// lazy thing to clear the dom
 
-                if (content.length === 0) {
+                if (lines.length === 0) {
                     preview_target.classList.add("text-muted")
                     preview_target.textContent = {!! json_encode(trans('info::info.editor_preview_empty_article')) !!}
                 } else {
@@ -264,7 +264,7 @@
                 }
 
                 render_article(
-                    content,
+                    lines,
                     document.getElementById("editor-preview-target"),
                     this.update_errors.bind(this),
                     (elementAstRepresentation) => {
