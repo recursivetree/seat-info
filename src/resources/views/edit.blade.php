@@ -269,8 +269,21 @@
                     document.getElementById("editor-preview-target"),
                     this.update_errors.bind(this),
                     (elementAstRepresentation) => {
+                        console.log(elementAstRepresentation)
                         this.selectAreaFromTokenList(elementAstRepresentation.tokens)
                     })
+            }
+
+            getElementForCursorPosition(position){
+                function traverseTree(node) {
+                    
+                }
+
+                if(this.astTree) {
+                    traverseTree(this.astTree)
+                }
+
+                return null
             }
 
             update_editor(selectionStart, selectionEnd, replace, position_after_center_section=false) {

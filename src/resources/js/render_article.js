@@ -111,24 +111,6 @@ class MarkupTag{
     }
 }
 
-class MarkupRootElement extends MarkupTag{
-    constructor(renderer,target) {
-        super(renderer);
-        //hacky hacky
-        this._stack = [target]
-    }
-
-    onOpen(attributes) {
-        //do nothing
-    }
-}
-
-class MarkupFakeWrapper extends MarkupTag {
-    constructor(renderer){
-        super(renderer,"span")
-    }
-}
-
 function process_seat_url(url) {
     let result = url.match(/^seatinfo:resource\/([0-9]+)$/)
     if (result) {
@@ -149,93 +131,229 @@ function process_seat_url(url) {
     return url
 }
 
-class MarkupRenderer{
-    constructor(tag_registry) {
-        this.tag_registry = tag_registry
+class SeatInfoDomElementBuilder {
+    static create(name){
+        return new SeatInfoDomElementBuilder(document.createElement(name))
+    }
+
+    static from(domElement){
+        return new SeatInfoDomElementBuilder(domElement)
+    }
+
+    constructor(domElement) {
+        this.domElement = domElement
+    }
+
+    class(...classes){
+        for (const clazz of classes) {
+            this.domElement.classList.add(clazz)
+        }
+
+        return this
+    }
+
+    removeClass(...classes){
+        for (const clazz of classes) {
+            this.domElement.classList.remove(clazz)
+        }
+
+        return this
+    }
+
+    style(property,value){
+        this.domElement.style.setProperty(property,value)
+
+        return this
+    }
+
+    attribute(name,value){
+        this.domElement.setAttribute(name,value)
+
+        return this
+    }
+
+    content(...children){
+        for (const child of children) {
+            if(child instanceof SeatInfoDomElementBuilder){
+                this.domElement.appendChild(child.domElement)
+            } else if (child instanceof Node){
+                this.domElement.appendChild(child)
+            } else if(child instanceof Array){
+                this.content(...child)
+            } else if(typeof child === "string" ) {
+                this.domElement.appendChild(document.createTextNode(child))
+            } else {
+                //Seat info element node
+                this.domElement.appendChild(child.dom)
+            }
+        }
+
+        return this
+    }
+
+    clearContent(...newChildren){
+        while (this.domElement.firstChild){
+            this.domElement.removeChild(this.domElement.firstChild)
+        }
+
+        this.content(...newChildren)
+    }
+
+    event(name, cb){
+        this.domElement.addEventListener(name,cb)
+
+        return this
+    }
+}
+
+class SeatInfoMarkupRenderer {
+
+    static ELEMENT_REGISTRY = {}
+    static LINK_PREPROCESSORS = {}
+
+    static registerElement(name, element){
+        SeatInfoMarkupRenderer.ELEMENT_REGISTRY[name] = element
+    }
+
+    static registerLinkPreProcessor(scope,preprocessor){
+        SeatInfoMarkupRenderer.LINK_PREPROCESSORS[scope] = preprocessor
+    }
+
+    constructor() {
         this.textNodeStart = null
 
         this.warnings = []
     }
 
-    render(lines, target, elementClickCallback=null){
+    warn(warning){
+        this.warnings.push(warning)
+    }
+
+    render(lines, targetContainer, astNodeClickCallback=null){
         const ast = parse(lines)
+        this.warnings = this.warnings.concat(ast.warnings)
 
-        const warnings = ast.warnings
+        const buildContentRecursive = (astContent) => {
+            const content = []
 
-        let root = new MarkupRootElement(this,target)
+            for (const astNode of astContent) {
 
-        let elementStack = new Stack()
+                if(astNode instanceof ASTText){
+                    const textNode = document.createElement("span") // we can't use a text node, because they don't fire events, which is required for the astNodeClickCallback
+                    textNode.textContent = astNode.text
 
-        elementStack.push(root)
+                    if(astNodeClickCallback){
+                        textNode.addEventListener("click",(e)=>{
+                            e.stopPropagation()
+                            astNodeClickCallback(astNode)
+                        },false)
+                    }
 
-        const recursiveBuildMarkupElements = (markupElement, content) => {
-            for (const contentAst of content) {
-                if(contentAst instanceof ASTText){
-                    markupElement.onTextContent(contentAst.text)
-                } else if (contentAst instanceof ASTTag){
-                    if(markupElement.allowChildren()){
+                    content.push({
+                        node: astNode,
+                        type:"text",
+                        dom:textNode
+                    })
+                } else if (astNode instanceof ASTTag){
+                    const elementImplementation = SeatInfoMarkupRenderer.ELEMENT_REGISTRY[astNode.tagName]
 
-                        //MarkupTag class used for the element
-                        let elementClass
+                    if(!elementImplementation){
+                        this.warn(new MarkupWarning(astNode.tokens,`Unknown tag type <${astNode.tagName}>!`))
 
-                        if(!this.tag_registry[contentAst.tagName]){
-                            //tag not found, treating it like a <span>
-                            warnings.push(new MarkupWarning(contentAst.tokens,`Unknown tag of type '${contentAst.tagName}'`))
-                            elementClass = MarkupFakeWrapper
-                        } else {
-                            //get markup tag class
-                            elementClass = this.tag_registry[contentAst.tagName]
-                        }
-
-                        const child = new elementClass(this)
-
-                        if(elementClickCallback){
-                            child.addEventListener("click",function (e) {
-                                e.stopPropagation()
-                                e.preventDefault()
-                                elementClickCallback(contentAst)
-                            }, true)
-                        }
-
-                        child.onOpen(contentAst.properties)
-
-                        if(child.allowChildren()) {
-                            recursiveBuildMarkupElements(child, contentAst.content)
-                        }
-
-                        child.onClose()
-
-                        //append child to parent
-                        markupElement.onChild(child)
-
-                        //e.g. when you have <br>text</br>, treat it as <br>
-                        if(!child.allowChildren() && contentAst.content.length > 0){
-                            warnings.push(new MarkupWarning(contentAst.tokens,`<${contentAst.tagName}> elements don't allow children. This can mean that you are using the old syntax <${contentAst.tagName}> instead of the new one with a closing slash: <${contentAst.tagName}/>`))
-
-
-                            recursiveBuildMarkupElements(markupElement,contentAst.content)
-                        }
+                        //still build children
+                        content.push(...buildContentRecursive(astNode.content))
 
                     } else {
-                        warnings.push(new MarkupWarning(contentAst.tokens,"Parent element doesn't allow children"))
+
+                        const elementInfo = {
+                            node: astNode,
+                            properties: astNode.properties,
+                            content: buildContentRecursive(astNode.content),
+                            renderer: this
+                        }
+
+                        const data = elementImplementation(elementInfo, SeatInfoDomElementBuilder.create)
+
+                        let domElementBuilder
+
+                        if(data.dom instanceof SeatInfoDomElementBuilder){
+                            domElementBuilder = data.dom
+                        } else if(data.dom instanceof Element){
+                            domElementBuilder = SeatInfoDomElementBuilder.from(data.dom)
+                        } else {
+                            this.warn(astNode.tokens,`Internal error: Renderer implementation for <${astNode.tagName}> didn't return a DOMElement-like object! Please report this bug!`)
+                        }
+
+                        //apply common properties
+                        this.commonProperties(elementInfo,data.disabledCommonProperties || [],domElementBuilder)
+
+                        //extract dom node
+                        data.dom = domElementBuilder.domElement
+
+                        if(astNodeClickCallback){
+                            data.dom.addEventListener("click",(e)=>{
+                                e.stopPropagation()
+                                astNodeClickCallback(astNode)
+                            },false)
+                        }
+
+                        data.type = "element"
+                        data.tagName = astNode.tagName
+
+                        content.push(data)
                     }
+
+                } else {
+                    this.warn(new MarkupWarning([],"Internal errors: AST tree doesn't contain ASTNodes! Please report this bug."))
+                }
+
+            }
+
+            return content
+        }
+
+        const rootContent = buildContentRecursive(ast.rootNode.content)
+
+        for (const rootContentNode of rootContent) {
+            targetContainer.appendChild(rootContentNode.dom)
+        }
+
+        return {
+            ast: ast
+        }
+    }
+
+    //shared properties like id and text-align
+    commonProperties(elementInfo, disabledCommonProperties, elementBuilder){
+        const properties = elementInfo.properties
+
+        if(properties["id"] && !disabledCommonProperties.includes("id")){
+            elementBuilder.attribute("id",properties["id"].value)
+        }
+        if(properties["text-align"] && !disabledCommonProperties.includes("text-align")){
+            let value = properties["text-align"].value
+            if (value === "right"){
+                elementBuilder.style("text-align","right")
+            } else if (value === "left"){
+                elementBuilder.style("text-align","left")
+            } else if (value === "center"){
+                elementBuilder.style("text-align","center")
+            } else {
+                if(value===true){
+                    this.warn(new MarkupWarning(properties["text-align"].tokens, `Attribute 'text-align' requires a value like text-align="right"!`))
+                } else {
+                    this.warn(new MarkupWarning(properties["text-align"].tokens, `Unsupported value '${value.substring(0, 20)}' for attribute 'text-align'!`))
                 }
             }
         }
-
-        recursiveBuildMarkupElements(root,ast.ast.content)
-
-        this.warnings = this.warnings.concat(warnings)
-
-        return ast
     }
 }
 
 function render_article(lines, target, done_cb,elementClickCallback=null) {
-    let renderer = new MarkupRenderer(MARKUP_TAG_REGISTRY)
-    let ast
+    let renderer = new SeatInfoMarkupRenderer()
+    let renderData
     try {
-        ast = renderer.render(lines, target, elementClickCallback)
+        renderData = renderer.render(lines, target, elementClickCallback)
     } catch (e) {
         console.log(e)
         done_cb({
@@ -246,10 +364,6 @@ function render_article(lines, target, done_cb,elementClickCallback=null) {
     }
     done_cb({
         warnings: renderer.warnings,
-        renderData: {ast: ast}
+        renderData: {ast: renderData.ast}
     })
-}
-
-const MARKUP_TAG_REGISTRY = {
-
 }

@@ -201,7 +201,13 @@ class ASTTag extends ASTBase {
         super(tokens);
         this.tagName = tagName
         this.content = []
-        this.properties = properties
+        this.properties = {}
+        for (const property of properties) {
+            if(this.properties[property.name]){
+                //TODO emit warning
+            }
+            this.properties[property.name] = property
+        }
     }
 
     appendNode(node) {
@@ -213,6 +219,14 @@ class ASTText extends ASTBase {
     constructor(tokens) {
         super(tokens);
         this.text = tokens.reduce((string,token)=>string+token.src,"")
+    }
+}
+
+class ASTTagProperty extends ASTBase{
+    constructor(tokens,name,value) {
+        super(tokens);
+        this.name = name
+        this.value = value
     }
 }
 
@@ -294,9 +308,9 @@ const parse = (lines) => {
     let textNodeTokens = []
     const tokenReader = new TokenReader(tokens)
 
-    const elementStack = new Stack([new ASTTag(null, null, {})])
+    const elementStack = new Stack([new ASTTag(null, null, [])])
 
-    var token
+    let token
 
     mainParserLoop: while (tokenReader.hasNext()) {
         token = tokenReader.next()
@@ -328,7 +342,7 @@ const parse = (lines) => {
                 //get tag name
                 const tagName = token.src
 
-                const properties = {}
+                const properties = []
                 let selfClosingTag = false
 
                 propertyLoop: while (true) {
@@ -363,6 +377,7 @@ const parse = (lines) => {
                         break
 
                     } else if (token.type === Token.TokenType.TEXT) {
+                        const propertyStart = tokenReader.position(-1)
                         const propertyName = token.src
 
                         tokenReader.skipWhiteSpace()
@@ -376,7 +391,10 @@ const parse = (lines) => {
                         if (token.type === Token.TokenType.TEXT || token.type === Token.TokenType.CLOSE_TAG || token.type === Token.TokenType.SLASH) {
                             //property without value
                             tokenReader.back()
-                            properties[propertyName] = true
+
+                            const property = new ASTTagProperty(tokenReader.tokenRange(propertyStart,tokenReader.position()),propertyName,true)
+                            properties.push(property)
+
                             continue propertyLoop
                         } else if (token.type === Token.TokenType.EQUALS) {
                             tokenReader.skipWhiteSpace()
@@ -409,7 +427,8 @@ const parse = (lines) => {
                                 argString += token.src
                             }
 
-                            properties[propertyName] = argString
+                            const property = new ASTTagProperty(tokenReader.tokenRange(propertyStart,tokenReader.position(-1)),propertyName,argString)
+                            properties.push(property)
 
                             continue propertyLoop
                         } else {
@@ -494,11 +513,11 @@ const parse = (lines) => {
 
     return {
         warnings,
-        ast: elementStack.get(0)
+        rootNode: elementStack.get(0)
     }
 }
 
-console.time('doSomething')
-const r = parse([""," <a>"])
-console.timeEnd('doSomething')
-console.log(r)
+// console.time('doSomething')
+// const r = parse([""," <a>"])
+// console.timeEnd('doSomething')
+// console.log(r)

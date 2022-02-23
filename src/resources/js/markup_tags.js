@@ -1,382 +1,283 @@
-function registerSimpleTextContainingMarkupTag(tagName){
-    class TempTag extends MarkupTag{
-        constructor(renderer) {
-            super(renderer,tagName);
-        }
-    }
-    MARKUP_TAG_REGISTRY[tagName] = TempTag
-    return TempTag
-}
-
-function registerSimpleNoContentMarkupTag(tagName){
-    class TempTag extends MarkupTag{
-        constructor(renderer) {
-            super(renderer,tagName);
-        }
-        onChild(child) {
-            //do nothing
-            //allowsContent should not even allow this to be called, but you never know
-            super.warn(`${tagName} tags don't allow children elements. Make sure the correct syntax  <${tagName} /> instead of just <${tagName}> is used`)
-        }
-        onTextContent(text) {
-            //do nothing
-            //allowsContent should not even allow this to be called, but you never know
-            super.warn(`${tagName} tags don't allow text content. Make sure the correct syntax the correct syntax <${tagName} /> instead of just <${tagName}> is used`)
-        }
-        allowChildren(){
-            return false
-        }
-    }
-    MARKUP_TAG_REGISTRY[tagName] = TempTag
-    return TempTag
-}
-
-function registerRestrainedChildrenMarkupTag(tagName,allowed_children, allow_text=false){
-    class TempTag extends MarkupTag{
-        constructor(renderer) {
-            super(renderer,tagName);
-        }
-        onChild(child) {
-            for(const allowed of allowed_children){
-                if (child instanceof allowed){
-                    super.addMarkupTag(child)
-                    return
-                }
+class SeatInfoMarkupElementHelper {
+    static simpleElement(markupName, htmlName) {
+        SeatInfoMarkupRenderer.registerElement(markupName, function (elementInfo, htmlElement) {
+            return {
+                dom: htmlElement(htmlName).content(elementInfo.content)
             }
-            super.warn(`Illegal children types in elements of type ${tagName}.`)
-        }
-        onTextContent(text) {
-            if(allow_text){
-                super.addTextNode(text)
-            }
-            //check if it is just whitespace
-            else if (!/^\s*$/.test(text)) {
-                super.warn(`${tagName} tags don't allow text content.`)
-            }
-        }
-    }
-    MARKUP_TAG_REGISTRY[tagName] = TempTag
-    return TempTag
-}
-
-function registerMarkupTag(tagName,clazz){
-    MARKUP_TAG_REGISTRY[tagName] = clazz
-}
-
-registerSimpleTextContainingMarkupTag("p")
-registerSimpleTextContainingMarkupTag("b")
-registerSimpleTextContainingMarkupTag("i")
-registerSimpleTextContainingMarkupTag("s")
-registerSimpleTextContainingMarkupTag("h1")
-registerSimpleTextContainingMarkupTag("h2")
-registerSimpleTextContainingMarkupTag("h3")
-registerSimpleTextContainingMarkupTag("h4")
-registerSimpleTextContainingMarkupTag("h5")
-registerSimpleTextContainingMarkupTag("h6")
-
-registerSimpleNoContentMarkupTag("br")
-registerSimpleNoContentMarkupTag("hr")
-
-class LinkMarkupTag extends MarkupTag{
-    constructor(renderer) {
-        super(renderer,"a");
-    }
-
-    onOpen(attributes) {
-        super.onOpen(attributes);
-
-        let href = ""
-        if(attributes.href){
-            href = process_seat_url(attributes.href)
-        }
-        super.setAttribute("href", href)
-
-        if(attributes.newtab){
-            super.setAttribute("target", "_blank")
-        }
-
-        if(attributes.download){
-            super.setAttribute("download", "")
-        }
-    }
-}
-registerMarkupTag("a",LinkMarkupTag)
-
-registerSimpleNoContentMarkupTag("pagelink")
-
-const liTag = registerSimpleTextContainingMarkupTag("li")
-registerRestrainedChildrenMarkupTag("ul",[liTag])
-registerRestrainedChildrenMarkupTag("ol",[liTag])
-
-function registerTableCellMarkupTag(tagName){
-    class TempTag extends MarkupTag{
-        constructor(renderer) {
-            super(renderer,tagName);
-        }
-
-        onOpen(attributes) {
-            super.onOpen(attributes);
-
-            if(attributes["colspan"]) {
-                let value
-                try{
-                    value = parseInt(attributes["colspan"])
-                    super.setAttribute("colspan",value)
-                } catch (e) {
-                    warn(`'${tagName}' elements with attribute 'colspan' is not an integer!"`)
-                }
-            }
-        }
-    }
-
-    MARKUP_TAG_REGISTRY[tagName] = TempTag
-    return TempTag
-}
-
-const thTag = registerSimpleTextContainingMarkupTag("th")
-const tdTag = registerTableCellMarkupTag("td")
-const trTag = registerRestrainedChildrenMarkupTag("tr",[thTag,tdTag])
-const tBodyTag = registerRestrainedChildrenMarkupTag("tbody",[trTag])
-const tHeadTag = registerRestrainedChildrenMarkupTag("thead",[trTag])
-
-class RootTableMarkupTag extends MarkupTag{
-    constructor(renderer) {
-        super(renderer,"table");
-    }
-    onOpen(attributes) {
-        super.onOpen(attributes)
-
-        super.addClass("table")
-        if (attributes.stripes) {
-            super.addClass("table-striped")
-        }
-        if (attributes.border) {
-            super.addClass("table-bordered")
-        }
-    }
-    onChild(child) {
-        for(const allowed of [tBodyTag,tHeadTag]){
-            if (child instanceof allowed){
-                super.addMarkupTag(child)
-                return
-            }
-        }
-    }
-}
-registerMarkupTag("table",RootTableMarkupTag)
-
-class ImgMarkupTag extends MarkupTag{
-    constructor(renderer,container="p") {
-        super(renderer,container);
-    }
-
-    onOpen(attributes) {
-        super.onOpen(attributes);
-
-        const container = super._stackTop() //hacky, but I plan to replace the component system to allow actually interactive components soon
-
-        super.openHTMLTag("img")
-
-        super.addEventListener("error",function () {
-            while (container.firstChild){
-                container.removeChild(container.firstChild)
-            }
-            const div = document.createElement("div")
-            div.classList.add("alert")
-            div.classList.add("alert-warning")
-
-            const icon = document.createElement("i")
-            icon.classList.add("fas","fa-exclamation-triangle")
-
-            div.appendChild(icon)
-            div.appendChild(document.createTextNode(`Could not load image! Description: ${attributes.alt || "no description provided"}`))
-
-            container.appendChild(div)
         })
-
-        if (attributes.src) {
-            super.setAttribute("src", process_seat_url(attributes.src))
-        }
-        if (attributes.alt) {
-            super.setAttribute("alt", attributes.alt)
-        }
-        super.addClass("mw-100")
-        super.closeHTMLTag()
     }
 
-    allowChildren(){
-        return false
+    static simpleSelfClosingElement(markupName, htmlName) {
+        SeatInfoMarkupRenderer.registerElement(markupName, function (elementInfo, htmlElement) {
+            if (elementInfo.content.length > 0) {
+                elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<${markupName} /> tags don't allow content. Consider converting them to the correct syntax <${markupName} />!`))
+            }
+
+            return {
+                dom: htmlElement("span").content(htmlElement(htmlName)).content(elementInfo.content)
+            }
+        })
     }
 
-    onChild(child) {
-        //do nothing
-        //allowsContent should not even allow this to be called, but you never know
-        super.warn("Image tags don't allow children elements. Make sure the correct syntax <tagname /> instead of just <tagname> is used")
-    }
-    onTextContent(text) {
-        //do nothing
-        //allowsContent should not even allow this to be called, but you never know
-        super.warn("Image tags don't allow text content. Make sure the correct syntax <tagname /> instead of just <tagname> is used")
-    }
-}
-registerMarkupTag("img",ImgMarkupTag)
-
-class IconMarkupTag extends ImgMarkupTag{
-    constructor(renderer) {
-        super(renderer,"span");
-    }
-}
-registerMarkupTag("icon",IconMarkupTag)
-
-class ColorTag extends MarkupTag{
-    constructor(renderer) {
-        super(renderer,"span");
-    }
-
-    onOpen(attributes) {
-        super.onOpen(attributes);
-
-        if(attributes["color"]){
-            super.setStyle("color",attributes["color"])
-        }
-
-        if(attributes["colour"]){
-            super.setStyle("color",attributes["colour"])
-        }
+    static simpleLimitedContentElement(markupName, htmlName, allowedChildren = [], allowText = false) {
+        SeatInfoMarkupRenderer.registerElement(markupName, function (elementInfo, htmlElement) {
+            return {
+                dom: htmlElement(htmlName).content(elementInfo.content.filter((e) => {
+                    if (!allowText && e.type === "text") {
+                        elementInfo.renderer.warn(new MarkupWarning(e.node.tokens, `<${markupName}> tags don't allow text content!`))
+                        return false
+                    }
+                    if (e.type === "element" && !allowedChildren.includes(e.tagName)) {
+                        elementInfo.renderer.warn(new MarkupWarning(e.node.tokens, `<${markupName}> tags don't allow <${e.tagName}> elements in them!`))
+                        return false
+                    }
+                    return true
+                }))
+            }
+        })
     }
 }
-registerMarkupTag("color",ColorTag)
-registerMarkupTag("colour",ColorTag)
 
-class AudioTag extends MarkupTag {
-    constructor(renderer) {
-        super(renderer,"p");
+SeatInfoMarkupElementHelper.simpleElement("p", "p")
+SeatInfoMarkupElementHelper.simpleElement("b", "b")
+SeatInfoMarkupElementHelper.simpleElement("i", "i")
+SeatInfoMarkupElementHelper.simpleElement("s", "s")
+SeatInfoMarkupElementHelper.simpleElement("h1", "h1")
+SeatInfoMarkupElementHelper.simpleElement("h2", "h2")
+SeatInfoMarkupElementHelper.simpleElement("h3", "h3")
+SeatInfoMarkupElementHelper.simpleElement("h4", "h4")
+SeatInfoMarkupElementHelper.simpleElement("h5", "h5")
+SeatInfoMarkupElementHelper.simpleElement("h6", "h6")
+
+SeatInfoMarkupElementHelper.simpleSelfClosingElement("br", "br")
+SeatInfoMarkupElementHelper.simpleSelfClosingElement("hr", "hr")
+
+//links
+function linkElementBuilder(elementInfo, htmlElement) {
+    const a = htmlElement("a").content(elementInfo.content)
+
+    if (elementInfo.properties["href"]) {
+        a.attribute("href", process_seat_url(elementInfo.properties["href"].value))
     }
 
-    formatTimeStamp(position, length){
-        return `${this.formatSeconds(position)} / ${this.formatSeconds(length)}`
+    if (elementInfo.properties["newtab"]) {
+        a.attribute("target", "_blank")
     }
 
-    formatSeconds(duration){
-        const seconds = duration % 60
-        const minutes = Math.floor(duration / 60) % 60
-        const hours = Math.floor(duration / 3600)
+    if (elementInfo.properties["download"]) {
+        a.attribute("download", "")
+    }
 
-        const options = {
-            maximumFractionDigits: 0,
-            minimumIntegerDigits: 2,
+    return {
+        dom: a
+    }
+}
+
+SeatInfoMarkupRenderer.registerElement("a", linkElementBuilder)
+SeatInfoMarkupRenderer.registerElement("pagelink", linkElementBuilder) // deprecated legacy function
+
+//lists
+SeatInfoMarkupElementHelper.simpleElement("li", "li")
+SeatInfoMarkupElementHelper.simpleLimitedContentElement("ul", "ul", ["li"], false)
+SeatInfoMarkupElementHelper.simpleLimitedContentElement("ol", "ol", ["li"], false)
+
+//tables
+SeatInfoMarkupRenderer.registerElement("table", function (elementInfo, htmlElement) {
+    const table = htmlElement("table")
+
+    table.class("table")
+    if (elementInfo.properties["stripes"]) {
+        table.class("table-striped")
+    }
+    if (elementInfo.properties["border"]) {
+        table.class("table-bordered")
+    }
+
+    return {
+        dom: table
+    }
+})
+
+function tableCellElementBuilder(type, elementInfo, htmlElement) {
+    const cell = htmlElement(type).content(elementInfo.content)
+
+    if (elementInfo.properties["colspan"]) {
+        let value
+        try {
+            value = parseInt(elementInfo.properties["colspan"])
+            cell.attribute("colspan", value)
+        } catch (e) {
+            elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<${type}> element with attribute 'colspan' is not an integer!"`))
+        }
+    }
+
+    cell.content(elementInfo.content.filter((e) => e.type === "element" && (e.tagName === "thead" || e.tagName === "tbody")))
+
+    return {
+        dom: cell
+    }
+}
+
+SeatInfoMarkupRenderer.registerElement("td", function (elementInfo, htmlElement) {
+    return tableCellElementBuilder("td", elementInfo, htmlElement)
+})
+SeatInfoMarkupRenderer.registerElement("th", function (elementInfo, htmlElement) {
+    return tableCellElementBuilder("th", elementInfo, htmlElement)
+})
+SeatInfoMarkupElementHelper.simpleLimitedContentElement("tr", "tr", ["td", "th"], false)
+SeatInfoMarkupElementHelper.simpleLimitedContentElement("tbody", "tbody", ["tr"], false)
+SeatInfoMarkupElementHelper.simpleLimitedContentElement("thead", "thead", ["tr"], false)
+
+//images
+function imageElementBuilder(elementInfo, htmlElement) {
+    const img = htmlElement("img")
+
+    //TODO img error handling
+
+    if (elementInfo.properties["src"]) {
+        img.attribute("src", process_seat_url(elementInfo.properties["src"].value))
+    }
+    if (elementInfo.properties["alt"]) {
+        img.attribute("alt", elementInfo.properties["alt"].value)
+    }
+    img.class("mw-100")
+
+    if (elementInfo.content.length > 0) {
+        elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `Image elements don't allow content. Consider converting them to the correct syntax <${elementInfo.tagName} />!`))
+    }
+
+    return img
+}
+SeatInfoMarkupRenderer.registerElement("img", function (elementInfo, htmlElement) {
+    return {
+        dom: htmlElement("p").content(imageElementBuilder(elementInfo, htmlElement))
+    }
+})
+SeatInfoMarkupRenderer.registerElement("icon", function (elementInfo, htmlElement) {
+    return {
+        dom: htmlElement("span").content(imageElementBuilder(elementInfo, htmlElement))
+    }
+})
+
+function colorElementBuilder (elementInfo, htmlElement) {
+    const color = htmlElement("span").content(elementInfo.content)
+
+    if (elementInfo.properties["color"]) {
+        color.style("color", elementInfo.properties["color"].value)
+    }
+    if (elementInfo.properties["colour"]) {
+        color.style("color", elementInfo.properties["colour"].value)
+    }
+
+    return {
+        dom: color
+    }
+}
+SeatInfoMarkupRenderer.registerElement("color", colorElementBuilder)
+SeatInfoMarkupRenderer.registerElement("colour", colorElementBuilder)
+
+//audio
+SeatInfoMarkupRenderer.registerElement("audio", function (elementInfo, htmlElement) {
+    if (elementInfo.content.length > 0) {
+        elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<audio /> elements don't allow content. Consider converting them to the correct syntax <${elementInfo.tagName} />!`))
+    }
+
+    if (elementInfo.properties["src"]) {
+
+        const formatSeconds = (duration) => {
+            const seconds = duration % 60
+            const minutes = Math.floor(duration / 60) % 60
+            const hours = Math.floor(duration / 3600)
+
+            const options = {
+                maximumFractionDigits: 0,
+                minimumIntegerDigits: 2,
+            }
+
+            if (hours > 0) {
+                return `${hours.toLocaleString(undefined, options)}:${minutes.toLocaleString(undefined, options)}:${seconds.toLocaleString(undefined, options)}`
+            }
+
+            return `${minutes.toLocaleString(undefined, options)}:${seconds.toLocaleString(undefined, options)}`
         }
 
-        if (hours>0){
-            return `${hours.toLocaleString(undefined, options)}:${minutes.toLocaleString(undefined, options)}:${seconds.toLocaleString(undefined, options)}`
+        const formatTimeStamp = (position, length) => {
+            return `${formatSeconds(position)} / ${formatSeconds(length)}`
         }
 
-        return `${minutes.toLocaleString(undefined, options)}:${seconds.toLocaleString(undefined, options)}`
-    }
+        const audio = new Audio(process_seat_url(elementInfo.properties["src"].value))
 
-    onOpen(attributes) {
-        super.onOpen(attributes);
+        const container = htmlElement("div")
+            .class("d-flex")
+            .class("align-items-center")
+            .class("p-2")
+            .style("background-color", "#BBBBBB")
+            .style("border-radius", "5px")
 
-        if(attributes["src"]){
-            let audio = new Audio(process_seat_url(attributes["src"]))
+        const buttonIcon = htmlElement("i")
+            .class("fas", "fa-play")
 
-            this.openHTMLTag("div")
-            this.addClass("d-flex")
-            this.addClass("align-items-center")
-
-            this.addClass("p-2")
-            this.setStyle("background-color","#BBBBBB")
-            this.setStyle("border-radius","5px")
-
-            //button
-            this.openHTMLTag("button")
-            this.addClass("btn")
-            this.addClass("btn-primary")
-
-            //icon
-            this.openHTMLTag("i")
-            this.addClass("fas")
-            this.addClass("fa-play")
-            let btnIcon = this._stackTop()
-            this.closeHTMLTag()
-
-            this.addEventListener("click",function () {
-                if(audio.paused) {
+        const button = htmlElement("button")
+            .class("btn", "btn-primary")
+            .content(buttonIcon)
+            .event("click",() => {
+                if (audio.paused) {
                     audio.play();
                 } else {
                     audio.pause()
                 }
             })
-            this.closeHTMLTag()
 
-            this.openHTMLTag("span")
-            this.setStyle("white-space","nowrap")
-            this.addClass("m-1")
-            let label = this._stackTop()
-            this.closeHTMLTag()
+        const label = htmlElement("span")
+            .style("white-space","nowrap")
+            .class("m-1")
+            .content("00:00 / 00:00")
 
-            //bootstrap: outer progress bar
-            this.openHTMLTag("div")
-            this.addClass("progress")
-            this.addClass("m-1") //margin
-            this.addClass("w-100") // use full width
-            this.setStyle("min-width","50px")
+        const progressBar = htmlElement("div")
+            .class("progress-bar")
 
-            this.openHTMLTag("div")
-            this.addClass("progress-bar")
-
-            //TODO remove hack fix
-            let innerElement = this._stackTop()
-
-            //inner progress bar div
-            this.closeHTMLTag()
-
-            //TODO remove hack fix
-            let outerElement = this._stackTop()
-
-            this.addEventListener("click",function (e) {
-                let progress = e.offsetX / outerElement.offsetWidth
+        const progress = htmlElement("div")
+            .class("progress","m-1","w-100")
+            .style("min-width","150px")
+            .content(progressBar)
+            .event("click", function (e) {
+                let progress = e.offsetX / e.currentTarget.offsetWidth
                 audio.currentTime = progress * audio.duration
             })
 
-            //outer progress bar div
-            this.closeHTMLTag()
+        container.content(button, label, progress)
 
-            //outer tag
-            this.closeHTMLTag()
+        audio.addEventListener("play", function () {
+            buttonIcon.removeClass("fa-play")
+            buttonIcon.class("fa-pause")
+        })
+        audio.addEventListener("ended", function () {
+            buttonIcon.removeClass("fa-pause")
+            buttonIcon.class("fa-play")
+        })
+        audio.addEventListener("pause", function () {
+            buttonIcon.removeClass("fa-pause")
+            buttonIcon.class("fa-play")
+        })
+        audio.addEventListener("durationchange", () => {
+            let progress = audio.currentTime / audio.duration
+            progressBar.style("width", `${progress * 100}%`)
+            label.clearContent(formatTimeStamp(audio.currentTime, audio.duration))
+        })
+        audio.addEventListener("timeupdate", () => {
+            let progress = audio.currentTime / audio.duration
+            progressBar.style("width", `${progress * 100}%`)
+            label.clearContent(formatTimeStamp(audio.currentTime, audio.duration))
+        })
 
-            audio.addEventListener("play",function (){
-                btnIcon.classList.remove("fa-play")
-                btnIcon.classList.add("fa-pause")
-            })
-            audio.addEventListener("ended",function (){
-                btnIcon.classList.remove("fa-pause")
-                btnIcon.classList.add("fa-play")
-            })
-            audio.addEventListener("pause",function (){
-                btnIcon.classList.remove("fa-pause")
-                btnIcon.classList.add("fa-play")
-            })
-            audio.addEventListener("durationchange",() => {
-                let progress = audio.currentTime / audio.duration
-                innerElement.style.setProperty("width",`${progress*100}%`)
-                label.textContent = this.formatTimeStamp(audio.currentTime,audio.duration)
-            })
-            audio.addEventListener("timeupdate",() => {
-                let progress = audio.currentTime / audio.duration
-                innerElement.style.setProperty("width",`${progress*100}%`)
-                label.textContent = this.formatTimeStamp(audio.currentTime,audio.duration)
-            })
-
-        } else {
-            this.warn("Audio element contains no audio source!")
+        return {
+            dom: container
+        }
+    } else {
+        elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<audio /> element doesn't contain a source. Specify one with <audio src="seatinfo:resource/..." />`))
+        return {
+            dom: htmlElement("span")
         }
     }
-
-    allowChildren() {
-        return false;
-    }
-}
-registerMarkupTag("audio",AudioTag)
-
+})
 
