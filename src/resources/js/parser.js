@@ -324,9 +324,14 @@ const parse = (lines) => {
 
             //finish previous text nodes
             if (textNodeTokens.length > 0) {
-                const astText = new ASTText(textNodeTokens)
-                elementStack.peek().appendNode(astText)
-                textNodeTokens = []
+
+                //check if text is only whitespace
+                if (textNodeTokens.reduce((previousValue, currentValue) => previousValue || currentValue.type !== Token.TokenType.WHITESPACE ,false)) {
+                    //it isn't only whitespace, so generate a text node
+                    const astText = new ASTText(textNodeTokens)
+                    elementStack.peek().appendNode(astText)
+                    textNodeTokens = []
+                }
             }
 
             tokenReader.skipWhiteSpace()
