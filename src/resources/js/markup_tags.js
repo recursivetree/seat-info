@@ -93,6 +93,18 @@ SeatInfoMarkupRenderer.registerElement("table", function (elementInfo, htmlEleme
         table.class("table-bordered")
     }
 
+    table.content(elementInfo.content.filter((e) => {
+        if (e.type === "text") {
+            elementInfo.renderer.warn(new MarkupWarning(e.node.tokens, `<table> tags don't allow text content in them and text won't be rendered!`))
+            return false
+        }
+        if (e.type === "element" && !(e.tagName==="thead" || e.tagName==="tbody")) {
+            elementInfo.renderer.warn(new MarkupWarning(e.node.tokens, `<table> tags don't allow <${e.tagName}> elements in them and they won't be rendered!`))
+            return false
+        }
+        return true
+    }))
+
     return {
         dom: table
     }
@@ -104,7 +116,7 @@ function tableCellElementBuilder(type, elementInfo, htmlElement) {
     if (elementInfo.properties["colspan"]) {
         let value
         try {
-            value = parseInt(elementInfo.properties["colspan"])
+            value = parseInt(elementInfo.properties["colspan"].value)
             cell.attribute("colspan", value)
         } catch (e) {
             elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<${type}> element with attribute 'colspan' is not an integer!"`))
@@ -143,19 +155,19 @@ function imageElementBuilder(elementInfo, htmlElement) {
     img.class("mw-100")
 
     if (elementInfo.content.length > 0) {
-        elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `Image elements don't allow content. Consider converting them to the correct syntax <${elementInfo.tagName} />!`))
+        elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `Image elements don't allow content. Consider converting them to the correct syntax <img /> or <icon />!`))
     }
 
     return img
 }
 SeatInfoMarkupRenderer.registerElement("img", function (elementInfo, htmlElement) {
     return {
-        dom: htmlElement("p").content(imageElementBuilder(elementInfo, htmlElement))
+        dom: htmlElement("p").content(imageElementBuilder(elementInfo, htmlElement), elementInfo.content)
     }
 })
 SeatInfoMarkupRenderer.registerElement("icon", function (elementInfo, htmlElement) {
     return {
-        dom: htmlElement("span").content(imageElementBuilder(elementInfo, htmlElement))
+        dom: htmlElement("span").content(imageElementBuilder(elementInfo, htmlElement), elementInfo.content)
     }
 })
 
@@ -179,7 +191,7 @@ SeatInfoMarkupRenderer.registerElement("colour", colorElementBuilder)
 //audio
 SeatInfoMarkupRenderer.registerElement("audio", function (elementInfo, htmlElement) {
     if (elementInfo.content.length > 0) {
-        elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<audio /> elements don't allow content. Consider converting them to the correct syntax <${elementInfo.tagName} />!`))
+        elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<audio /> elements don't allow content. Consider converting them to the correct syntax <audio />!`))
     }
 
     if (elementInfo.properties["src"]) {
@@ -271,12 +283,12 @@ SeatInfoMarkupRenderer.registerElement("audio", function (elementInfo, htmlEleme
         })
 
         return {
-            dom: container
+            dom: htmlElement("div").content(container,elementInfo.content)
         }
     } else {
         elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<audio /> element doesn't contain a source. Specify one with <audio src="seatinfo:resource/..." />`))
         return {
-            dom: htmlElement("span")
+            dom: htmlElement("div").content(elementInfo.content)
         }
     }
 })
