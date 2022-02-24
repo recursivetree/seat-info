@@ -211,8 +211,11 @@ class SeatInfoMarkupRenderer {
     static ELEMENT_REGISTRY = {}
     static LINK_PREPROCESSORS = {}
 
-    static registerElement(name, element){
-        SeatInfoMarkupRenderer.ELEMENT_REGISTRY[name] = element
+    static registerElement(name,isSelfClosing, element){
+        SeatInfoMarkupRenderer.ELEMENT_REGISTRY[name] = {
+            selfClosing: isSelfClosing,
+            builder: element
+        }
     }
 
     static registerLinkPreProcessor(scope,preprocessor){
@@ -272,7 +275,7 @@ class SeatInfoMarkupRenderer {
                             renderer: this
                         }
 
-                        const data = elementImplementation(elementInfo, SeatInfoDomElementBuilder.create)
+                        const data = elementImplementation.builder(elementInfo, SeatInfoDomElementBuilder.create)
 
                         let domElementBuilder
 
@@ -301,6 +304,15 @@ class SeatInfoMarkupRenderer {
                         data.tagName = astNode.tagName
 
                         content.push(data)
+
+                        if(data.noContent && elementInfo.content.length > 0){
+                            if(elementImplementation.selfClosing){
+                                this.warn(new MarkupWarning(astNode.tokens, `<${astNode.tagName}> does not allow any content, as it is a self-closing tag. Consider upgrading it to <${astNode.tagName} />`))
+                            } else {
+                                this.warn(new MarkupWarning(astNode.tokens, `<${astNode.tagName}> does not allow any content!`))
+                            }
+                            content.push(...elementInfo.content)
+                        }
                     }
 
                 } else {

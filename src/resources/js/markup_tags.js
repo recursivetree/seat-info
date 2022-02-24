@@ -1,6 +1,6 @@
 class SeatInfoMarkupElementHelper {
     static simpleElement(markupName, htmlName) {
-        SeatInfoMarkupRenderer.registerElement(markupName, function (elementInfo, htmlElement) {
+        SeatInfoMarkupRenderer.registerElement(markupName, false, function (elementInfo, htmlElement) {
             return {
                 dom: htmlElement(htmlName).content(elementInfo.content)
             }
@@ -8,19 +8,16 @@ class SeatInfoMarkupElementHelper {
     }
 
     static simpleSelfClosingElement(markupName, htmlName) {
-        SeatInfoMarkupRenderer.registerElement(markupName, function (elementInfo, htmlElement) {
-            if (elementInfo.content.length > 0) {
-                elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<${markupName} /> tags don't allow content. Consider converting them to the correct syntax <${markupName} />!`))
-            }
-
+        SeatInfoMarkupRenderer.registerElement(markupName,true, function (elementInfo, htmlElement) {
             return {
-                dom: htmlElement("span").content(htmlElement(htmlName)).content(elementInfo.content)
+                dom: htmlElement("span").content(htmlElement(htmlName)),
+                noContent: true
             }
         })
     }
 
     static simpleLimitedContentElement(markupName, htmlName, allowedChildren = [], allowText = false) {
-        SeatInfoMarkupRenderer.registerElement(markupName, function (elementInfo, htmlElement) {
+        SeatInfoMarkupRenderer.registerElement(markupName, false, function (elementInfo, htmlElement) {
             return {
                 dom: htmlElement(htmlName).content(elementInfo.content.filter((e) => {
                     if (!allowText && e.type === "text") {
@@ -73,8 +70,8 @@ function linkElementBuilder(elementInfo, htmlElement) {
     }
 }
 
-SeatInfoMarkupRenderer.registerElement("a", linkElementBuilder)
-SeatInfoMarkupRenderer.registerElement("pagelink", linkElementBuilder) // deprecated legacy function
+SeatInfoMarkupRenderer.registerElement("a",false, linkElementBuilder)
+SeatInfoMarkupRenderer.registerElement("pagelink", false, linkElementBuilder) // deprecated legacy function
 
 //lists
 SeatInfoMarkupElementHelper.simpleElement("li", "li")
@@ -82,7 +79,7 @@ SeatInfoMarkupElementHelper.simpleLimitedContentElement("ul", "ul", ["li"], fals
 SeatInfoMarkupElementHelper.simpleLimitedContentElement("ol", "ol", ["li"], false)
 
 //tables
-SeatInfoMarkupRenderer.registerElement("table", function (elementInfo, htmlElement) {
+SeatInfoMarkupRenderer.registerElement("table",false, function (elementInfo, htmlElement) {
     const table = htmlElement("table")
 
     table.class("table")
@@ -130,10 +127,10 @@ function tableCellElementBuilder(type, elementInfo, htmlElement) {
     }
 }
 
-SeatInfoMarkupRenderer.registerElement("td", function (elementInfo, htmlElement) {
+SeatInfoMarkupRenderer.registerElement("td", false, function (elementInfo, htmlElement) {
     return tableCellElementBuilder("td", elementInfo, htmlElement)
 })
-SeatInfoMarkupRenderer.registerElement("th", function (elementInfo, htmlElement) {
+SeatInfoMarkupRenderer.registerElement("th", false, function (elementInfo, htmlElement) {
     return tableCellElementBuilder("th", elementInfo, htmlElement)
 })
 SeatInfoMarkupElementHelper.simpleLimitedContentElement("tr", "tr", ["td", "th"], false)
@@ -154,20 +151,18 @@ function imageElementBuilder(elementInfo, htmlElement) {
     }
     img.class("mw-100")
 
-    if (elementInfo.content.length > 0) {
-        elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `Image elements don't allow content. Consider converting them to the correct syntax <img /> or <icon />!`))
-    }
-
     return img
 }
-SeatInfoMarkupRenderer.registerElement("img", function (elementInfo, htmlElement) {
+SeatInfoMarkupRenderer.registerElement("img", true,function (elementInfo, htmlElement) {
     return {
-        dom: htmlElement("p").content(imageElementBuilder(elementInfo, htmlElement), elementInfo.content)
+        dom: htmlElement("p").content(imageElementBuilder(elementInfo, htmlElement)),
+        noContent: true
     }
 })
-SeatInfoMarkupRenderer.registerElement("icon", function (elementInfo, htmlElement) {
+SeatInfoMarkupRenderer.registerElement("icon",true, function (elementInfo, htmlElement) {
     return {
-        dom: htmlElement("span").content(imageElementBuilder(elementInfo, htmlElement), elementInfo.content)
+        dom: htmlElement("span").content(imageElementBuilder(elementInfo, htmlElement)),
+        noContent: true
     }
 })
 
@@ -185,15 +180,11 @@ function colorElementBuilder (elementInfo, htmlElement) {
         dom: color
     }
 }
-SeatInfoMarkupRenderer.registerElement("color", colorElementBuilder)
-SeatInfoMarkupRenderer.registerElement("colour", colorElementBuilder)
+SeatInfoMarkupRenderer.registerElement("color",false, colorElementBuilder)
+SeatInfoMarkupRenderer.registerElement("colour",false, colorElementBuilder)
 
 //audio
-SeatInfoMarkupRenderer.registerElement("audio", function (elementInfo, htmlElement) {
-    if (elementInfo.content.length > 0) {
-        elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<audio /> elements don't allow content. Consider converting them to the correct syntax <audio />!`))
-    }
-
+SeatInfoMarkupRenderer.registerElement("audio",true, function (elementInfo, htmlElement) {
     if (elementInfo.properties["src"]) {
 
         const formatSeconds = (duration) => {
@@ -283,12 +274,14 @@ SeatInfoMarkupRenderer.registerElement("audio", function (elementInfo, htmlEleme
         })
 
         return {
-            dom: htmlElement("div").content(container,elementInfo.content)
+            dom: htmlElement("div").content(container),
+            noContent: true
         }
     } else {
         elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<audio /> element doesn't contain a source. Specify one with <audio src="seatinfo:resource/..." />`))
         return {
-            dom: htmlElement("div").content(elementInfo.content)
+            dom: htmlElement("div"),
+            noContent: true
         }
     }
 })
