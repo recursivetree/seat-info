@@ -1,3 +1,30 @@
+SeatInfoMarkupRenderer.registerLinkPreProcessor("seatinfo",(link)=>{
+    const articleLink = /^article\/(?<article_id>\d+)(?:#(?<hash>.*))?$/gm.exec(link)
+    if(articleLink){
+        if(articleLink.groups.hash){
+            return {
+                url: `/info/article/view/${articleLink.groups.article_id}#${articleLink.groups.hash}`
+            }
+        } else {
+            return {
+                url: `/info/article/view/${articleLink.groups.article_id}`
+            }
+        }
+    }
+
+    const resourceLink = /^resource\/(?<resource_id>\d+$)/gm.exec(link)
+    if(resourceLink){
+        return {
+            url: `/info/resource/${resourceLink.groups.resource_id}`
+        }
+    }
+
+    return {
+        warning: "Unknown url schema!"
+    }
+})
+
+
 class SeatInfoMarkupElementHelper {
     static simpleElement(markupName, htmlName) {
         SeatInfoMarkupRenderer.registerElement(markupName, false, function (elementInfo, htmlElement) {
@@ -53,8 +80,15 @@ SeatInfoMarkupElementHelper.simpleSelfClosingElement("hr", "hr")
 function linkElementBuilder(elementInfo, htmlElement) {
     const a = htmlElement("a").content(elementInfo.content)
 
-    if (elementInfo.properties["href"]) {
-        a.attribute("href", process_seat_url(elementInfo.properties["href"].value))
+    const url = elementInfo.renderer.preprocessLink(elementInfo.properties["href"])
+    if (!url.warning) {
+        a.attribute("href", url.url)
+    } else {
+        if(elementInfo.properties["href"]){
+            elementInfo.renderer.warn(new MarkupWarning(elementInfo.properties["href"].tokens, `Href url is in an invalid format: ${url.warning}!`))
+        } else {
+            elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<a> elements need a src property to load the image!`))
+        }
     }
 
     if (elementInfo.properties["newtab"]) {
@@ -143,9 +177,17 @@ function imageElementBuilder(elementInfo, htmlElement) {
 
     //TODO img error handling
 
-    if (elementInfo.properties["src"]) {
-        img.attribute("src", process_seat_url(elementInfo.properties["src"].value))
+    const url = elementInfo.renderer.preprocessLink(elementInfo.properties["src"])
+    if (!url.warning) {
+        img.attribute("src", url.url)
+    } else {
+        if(elementInfo.properties["src"]){
+            elementInfo.renderer.warn(new MarkupWarning(elementInfo.properties["src"].tokens, `Source url is in an invalid format: ${url.warning}!`))
+        } else {
+            elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `Image elements need a src property to load the image!`))
+        }
     }
+
     if (elementInfo.properties["alt"]) {
         img.attribute("alt", elementInfo.properties["alt"].value)
     }
@@ -185,8 +227,10 @@ SeatInfoMarkupRenderer.registerElement("colour",false, colorElementBuilder)
 
 //audio
 SeatInfoMarkupRenderer.registerElement("audio",true, function (elementInfo, htmlElement) {
-    if (elementInfo.properties["src"]) {
 
+    const url = elementInfo.renderer.preprocessLink(elementInfo.properties["src"])
+
+    if (!url.warning) {
         const formatSeconds = (duration) => {
             const seconds = duration % 60
             const minutes = Math.floor(duration / 60) % 60
@@ -208,7 +252,7 @@ SeatInfoMarkupRenderer.registerElement("audio",true, function (elementInfo, html
             return `${formatSeconds(position)} / ${formatSeconds(length)}`
         }
 
-        const audio = new Audio(process_seat_url(elementInfo.properties["src"].value))
+        const audio = new Audio(url.url)
 
         const container = htmlElement("div")
             .class("d-flex")
@@ -278,7 +322,7 @@ SeatInfoMarkupRenderer.registerElement("audio",true, function (elementInfo, html
             noContent: true
         }
     } else {
-        elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<audio /> element doesn't contain a source. Specify one with <audio src="seatinfo:resource/..." />`))
+        elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<audio /> element doesn't contain a valid source: ${url.warning}.`))
         return {
             dom: htmlElement("div"),
             noContent: true

@@ -167,7 +167,9 @@ class SeatInfoDomElementBuilder {
     }
 
     attribute(name,value){
-        this.domElement.setAttribute(name,value)
+        if(value) {
+            this.domElement.setAttribute(name, value)
+        }
 
         return this
     }
@@ -220,6 +222,37 @@ class SeatInfoMarkupRenderer {
 
     static registerLinkPreProcessor(scope,preprocessor){
         SeatInfoMarkupRenderer.LINK_PREPROCESSORS[scope] = preprocessor
+    }
+
+    preprocessLink(link){
+        if(!link){
+            return {
+                warning: "No url specified!"
+            }
+        }
+
+        if (link instanceof ASTTagProperty){
+            link = link.value
+        }
+
+        const data = /^(?<resource>.+):(?<data>.*)$/gm.exec(link)
+
+        if(data) {
+            const scope = data.groups.resource
+            const handler = SeatInfoMarkupRenderer.LINK_PREPROCESSORS[scope]
+
+            if(!handler){
+                return {
+                    url: data.groups.data
+                }
+            }
+
+            return handler(data.groups.data)
+        } else {
+            return {
+                url: link
+            }
+        }
     }
 
     constructor() {
