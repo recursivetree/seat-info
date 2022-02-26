@@ -145,6 +145,9 @@
     <script>
 
         class MarkupEditor {
+            editor;
+            astTree;
+
             constructor() {
                 this.astTree = null
 
@@ -170,39 +173,8 @@
                 this.editor.focus()
             }
 
-            getSelectionRange(tokens){
-                let start = {
-                    lineIndex: Number.MAX_SAFE_INTEGER,
-                    colIndex: Number.MAX_SAFE_INTEGER
-                }
-                let end = {
-                    lineIndex: Number.MIN_SAFE_INTEGER,
-                    colIndex: Number.MIN_SAFE_INTEGER
-                }
-
-                for (const token of tokens) {
-                    if(token.start.lineIndex <= start.lineIndex){
-                        start.lineIndex = token.start.lineIndex
-                        if(token.start.colIndex <= start.colIndex){
-                            start.colIndex = token.start.colIndex
-                        }
-                    }
-                    if(token.end.lineIndex >= end.lineIndex){
-                        end.lineIndex = token.end.lineIndex
-                        if(token.end.colIndex >= end.colIndex){
-                            end.colIndex = token.end.colIndex
-                        }
-                    }
-                }
-
-                return {
-                    start,
-                    end
-                }
-            }
-
             selectAreaFromTokenList(tokens) {
-                const selectionRange = this.getSelectionRange(tokens)
+                const selectionRange = Token.getRange(tokens)
 
                 this.selectArea(selectionRange.start, selectionRange.end)
             }
@@ -233,7 +205,7 @@
                 }
 
                 for (const warning of e.warnings) {
-                    const warningTokenRange = this.getSelectionRange(warning.tokens)
+                    const warningTokenRange = Token.getRange(warning.tokens)
 
                     let liElement = document.createElement("li")
                     liElement.textContent = `L${warningTokenRange.start.lineIndex+1}:${warningTokenRange.start.colIndex}-L${warningTokenRange.end.lineIndex+1}:${warningTokenRange.end.colIndex+1}: ${warning.message}`
@@ -274,76 +246,153 @@
                     })
             }
 
-            getElementForCursorPosition(position){
+            getElementForPosition(aceRange){
+                const start = {
+                    lineIndex: aceRange.start.row,
+                    colIndex: aceRange.start.column
+                }
+                const end = {
+                    lineIndex: aceRange.end.row,
+                    colIndex: aceRange.end.column
+                }
+
                 function traverseTree(node) {
-                    
+                    let element = null
+
+                    if(node.isIn(start, end)){
+                        element = node
+                    }
+
+                    if (node instanceof ASTTag) {
+                        for (const contentNode of node.content) {
+                            const childElement = traverseTree(contentNode)
+                            if (childElement) {
+                                element = childElement
+                            }
+                        }
+                    }
+
+                    return element
                 }
 
                 if(this.astTree) {
-                    traverseTree(this.astTree)
+                    return traverseTree(this.astTree.rootNode)
                 }
 
                 return null
             }
 
-            update_editor(selectionStart, selectionEnd, replace, position_after_center_section=false) {
+            removeElement(element){
+                let text = element.content
+                    .flatMap((e)=>e.tokens)
+                    .sort((a,b)=>{
+                    if(a.start.lineIndex === b.start.lineIndex && a.start.colIndex === b.start.colIndex){
+                        return 0
+                    } else if(a.start.lineIndex > b.start.lineIndex){
+                        return 1
+                    } else  if(a.start.lineIndex === b.start.lineIndex){
+                        if(a.start.colIndex > b.start.colIndex) {
+                            return 1
+                        } else {
+                            return -1
+                        }
+                    } else {
+                        return -1
+                    }
+                })
+                .reduce((prev,current)=>prev+current.src,"")
+
+                const range = new ace.Range(element.range.start.lineIndex,element.range.start.colIndex,element.range.end.lineIndex,element.range.end.colIndex+1)
+                this.editor.session.replace(range,text)
+            }
+
+            updateSelection(tagType,selectionStart, selectionEnd, replace, position_after_center_section=false) {
+                if (tagType) {
+                    const element = getSelectedElementWithType(tagType)
+                    if (element) {
+                        editor.removeElement(element)
+                        this.editor.focus()
+                        return
+                    }
+                }
+
+
                 const text = (selectionStart || "") + (replace || this.editor.getSelectedText()) + (selectionEnd || "")
                 this.editor.session.replace(this.editor.getSelectionRange(), text)
 
-                if(position_after_center_section){
+                if (position_after_center_section) {
                     let length = (selectionEnd || "").length
                     this.editor.navigateLeft(length)
                 }
-
                 this.editor.focus()
             }
+        }
+
+        function getSelectedElementWithType(type) {
+            const aceRange = editor.editor.getSelectionRange()
+            const element = editor.getElementForPosition(aceRange)
+
+            if(element){
+                if (
+                    element instanceof ASTTag
+                    && element.tagName === type
+                ) return element
+
+                else if (
+                    element instanceof ASTText
+                    && element.parent instanceof ASTTag
+                    && element.parent.tagName === type
+                ) return element.parent
+            }
+
+            return null
         }
 
         const editor = new MarkupEditor()
 
         document.getElementById("button-insert-heading-1").addEventListener("click", function () {
-            editor.update_editor("<h1>", "</h1>", null, position_after_center_section=true)
+            editor.updateSelection("h1","<h1>", "</h1>", null, position_after_center_section=true)
         })
         document.getElementById("button-insert-heading-2").addEventListener("click", function () {
-            editor.update_editor("<h2>", "</h2>", null, position_after_center_section=true)
+            editor.updateSelection("h2","<h2>", "</h2>", null, position_after_center_section=true)
         })
         document.getElementById("button-insert-heading-3").addEventListener("click", function () {
-            editor.update_editor("<h3>", "</h3>", null, position_after_center_section=true)
+            editor.updateSelection("h3","<h3>", "</h3>", null, position_after_center_section=true)
         })
         document.getElementById("button-insert-heading-4").addEventListener("click", function () {
-            editor.update_editor("<h4>", "</h4>", null, position_after_center_section=true)
+            editor.updateSelection("h4","<h4>", "</h4>", null, position_after_center_section=true)
         })
         document.getElementById("button-insert-heading-5").addEventListener("click", function () {
-            editor.update_editor("<h5>", "</h5>", null, position_after_center_section=true)
+            editor.updateSelection("h5","<h5>", "</h5>", null, position_after_center_section=true)
         })
         document.getElementById("button-insert-heading-6").addEventListener("click", function () {
-            editor.update_editor("<h6>", "</h6>", null, position_after_center_section=true)
+            editor.updateSelection("h6","<h6>", "</h6>", null, position_after_center_section=true)
         })
 
 
         document.getElementById("button-insert-paragraph").addEventListener("click", function () {
-            editor.update_editor("<p>", "</p>", null, position_after_center_section=true)
+            editor.updateSelection("p","<p>", "</p>", null, position_after_center_section=true)
         })
         document.getElementById("button-insert-bold").addEventListener("click", function () {
-            editor.update_editor("<b>", "</b>", null, position_after_center_section=true)
+            editor.updateSelection("b","<b>", "</b>", null, position_after_center_section=true)
         })
         document.getElementById("button-insert-italic").addEventListener("click", function () {
-            editor.update_editor("<i>", "</i>", null, position_after_center_section=true)
+            editor.updateSelection("i","<i>", "</i>", null, position_after_center_section=true)
         })
         document.getElementById("button-insert-link").addEventListener("click", function () {
-            editor.update_editor("<a href=\"seatinfo:article/\">", "</a>", null, position_after_center_section=true)
+            editor.updateSelection("a","<a href=\"seatinfo:article/\">", "</a>", null, position_after_center_section=true)
         })
         document.getElementById("button-insert-image").addEventListener("click", function () {
-            editor.update_editor(null, null, "<img src=\"seatinfo:resource/\" alt=\"description of the image\">")
+            editor.updateSelection(null,null, null, "<img src=\"seatinfo:resource/\" alt=\"description of the image\" />")
         })
         document.getElementById("button-insert-list").addEventListener("click", function () {
-            editor.update_editor(null, null, "<ul>\n    <li>\n    </li>\n    <li>\n    </li>\n    <li>\n    </li>\n</ul>")
+            editor.updateSelection(null,null, null, "<ul>\n    <li>\n    </li>\n    <li>\n    </li>\n    <li>\n    </li>\n</ul>")
         })
         document.getElementById("button-insert-list-ol").addEventListener("click", function () {
-            editor.update_editor(null, null, "<ol>\n    <li>\n    </li>\n    <li>\n    </li>\n    <li>\n    </li>\n</ol>")
+            editor.updateSelection(null,null, null, "<ol>\n    <li>\n    </li>\n    <li>\n    </li>\n    <li>\n    </li>\n</ol>")
         })
         document.getElementById("button-insert-color").addEventListener("click", function () {
-            editor.update_editor("<color color=\"red\">", "</color>", null, position_after_center_section=true)
+            editor.updateSelection("color","<color color=\"red\">", "</color>", null, position_after_center_section=true)
         })
     </script>
 @endpush

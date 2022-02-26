@@ -118,6 +118,37 @@ class Token {
         this.start = start
         this.end = end
     }
+
+    static getRange(tokens){
+        let start = {
+            lineIndex: Number.MAX_SAFE_INTEGER,
+            colIndex: Number.MAX_SAFE_INTEGER
+        }
+        let end = {
+            lineIndex: Number.MIN_SAFE_INTEGER,
+            colIndex: Number.MIN_SAFE_INTEGER
+        }
+
+        for (const token of tokens) {
+            if(token.start.lineIndex <= start.lineIndex){
+                start.lineIndex = token.start.lineIndex
+                if(token.start.colIndex <= start.colIndex){
+                    start.colIndex = token.start.colIndex
+                }
+            }
+            if(token.end.lineIndex >= end.lineIndex){
+                end.lineIndex = token.end.lineIndex
+                if(token.end.colIndex >= end.colIndex){
+                    end.colIndex = token.end.colIndex
+                }
+            }
+        }
+
+        return {
+            start,
+            end
+        }
+    }
 }
 
 class TokenReader {
@@ -193,11 +224,19 @@ class MarkupWarning {
 class ASTBase {
     constructor(tokens) {
         this.tokens = tokens
+        this.range = Token.getRange(tokens)
+    }
+
+    isIn(start, end){
+        const inStart = (this.range.start.lineIndex < start.lineIndex) || (this.range.start.lineIndex === start.lineIndex && this.range.start.colIndex <= start.colIndex)
+        const inEnd = (this.range.end.lineIndex > end.lineIndex) || (this.range.end.lineIndex === end.lineIndex && this.range.end.colIndex+1 >= end.colIndex)
+
+        return inStart && inEnd
     }
 }
 
 class ASTTag extends ASTBase {
-    constructor(tokens, tagName, properties) {
+    constructor(tokens, tagName, properties, parent) {
         super(tokens);
         this.tagName = tagName
         this.content = []
@@ -208,17 +247,24 @@ class ASTTag extends ASTBase {
             }
             this.properties[property.name] = property
         }
+        this.parent = parent
     }
 
     appendNode(node) {
         this.content.push(node)
     }
+
+    appendTokens(tokens){
+        this.tokens.push(...tokens)
+        this.range = Token.getRange(this.tokens)
+    }
 }
 
 class ASTText extends ASTBase {
-    constructor(tokens) {
+    constructor(tokens,parent) {
         super(tokens);
         this.text = tokens.reduce((string,token)=>string+token.src,"")
+        this.parent = parent
     }
 }
 
@@ -308,7 +354,7 @@ const parse = (lines) => {
     let textNodeTokens = []
     const tokenReader = new TokenReader(tokens)
 
-    const elementStack = new Stack([new ASTTag(null, null, [])])
+    const elementStack = new Stack([new ASTTag(tokens, null, [],null)])
 
     let token
 
@@ -328,7 +374,7 @@ const parse = (lines) => {
                 //check if text is only whitespace
                 if (textNodeTokens.reduce((previousValue, currentValue) => previousValue || currentValue.type !== Token.TokenType.WHITESPACE ,false)) {
                     //it isn't only whitespace, so generate a text node
-                    const astText = new ASTText(textNodeTokens)
+                    const astText = new ASTText(textNodeTokens,elementStack.peek())
                     elementStack.peek().appendNode(astText)
                     textNodeTokens = []
                 }
@@ -447,9 +493,10 @@ const parse = (lines) => {
                     }
                 }
 
-                const tag = new ASTTag(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), tagName, properties)
-
                 const stackTop = elementStack.peek()
+
+                const tag = new ASTTag(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), tagName, properties, stackTop)
+
                 stackTop.appendNode(tag)
 
                 if(!selfClosingTag) {
@@ -495,7 +542,7 @@ const parse = (lines) => {
                     const tokens = tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position())
 
                     const element = elementStack.pop()
-                    element.tokens = element.tokens.concat(tokens)
+                    element.appendTokens(tokens)
                 }
 
             } else {
@@ -507,7 +554,7 @@ const parse = (lines) => {
 
     //finish previous text nodes
     if (textNodeTokens.length > 0) {
-        const astText = new ASTText(textNodeTokens)
+        const astText = new ASTText(textNodeTokens,elementStack.peek())
         elementStack.peek().appendNode(astText)
     }
 
