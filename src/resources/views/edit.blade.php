@@ -222,9 +222,13 @@
             }
 
             render_preview() {
+                const renderTarget = document.getElementById("editor-preview-target")
+
                 document.getElementById("submitText").value = this.editor.getValue()
 
                 const lines = this.editor.session.getLines(0,this.editor.session.getLength())
+
+                const scrollPos = renderTarget.scrollTop
 
                 let preview_target = document.getElementById("editor-preview-target")
                 preview_target.textContent = ""// lazy thing to clear the dom
@@ -238,12 +242,14 @@
 
                 render_article(
                     lines,
-                    document.getElementById("editor-preview-target"),
+                    renderTarget,
                     this.update_errors.bind(this),
                     (elementAstRepresentation) => {
                         console.log(elementAstRepresentation)
                         this.selectAreaFromTokenList(elementAstRepresentation.tokens)
                     })
+
+                renderTarget.scrollTop = scrollPos
             }
 
             getElementForPosition(aceRange){
