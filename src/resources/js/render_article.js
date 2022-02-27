@@ -211,7 +211,8 @@ class SeatInfoDomElementBuilder {
 class SeatInfoMarkupRenderer {
 
     static ELEMENT_REGISTRY = {}
-    static LINK_PREPROCESSORS = {}
+    static LINK_PREPROCESSORS_REGISTRY = {}
+    static COMMON_PROPERTY_REGISTRY = {}
 
     static registerElement(name,isSelfClosing, element){
         SeatInfoMarkupRenderer.ELEMENT_REGISTRY[name] = {
@@ -221,7 +222,11 @@ class SeatInfoMarkupRenderer {
     }
 
     static registerLinkPreProcessor(scope,preprocessor){
-        SeatInfoMarkupRenderer.LINK_PREPROCESSORS[scope] = preprocessor
+        SeatInfoMarkupRenderer.LINK_PREPROCESSORS_REGISTRY[scope] = preprocessor
+    }
+
+    static registerCommonProperty(name, handler){
+        SeatInfoMarkupRenderer.COMMON_PROPERTY_REGISTRY[name] = handler
     }
 
     preprocessLink(link){
@@ -239,7 +244,7 @@ class SeatInfoMarkupRenderer {
 
         if(data) {
             const scope = data.groups.resource
-            const handler = SeatInfoMarkupRenderer.LINK_PREPROCESSORS[scope]
+            const handler = SeatInfoMarkupRenderer.LINK_PREPROCESSORS_REGISTRY[scope]
 
             if(!handler){
                 return {
@@ -308,37 +313,57 @@ class SeatInfoMarkupRenderer {
                             renderer: this
                         }
 
-                        const data = elementImplementation.builder(elementInfo, SeatInfoDomElementBuilder.create)
+                        const elementData = elementImplementation.builder(elementInfo, SeatInfoDomElementBuilder.create)
 
+                        //extract or create a DomElementBuilder
                         let domElementBuilder
-
-                        if(data.dom instanceof SeatInfoDomElementBuilder){
-                            domElementBuilder = data.dom
-                        } else if(data.dom instanceof Element){
-                            domElementBuilder = SeatInfoDomElementBuilder.from(data.dom)
+                        if(elementData.dom instanceof SeatInfoDomElementBuilder){
+                            domElementBuilder = elementData.dom
+                        } else if(elementData.dom instanceof Element){
+                            domElementBuilder = SeatInfoDomElementBuilder.from(elementData.dom)
                         } else {
                             this.warn(astNode.tokens,`Internal error: Renderer implementation for <${astNode.tagName}> didn't return a DOMElement-like object! Please report this bug!`)
                         }
 
-                        //apply common properties
-                        this.commonProperties(elementInfo,data.disabledCommonProperties || [],domElementBuilder)
+                        //apply properties common across different elements
+                        const disableCommonProperties = new Set(elementData.disabledCommonProperties || [])
+                        this.commonProperties({
+                            elementInfo,
+                            elementData,
+                            htmlBuilder: domElementBuilder,
+                            renderer: this
+                        }, elementInfo.properties, disableCommonProperties)
 
-                        //extract dom node
-                        data.dom = domElementBuilder.domElement
+                        //check for unsupported properties
+                        const supportedElementProperties = new Set([
+                                ...(elementData.supportedElementProperties || []),
+                                ...Object.keys(SeatInfoMarkupRenderer.COMMON_PROPERTY_REGISTRY)
+                            ].filter((e)=>!disableCommonProperties.has(e))
+                        )
+                        for (const property of Object.values(elementInfo.properties)) {
+                            if(!supportedElementProperties.has(property.name)){
+                                this.warn(new MarkupWarning(property.tokens, `<${astNode.tagName}> elements don't support the property "${property.name}"!`))
+                            }
+                        }
 
+                        //add click callback
                         if(astNodeClickCallback){
-                            data.dom.addEventListener("click",(e)=>{
+                            domElementBuilder.event("click",(e)=>{
                                 e.stopPropagation()
                                 astNodeClickCallback(astNode)
                             },false)
                         }
 
-                        data.type = "element"
-                        data.tagName = astNode.tagName
+                        //add this element to element list
+                        content.push({
+                            dom: domElementBuilder.domElement,
+                            type: "element",
+                            tagName: astNode.tagName,
+                            node: astNode
+                        })
 
-                        content.push(data)
-
-                        if(data.noContent && elementInfo.content.length > 0){
+                        //if an element doesn't allow content, add the content afterwards
+                        if(elementData.noContent && elementInfo.content.length > 0){
                             if(elementImplementation.selfClosing){
                                 this.warn(new MarkupWarning(astNode.tokens, `<${astNode.tagName}> does not allow any content, as it is a self-closing tag. Consider upgrading it to <${astNode.tagName} />`))
                             } else {
@@ -369,27 +394,14 @@ class SeatInfoMarkupRenderer {
     }
 
     //shared properties like id and text-align
-    commonProperties(elementInfo, disabledCommonProperties, elementBuilder){
-        const properties = elementInfo.properties
+    commonProperties(elementData,properties,disabledProperties){
+        const propertyHandlers = Object.entries(SeatInfoMarkupRenderer.COMMON_PROPERTY_REGISTRY)
+            .filter((e)=>properties[e[0]])
+            .filter((e)=>!disabledProperties.has(e[0]))
 
-        if(properties["id"] && !disabledCommonProperties.includes("id")){
-            elementBuilder.attribute("id",properties["id"].value)
-        }
-        if(properties["text-align"] && !disabledCommonProperties.includes("text-align")){
-            let value = properties["text-align"].value
-            if (value === "right"){
-                elementBuilder.style("text-align","right")
-            } else if (value === "left"){
-                elementBuilder.style("text-align","left")
-            } else if (value === "center"){
-                elementBuilder.style("text-align","center")
-            } else {
-                if(value===true){
-                    this.warn(new MarkupWarning(properties["text-align"].tokens, `Attribute 'text-align' requires a value like text-align="right"!`))
-                } else {
-                    this.warn(new MarkupWarning(properties["text-align"].tokens, `Unsupported value '${value.substring(0, 20)}' for attribute 'text-align'!`))
-                }
-            }
+        for (const propertyHandlerInfo of propertyHandlers) {
+            const [propertyName,propertyHandler] = propertyHandlerInfo
+            propertyHandler(properties[propertyName],elementData)
         }
     }
 }

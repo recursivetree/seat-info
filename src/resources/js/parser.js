@@ -443,7 +443,8 @@ const parse = (lines) => {
                             //property without value
                             tokenReader.back()
 
-                            const property = new ASTTagProperty(tokenReader.tokenRange(propertyStart,tokenReader.position()),propertyName,true)
+                            //token range is non-inclusive
+                            const property = new ASTTagProperty(tokenReader.tokenRange(propertyStart,propertyStart+1),propertyName,true)
                             properties.push(property)
 
                             continue propertyLoop
@@ -478,7 +479,7 @@ const parse = (lines) => {
                                 argString += token.src
                             }
 
-                            const property = new ASTTagProperty(tokenReader.tokenRange(propertyStart,tokenReader.position(-1)),propertyName,argString)
+                            const property = new ASTTagProperty(tokenReader.tokenRange(propertyStart,tokenReader.position()),propertyName,argString)
                             properties.push(property)
 
                             continue propertyLoop

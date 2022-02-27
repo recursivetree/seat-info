@@ -1,7 +1,7 @@
-SeatInfoMarkupRenderer.registerLinkPreProcessor("seatinfo",(link)=>{
+SeatInfoMarkupRenderer.registerLinkPreProcessor("seatinfo", (link) => {
     const articleLink = /^article\/(?<article_id>\d+)(?:#(?<hash>.*))?$/gm.exec(link)
-    if(articleLink){
-        if(articleLink.groups.hash){
+    if (articleLink) {
+        if (articleLink.groups.hash) {
             return {
                 url: `/info/article/view/${articleLink.groups.article_id}#${articleLink.groups.hash}`
             }
@@ -13,7 +13,7 @@ SeatInfoMarkupRenderer.registerLinkPreProcessor("seatinfo",(link)=>{
     }
 
     const resourceLink = /^resource\/(?<resource_id>\d+$)/gm.exec(link)
-    if(resourceLink){
+    if (resourceLink) {
         return {
             url: `/info/resource/${resourceLink.groups.resource_id}`
         }
@@ -21,6 +21,27 @@ SeatInfoMarkupRenderer.registerLinkPreProcessor("seatinfo",(link)=>{
 
     return {
         warning: "Unknown url schema!"
+    }
+})
+
+SeatInfoMarkupRenderer.registerCommonProperty("id", (value, elementData) => {
+    elementData.htmlBuilder.attribute("id", value.value)
+})
+
+SeatInfoMarkupRenderer.registerCommonProperty("text-align", (property, elementData) => {
+    const value = property.value
+    if (value === "right") {
+        elementData.htmlBuilder.style("text-align", "right")
+    } else if (value === "left") {
+        elementData.htmlBuilder.style("text-align", "left")
+    } else if (value === "center") {
+        elementData.htmlBuilder.style("text-align", "center")
+    } else {
+        if (value === true) {
+            elementData.renderer.warn(new MarkupWarning(property.tokens, `Attribute 'text-align' requires a value like text-align="right"!`))
+        } else {
+            elementData.renderer.warn(new MarkupWarning(property.tokens, `Unsupported value '${value.substring(0, 20)}' for attribute 'text-align'!`))
+        }
     }
 })
 
@@ -35,10 +56,11 @@ class SeatInfoMarkupElementHelper {
     }
 
     static simpleSelfClosingElement(markupName, htmlName) {
-        SeatInfoMarkupRenderer.registerElement(markupName,true, function (elementInfo, htmlElement) {
+        SeatInfoMarkupRenderer.registerElement(markupName, true, function (elementInfo, htmlElement) {
             return {
                 dom: htmlElement("span").content(htmlElement(htmlName)),
-                noContent: true
+                noContent: true,
+                disabledCommonProperties: ["text-align"]
             }
         })
     }
@@ -84,7 +106,7 @@ function linkElementBuilder(elementInfo, htmlElement) {
     if (!url.warning) {
         a.attribute("href", url.url)
     } else {
-        if(elementInfo.properties["href"]){
+        if (elementInfo.properties["href"]) {
             elementInfo.renderer.warn(new MarkupWarning(elementInfo.properties["href"].tokens, `Href url is in an invalid format: ${url.warning}!`))
         } else {
             elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<a> elements need a src property to load the image!`))
@@ -100,11 +122,12 @@ function linkElementBuilder(elementInfo, htmlElement) {
     }
 
     return {
-        dom: a
+        dom: a,
+        supportedElementProperties: ["href","newtab","download"]
     }
 }
 
-SeatInfoMarkupRenderer.registerElement("a",false, linkElementBuilder)
+SeatInfoMarkupRenderer.registerElement("a", false, linkElementBuilder)
 SeatInfoMarkupRenderer.registerElement("pagelink", false, linkElementBuilder) // deprecated legacy function
 
 //lists
@@ -113,7 +136,7 @@ SeatInfoMarkupElementHelper.simpleLimitedContentElement("ul", "ul", ["li"], fals
 SeatInfoMarkupElementHelper.simpleLimitedContentElement("ol", "ol", ["li"], false)
 
 //tables
-SeatInfoMarkupRenderer.registerElement("table",false, function (elementInfo, htmlElement) {
+SeatInfoMarkupRenderer.registerElement("table", false, function (elementInfo, htmlElement) {
     const table = htmlElement("table")
 
     table.class("table")
@@ -129,7 +152,7 @@ SeatInfoMarkupRenderer.registerElement("table",false, function (elementInfo, htm
             elementInfo.renderer.warn(new MarkupWarning(e.node.tokens, `<table> tags don't allow text content in them and text won't be rendered!`))
             return false
         }
-        if (e.type === "element" && !(e.tagName==="thead" || e.tagName==="tbody")) {
+        if (e.type === "element" && !(e.tagName === "thead" || e.tagName === "tbody")) {
             elementInfo.renderer.warn(new MarkupWarning(e.node.tokens, `<table> tags don't allow <${e.tagName}> elements in them and they won't be rendered!`))
             return false
         }
@@ -137,7 +160,8 @@ SeatInfoMarkupRenderer.registerElement("table",false, function (elementInfo, htm
     }))
 
     return {
-        dom: table
+        dom: table,
+        supportedElementProperties: ["stripes","border"]
     }
 })
 
@@ -157,7 +181,8 @@ function tableCellElementBuilder(type, elementInfo, htmlElement) {
     cell.content(elementInfo.content.filter((e) => e.type === "element" && (e.tagName === "thead" || e.tagName === "tbody")))
 
     return {
-        dom: cell
+        dom: cell,
+        supportedElementProperties: ["colspan"]
     }
 }
 
@@ -181,7 +206,7 @@ function imageElementBuilder(elementInfo, htmlElement) {
     if (!url.warning) {
         img.attribute("src", url.url)
     } else {
-        if(elementInfo.properties["src"]){
+        if (elementInfo.properties["src"]) {
             elementInfo.renderer.warn(new MarkupWarning(elementInfo.properties["src"].tokens, `Source url is in an invalid format: ${url.warning}!`))
         } else {
             elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `Image elements need a src property to load the image!`))
@@ -195,20 +220,24 @@ function imageElementBuilder(elementInfo, htmlElement) {
 
     return img
 }
-SeatInfoMarkupRenderer.registerElement("img", true,function (elementInfo, htmlElement) {
+
+SeatInfoMarkupRenderer.registerElement("img", true, function (elementInfo, htmlElement) {
     return {
         dom: htmlElement("p").content(imageElementBuilder(elementInfo, htmlElement)),
-        noContent: true
+        noContent: true,
+        supportedElementProperties: ["src","alt"],
     }
 })
-SeatInfoMarkupRenderer.registerElement("icon",true, function (elementInfo, htmlElement) {
+SeatInfoMarkupRenderer.registerElement("icon", true, function (elementInfo, htmlElement) {
     return {
         dom: htmlElement("span").content(imageElementBuilder(elementInfo, htmlElement)),
-        noContent: true
+        noContent: true,
+        supportedElementProperties: ["src","alt"],
+        disabledCommonProperties: ["text-align"]
     }
 })
 
-function colorElementBuilder (elementInfo, htmlElement) {
+function colorElementBuilder(elementInfo, htmlElement) {
     const color = htmlElement("span").content(elementInfo.content)
 
     if (elementInfo.properties["color"]) {
@@ -219,14 +248,16 @@ function colorElementBuilder (elementInfo, htmlElement) {
     }
 
     return {
-        dom: color
+        dom: color,
+        supportedElementProperties: ["color","colour"]
     }
 }
-SeatInfoMarkupRenderer.registerElement("color",false, colorElementBuilder)
-SeatInfoMarkupRenderer.registerElement("colour",false, colorElementBuilder)
+
+SeatInfoMarkupRenderer.registerElement("color", false, colorElementBuilder)
+SeatInfoMarkupRenderer.registerElement("colour", false, colorElementBuilder)
 
 //audio
-SeatInfoMarkupRenderer.registerElement("audio",true, function (elementInfo, htmlElement) {
+SeatInfoMarkupRenderer.registerElement("audio", true, function (elementInfo, htmlElement) {
 
     const url = elementInfo.renderer.preprocessLink(elementInfo.properties["src"])
 
@@ -267,7 +298,7 @@ SeatInfoMarkupRenderer.registerElement("audio",true, function (elementInfo, html
         const button = htmlElement("button")
             .class("btn", "btn-primary")
             .content(buttonIcon)
-            .event("click",() => {
+            .event("click", () => {
                 if (audio.paused) {
                     audio.play();
                 } else {
@@ -276,7 +307,7 @@ SeatInfoMarkupRenderer.registerElement("audio",true, function (elementInfo, html
             })
 
         const label = htmlElement("span")
-            .style("white-space","nowrap")
+            .style("white-space", "nowrap")
             .class("m-1")
             .content("00:00 / 00:00")
 
@@ -284,8 +315,8 @@ SeatInfoMarkupRenderer.registerElement("audio",true, function (elementInfo, html
             .class("progress-bar")
 
         const progress = htmlElement("div")
-            .class("progress","m-1","w-100")
-            .style("min-width","150px")
+            .class("progress", "m-1", "w-100")
+            .style("min-width", "150px")
             .content(progressBar)
             .event("click", function (e) {
                 let progress = e.offsetX / e.currentTarget.offsetWidth
@@ -319,13 +350,17 @@ SeatInfoMarkupRenderer.registerElement("audio",true, function (elementInfo, html
 
         return {
             dom: htmlElement("div").content(container),
-            noContent: true
+            noContent: true,
+            supportedElementProperties: ["src"],
+            disabledCommonProperties: ["text-align"]
         }
     } else {
         elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<audio /> element doesn't contain a valid source: ${url.warning}.`))
         return {
             dom: htmlElement("div"),
-            noContent: true
+            noContent: true,
+            supportedElementProperties: ["src"],
+            disabledCommonProperties: ["text-align"]
         }
     }
 })
