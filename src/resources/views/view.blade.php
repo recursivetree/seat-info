@@ -40,7 +40,7 @@
                         </div>
                         <div class="card-body">
                             <div class="alert alert-danger" style="display: none;" id="rendering-error">
-                                <p>{{ trans("info::info.view_render_errors_message") }}</p>
+                                <span>{{ trans("info::info.view_render_errors_message") }}</span>
                             </div>
                             <p class="card-text" id="info-content-target"></p>
                         </div>
@@ -63,7 +63,7 @@
         <script>
             window.addEventListener('load', (event) => {
                 render_article({!! json_encode( $article->text) !!}, document.getElementById("info-content-target"), function (e) {
-                    if (e.error) {
+                    if (e.error || e.warnings.length > 0) {
                         console.log(e)
                         document.getElementById("rendering-error").style.display = "block"
                     }

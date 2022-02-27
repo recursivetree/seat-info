@@ -123,7 +123,7 @@ function linkElementBuilder(elementInfo, htmlElement) {
 
     return {
         dom: a,
-        supportedElementProperties: ["href","newtab","download"]
+        supportedElementProperties: ["href", "newtab", "download"]
     }
 }
 
@@ -161,7 +161,7 @@ SeatInfoMarkupRenderer.registerElement("table", false, function (elementInfo, ht
 
     return {
         dom: table,
-        supportedElementProperties: ["stripes","border"]
+        supportedElementProperties: ["stripes", "border"]
     }
 })
 
@@ -225,14 +225,14 @@ SeatInfoMarkupRenderer.registerElement("img", true, function (elementInfo, htmlE
     return {
         dom: htmlElement("p").content(imageElementBuilder(elementInfo, htmlElement)),
         noContent: true,
-        supportedElementProperties: ["src","alt"],
+        supportedElementProperties: ["src", "alt"],
     }
 })
 SeatInfoMarkupRenderer.registerElement("icon", true, function (elementInfo, htmlElement) {
     return {
         dom: htmlElement("span").content(imageElementBuilder(elementInfo, htmlElement)),
         noContent: true,
-        supportedElementProperties: ["src","alt"],
+        supportedElementProperties: ["src", "alt"],
         disabledCommonProperties: ["text-align"]
     }
 })
@@ -249,7 +249,7 @@ function colorElementBuilder(elementInfo, htmlElement) {
 
     return {
         dom: color,
-        supportedElementProperties: ["color","colour"]
+        supportedElementProperties: ["color", "colour"]
     }
 }
 

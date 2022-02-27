@@ -6,20 +6,20 @@ class CharReader {
         this.end_reached = false
     }
 
-    move(offset){
+    move(offset) {
         let lineIndex = this.lineIndex
         let colIndex = this.colIndex
 
-        if(0<offset){
+        if (0 < offset) {
             for (let i = 0; i < offset; i++) {
                 colIndex += 1
-                if (colIndex < this.lines[lineIndex].length){
+                if (colIndex < this.lines[lineIndex].length) {
                     continue
                 }
-                while (true){
+                while (true) {
                     lineIndex += 1
                     if (!(lineIndex < this.lines.length)) return null
-                    if (this.lines[lineIndex].length>0) {
+                    if (this.lines[lineIndex].length > 0) {
                         colIndex = 0
                         break
                     }
@@ -33,15 +33,15 @@ class CharReader {
             offset = -offset
             for (let i = 0; i < offset; i++) {
                 colIndex -= 1
-                if (0 <= colIndex){
+                if (0 <= colIndex) {
                     continue
                 }
-                while (true){
+                while (true) {
                     lineIndex -= 1
-                    if(lineIndex < 0){
+                    if (lineIndex < 0) {
                         return null
                     }
-                    if(this.lines[lineIndex].length > 0){
+                    if (this.lines[lineIndex].length > 0) {
                         colIndex = this.lines[lineIndex].length - 1
                         break
                     }
@@ -55,14 +55,14 @@ class CharReader {
     }
 
     next() {
-        if(this.end_reached){
+        if (this.end_reached) {
             return null
         }
 
         const c = this.lines[this.lineIndex].charAt(this.colIndex)
 
         const newPos = this.move(1)
-        if(newPos) {
+        if (newPos) {
             this.lineIndex = newPos.lineIndex
             this.colIndex = newPos.colIndex
         } else {
@@ -80,21 +80,21 @@ class CharReader {
     }
 
     position(offset = 0) {
-        return this.move(offset-1)
+        return this.move(offset - 1)
     }
 
     range(start, stop) {
-        if(start.lineIndex===stop.lineIndex){
+        if (start.lineIndex === stop.lineIndex) {
             const text = this.lines[start.lineIndex]
-            return text.substring(start.colIndex,stop.colIndex+1)
+            return text.substring(start.colIndex, stop.colIndex + 1)
         } else {
             let text = this.lines[start.lineIndex].substring(start.colIndex)
 
-            for (let i = start.lineIndex+1; i < stop.lineIndex; i++) {
+            for (let i = start.lineIndex + 1; i < stop.lineIndex; i++) {
                 text += this.lines[i]
             }
 
-            text += this.lines[stop.lineIndex].substring(0,stop.colIndex+1)
+            text += this.lines[stop.lineIndex].substring(0, stop.colIndex + 1)
             return text
         }
     }
@@ -119,7 +119,7 @@ class Token {
         this.end = end
     }
 
-    static getRange(tokens){
+    static getRange(tokens) {
         let start = {
             lineIndex: Number.MAX_SAFE_INTEGER,
             colIndex: Number.MAX_SAFE_INTEGER
@@ -130,15 +130,15 @@ class Token {
         }
 
         for (const token of tokens) {
-            if(token.start.lineIndex <= start.lineIndex){
+            if (token.start.lineIndex <= start.lineIndex) {
                 start.lineIndex = token.start.lineIndex
-                if(token.start.colIndex <= start.colIndex){
+                if (token.start.colIndex <= start.colIndex) {
                     start.colIndex = token.start.colIndex
                 }
             }
-            if(token.end.lineIndex >= end.lineIndex){
+            if (token.end.lineIndex >= end.lineIndex) {
                 end.lineIndex = token.end.lineIndex
-                if(token.end.colIndex >= end.colIndex){
+                if (token.end.colIndex >= end.colIndex) {
                     end.colIndex = token.end.colIndex
                 }
             }
@@ -179,12 +179,12 @@ class TokenReader {
         }
     }
 
-    tokenRange(start,end){
-        return this.tokens.slice(start,end)
+    tokenRange(start, end) {
+        return this.tokens.slice(start, end)
     }
 
-    position(offset=0){
-        return this.index+offset
+    position(offset = 0) {
+        return this.index + offset
     }
 }
 
@@ -209,7 +209,7 @@ class Stack {
         return this.stack.length
     }
 
-    get(i){
+    get(i) {
         return this.stack[i]
     }
 }
@@ -227,9 +227,9 @@ class ASTBase {
         this.range = Token.getRange(tokens)
     }
 
-    isIn(start, end){
+    isIn(start, end) {
         const inStart = (this.range.start.lineIndex < start.lineIndex) || (this.range.start.lineIndex === start.lineIndex && this.range.start.colIndex <= start.colIndex)
-        const inEnd = (this.range.end.lineIndex > end.lineIndex) || (this.range.end.lineIndex === end.lineIndex && this.range.end.colIndex+1 >= end.colIndex)
+        const inEnd = (this.range.end.lineIndex > end.lineIndex) || (this.range.end.lineIndex === end.lineIndex && this.range.end.colIndex + 1 >= end.colIndex)
 
         return inStart && inEnd
     }
@@ -242,7 +242,7 @@ class ASTTag extends ASTBase {
         this.content = []
         this.properties = {}
         for (const property of properties) {
-            if(this.properties[property.name]){
+            if (this.properties[property.name]) {
                 //TODO emit warning
             }
             this.properties[property.name] = property
@@ -254,22 +254,22 @@ class ASTTag extends ASTBase {
         this.content.push(node)
     }
 
-    appendTokens(tokens){
+    appendTokens(tokens) {
         this.tokens.push(...tokens)
         this.range = Token.getRange(this.tokens)
     }
 }
 
 class ASTText extends ASTBase {
-    constructor(tokens,parent) {
+    constructor(tokens, parent) {
         super(tokens);
-        this.text = tokens.reduce((string,token)=>string+token.src,"")
+        this.text = tokens.reduce((string, token) => string + token.src, "")
         this.parent = parent
     }
 }
 
-class ASTTagProperty extends ASTBase{
-    constructor(tokens,name,value) {
+class ASTTagProperty extends ASTBase {
+    constructor(tokens, name, value) {
         super(tokens);
         this.name = name
         this.value = value
@@ -292,40 +292,41 @@ const parse = (lines) => {
         " ": Token.TokenType.WHITESPACE,
         "\n": Token.TokenType.WHITESPACE,
         "\t": Token.TokenType.WHITESPACE,
+        "\r": Token.TokenType.WHITESPACE,
     }
 
     let textTokenStart = null
 
     while (true) {
         const c = reader.next()
-        if(c==null){
+        if (c == null) {
             break
         }
 
         let isEscaped = false
 
-        if(c === "\\"){
+        if (c === "\\") {
             const n = reader.next()
-            if(!n){
-                warnings.push(new MarkupWarning([new Token(Token.TokenType.ESCAPE_SEQUENCE,c,reader.position(),reader.position())],
+            if (!n) {
+                warnings.push(new MarkupWarning([new Token(Token.TokenType.ESCAPE_SEQUENCE, c, reader.position(), reader.position())],
                     "Expected another character following the escape character '\\', reading the '\\' as literal. For literal backslashes, please escape it as '\\\\'."))
                 continue
             }
 
-            if(singleCharacterMap[n]){
+            if (singleCharacterMap[n]) {
                 const type = singleCharacterMap[n]
-                if(type === Token.TokenType.WHITESPACE){
-                    warnings.push(new MarkupWarning([new Token(Token.TokenType.ESCAPE_SEQUENCE,c+n,reader.position(-1),reader.position())],
+                if (type === Token.TokenType.WHITESPACE) {
+                    warnings.push(new MarkupWarning([new Token(Token.TokenType.ESCAPE_SEQUENCE, c + n, reader.position(-1), reader.position())],
                         "Whitespace shouldn't be escaped, reading the '\\' as literal. For literal backslashes, please escape it as '\\\\'."
                     ))
                     reader.back() // go back so the following character after the \ is handled normally
                 } else {
                     isEscaped = true
                 }
-            } else if(n==="\\") {
+            } else if (n === "\\") {
                 isEscaped = true // escaping a \. \ is not in singleCharacterMap, but still escapable
             } else {
-                warnings.push(new MarkupWarning([new Token(Token.TokenType.ESCAPE_SEQUENCE,c+n,reader.position(-1),reader.position())],
+                warnings.push(new MarkupWarning([new Token(Token.TokenType.ESCAPE_SEQUENCE, c + n, reader.position(-1), reader.position())],
                     `You don't need to escape the character '${n}', reading the '\\' as literal. For literal backslashes, please escape it as '\\\\'.`
                 ))
                 reader.back() // go back so the following character after the \ is handled normally
@@ -336,11 +337,11 @@ const parse = (lines) => {
             if (textTokenStart !== null) {
                 const end = reader.position(-1)
                 const content = reader.range(textTokenStart, end)
-                tokens.push(new Token(Token.TokenType.TEXT, content,textTokenStart,end))
+                tokens.push(new Token(Token.TokenType.TEXT, content, textTokenStart, end))
                 textTokenStart = null
             }
 
-            tokens.push(new Token(singleCharacterMap[c], c,reader.position(),reader.position()))
+            tokens.push(new Token(singleCharacterMap[c], c, reader.position(), reader.position()))
         } else if (textTokenStart === null) {
             textTokenStart = reader.position()
         }
@@ -348,13 +349,13 @@ const parse = (lines) => {
 
     if (textTokenStart !== null) {
         const content = reader.range(textTokenStart, reader.position())
-        tokens.push(new Token(Token.TokenType.TEXT, content,textTokenStart,reader.position()))
+        tokens.push(new Token(Token.TokenType.TEXT, content, textTokenStart, reader.position()))
     }
 
     let textNodeTokens = []
     const tokenReader = new TokenReader(tokens)
 
-    const elementStack = new Stack([new ASTTag(tokens, null, [],null)])
+    const elementStack = new Stack([new ASTTag(tokens, null, [], null)])
 
     let token
 
@@ -372,9 +373,9 @@ const parse = (lines) => {
             if (textNodeTokens.length > 0) {
 
                 //check if text is only whitespace
-                if (textNodeTokens.reduce((previousValue, currentValue) => previousValue || currentValue.type !== Token.TokenType.WHITESPACE ,false)) {
+                if (textNodeTokens.reduce((previousValue, currentValue) => previousValue || currentValue.type !== Token.TokenType.WHITESPACE, false)) {
                     //it isn't only whitespace, so generate a text node
-                    const astText = new ASTText(textNodeTokens,elementStack.peek())
+                    const astText = new ASTText(textNodeTokens, elementStack.peek())
                     elementStack.peek().appendNode(astText)
                     textNodeTokens = []
                 }
@@ -383,7 +384,7 @@ const parse = (lines) => {
             tokenReader.skipWhiteSpace()
             if (!tokenReader.hasNext()) {
                 warnings.push(new MarkupWarning([token], "Expected the tag name or a closing slash after an opening tag!"))
-                continue mainParserLoop
+                continue;
             }
 
             token = tokenReader.next()
@@ -401,27 +402,27 @@ const parse = (lines) => {
                     tokenReader.skipWhiteSpace()
 
                     if (!tokenReader.hasNext()) {
-                        warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected a property name, self-closing slash or '>' after the tag name!"))
+                        warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex, tokenReader.position()), "Expected a property name, self-closing slash or '>' after the tag name!"))
                         continue mainParserLoop
                     }
                     token = tokenReader.next()
 
                     if (token.type === Token.TokenType.CLOSE_TAG) {
                         break // tag ends
-                    } else if(token.type === Token.TokenType.SLASH){
+                    } else if (token.type === Token.TokenType.SLASH) {
                         //self closing tag
                         selfClosingTag = true
 
                         tokenReader.skipWhiteSpace()
 
                         if (!tokenReader.hasNext()) {
-                            warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected a '>' after a closing slash!"))
+                            warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex, tokenReader.position()), "Expected a '>' after a closing slash!"))
                             break
                         }
                         token = tokenReader.next()
 
-                        if(token.type !== Token.TokenType.CLOSE_TAG){
-                            warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected a '>' after the closing slash of a self-closing element!"))
+                        if (token.type !== Token.TokenType.CLOSE_TAG) {
+                            warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex, tokenReader.position()), "Expected a '>' after the closing slash of a self-closing element!"))
                             tokenReader.back()
                         }
 
@@ -434,7 +435,7 @@ const parse = (lines) => {
                         tokenReader.skipWhiteSpace()
 
                         if (!tokenReader.hasNext()) {
-                            warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected the next property name, a closing '>' or the equals sign if the property has a value!"))
+                            warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex, tokenReader.position()), "Expected the next property name, a closing '>' or the equals sign if the property has a value!"))
                             continue mainParserLoop
                         }
                         token = tokenReader.next()
@@ -444,30 +445,30 @@ const parse = (lines) => {
                             tokenReader.back()
 
                             //token range is non-inclusive
-                            const property = new ASTTagProperty(tokenReader.tokenRange(propertyStart,propertyStart+1),propertyName,true)
+                            const property = new ASTTagProperty(tokenReader.tokenRange(propertyStart, propertyStart + 1), propertyName, true)
                             properties.push(property)
 
-                            continue propertyLoop
+
                         } else if (token.type === Token.TokenType.EQUALS) {
                             tokenReader.skipWhiteSpace()
 
                             //search opening quote
                             if (!tokenReader.hasNext()) {
-                                warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected a \" or ' to define a property with value!"))
+                                warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex, tokenReader.position()), "Expected a \" or ' to define a property with value!"))
                                 continue mainParserLoop
                             }
 
                             token = tokenReader.next()
 
                             if (token.type !== Token.TokenType.QUOTES) {
-                                warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected a \" or ' to define a property with value!"))
+                                warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex, tokenReader.position()), "Expected a \" or ' to define a property with value!"))
                                 continue mainParserLoop
                             }
 
                             let argString = ""
                             while (true) {
                                 if (!tokenReader.hasNext()) {
-                                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Property value is not terminated with \" or '!"))
+                                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex, tokenReader.position()), "Property value is not terminated with \" or '!"))
                                     continue mainParserLoop
                                 }
                                 token = tokenReader.next()
@@ -479,13 +480,13 @@ const parse = (lines) => {
                                 argString += token.src
                             }
 
-                            const property = new ASTTagProperty(tokenReader.tokenRange(propertyStart,tokenReader.position()),propertyName,argString)
+                            const property = new ASTTagProperty(tokenReader.tokenRange(propertyStart, tokenReader.position()), propertyName, argString)
                             properties.push(property)
 
-                            continue propertyLoop
+
                         } else {
                             warnings.push(new MarkupWarning([token], "Expected the next property name, a closing '>' or the equals sign if the property has a value!"))
-                            continue propertyLoop
+
                         }
 
                     } else {
@@ -496,11 +497,11 @@ const parse = (lines) => {
 
                 const stackTop = elementStack.peek()
 
-                const tag = new ASTTag(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), tagName, properties, stackTop)
+                const tag = new ASTTag(tokenReader.tokenRange(tagStartTokenIndex, tokenReader.position()), tagName, properties, stackTop)
 
                 stackTop.appendNode(tag)
 
-                if(!selfClosingTag) {
+                if (!selfClosingTag) {
                     elementStack.push(tag)
                 }
 
@@ -512,13 +513,13 @@ const parse = (lines) => {
 
                 //check for tag name
                 if (!tokenReader.hasNext()) {
-                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected the tag name after the slash of a closing tag!"))
-                    continue mainParserLoop
+                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex, tokenReader.position()), "Expected the tag name after the slash of a closing tag!"))
+                    continue;
                 }
                 token = tokenReader.next()
                 if (token.type !== Token.TokenType.TEXT) {
-                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Tag names should only consist out of alphabetic characters!"))
-                    continue mainParserLoop
+                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex, tokenReader.position()), "Tag names should only consist out of alphabetic characters!"))
+                    continue;
                 }
                 let tagName = token.src
 
@@ -526,41 +527,41 @@ const parse = (lines) => {
 
                 //check for closing >
                 if (!tokenReader.hasNext()) {
-                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected a '>' to end the tag!"))
-                    continue mainParserLoop
+                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex, tokenReader.position()), "Expected a '>' to end the tag!"))
+                    continue;
                 }
                 token = tokenReader.next()
                 if (token.type !== Token.TokenType.CLOSE_TAG) {
-                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected a '>' to end the tag!"))
-                    continue mainParserLoop
+                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex, tokenReader.position()), "Expected a '>' to end the tag!"))
+                    continue;
                 }
 
                 let stackTop = elementStack.peek()
-                if (stackTop.tagName !== tagName){
-                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Closing tag doesn't match last opened tag!"))
+                if (stackTop.tagName !== tagName) {
+                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex, tokenReader.position()), "Closing tag doesn't match last opened tag!"))
                 } else {
                     //actually close the tag
-                    const tokens = tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position())
+                    const tokens = tokenReader.tokenRange(tagStartTokenIndex, tokenReader.position())
 
                     const element = elementStack.pop()
                     element.appendTokens(tokens)
                 }
 
             } else {
-                warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex,tokenReader.position()), "Expected a tag name or slash after an opening '<'!"))
-                continue mainParserLoop
+                warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex, tokenReader.position()), "Expected a tag name or slash after an opening '<'!"))
+
             }
         }
     }
 
     //finish previous text nodes
     if (textNodeTokens.length > 0) {
-        const astText = new ASTText(textNodeTokens,elementStack.peek())
+        const astText = new ASTText(textNodeTokens, elementStack.peek())
         elementStack.peek().appendNode(astText)
     }
 
-    if(elementStack.size()>1){
-        warnings.push(new MarkupWarning([token], `Unclosed tags at the end! You might be able to fix this by adding '${elementStack.stack.slice(1).reduceRight((p,t)=>p+`</${t.tagName}>`,"")}'`))
+    if (elementStack.size() > 1) {
+        warnings.push(new MarkupWarning([token], `Unclosed tags at the end! You might be able to fix this by adding '${elementStack.stack.slice(1).reduceRight((p, t) => p + `</${t.tagName}>`, "")}'`))
     }
 
 
@@ -569,8 +570,3 @@ const parse = (lines) => {
         rootNode: elementStack.get(0)
     }
 }
-
-// console.time('doSomething')
-// const r = parse([""," <a>"])
-// console.timeEnd('doSomething')
-// console.log(r)
