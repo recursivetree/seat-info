@@ -77,6 +77,10 @@ class CharReader {
         const newPos = this.move(-1)
         this.lineIndex = newPos.lineIndex
         this.colIndex = newPos.colIndex
+
+        if(this.end_reached){
+            this.end_reached = false
+        }
     }
 
     position(offset = 0) {
@@ -303,37 +307,50 @@ const parse = (lines) => {
             break
         }
 
-        let isEscaped = false
+        let escape = false
 
         if (c === "\\") {
             const n = reader.next()
             if (!n) {
                 warnings.push(new MarkupWarning([new Token(Token.TokenType.ESCAPE_SEQUENCE, c, reader.position(), reader.position())],
                     "Expected another character following the escape character '\\', reading the '\\' as literal. For literal backslashes, please escape it as '\\\\'."))
-                continue
-            }
+            } else {
 
-            if (singleCharacterMap[n]) {
-                const type = singleCharacterMap[n]
-                if (type === Token.TokenType.WHITESPACE) {
+                if (singleCharacterMap[n]) {
+                    const type = singleCharacterMap[n]
+                    if (type === Token.TokenType.WHITESPACE) {
+                        warnings.push(new MarkupWarning([new Token(Token.TokenType.ESCAPE_SEQUENCE, c + n, reader.position(-1), reader.position())],
+                            "Whitespace shouldn't be escaped, reading the '\\' as literal. For literal backslashes, please escape it as '\\\\'."
+                        ))
+                        reader.back() // go back so the following character after the \ is handled normally
+                    } else {
+                        //valid escape
+                        escape = true
+                    }
+                } else if (n === "\\") {
+                    escape = true // escaping a \. \ is not in singleCharacterMap, but still escapable
+                } else {
                     warnings.push(new MarkupWarning([new Token(Token.TokenType.ESCAPE_SEQUENCE, c + n, reader.position(-1), reader.position())],
-                        "Whitespace shouldn't be escaped, reading the '\\' as literal. For literal backslashes, please escape it as '\\\\'."
+                        `You don't need to escape the character '${n}', reading the '\\' as literal. For literal backslashes, please escape it as '\\\\'.`
                     ))
                     reader.back() // go back so the following character after the \ is handled normally
-                } else {
-                    isEscaped = true
                 }
-            } else if (n === "\\") {
-                isEscaped = true // escaping a \. \ is not in singleCharacterMap, but still escapable
-            } else {
-                warnings.push(new MarkupWarning([new Token(Token.TokenType.ESCAPE_SEQUENCE, c + n, reader.position(-1), reader.position())],
-                    `You don't need to escape the character '${n}', reading the '\\' as literal. For literal backslashes, please escape it as '\\\\'.`
-                ))
-                reader.back() // go back so the following character after the \ is handled normally
+
             }
         }
 
-        if (!isEscaped && singleCharacterMap[c]) {
+        if(escape){
+            //finish text node
+            if (textTokenStart !== null) {
+                const end = reader.position(-2)
+                const content = reader.range(textTokenStart, end)
+                tokens.push(new Token(Token.TokenType.TEXT, content, textTokenStart, end))
+            }
+            textTokenStart = reader.position()
+            continue
+        }
+
+        if (singleCharacterMap[c]) {
             if (textTokenStart !== null) {
                 const end = reader.position(-1)
                 const content = reader.range(textTokenStart, end)
