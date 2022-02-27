@@ -310,6 +310,11 @@
 
                 const range = new ace.Range(element.range.start.lineIndex,element.range.start.colIndex,element.range.end.lineIndex,element.range.end.colIndex+1)
                 this.editor.session.replace(range,text)
+
+                this.selectArea(element.range.start,{
+                    lineIndex: element.range.start.lineIndex,
+                    colIndex: element.range.start.colIndex + text.length - 1
+                })
             }
 
             updateSelection(tagType,selectionStart, selectionEnd, replace, position_after_center_section=false) {
@@ -321,7 +326,6 @@
                         return
                     }
                 }
-
 
                 const text = (selectionStart || "") + (replace || this.editor.getSelectedText()) + (selectionEnd || "")
                 this.editor.session.replace(this.editor.getSelectionRange(), text)
