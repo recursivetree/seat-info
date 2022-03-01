@@ -1,27 +1,34 @@
-SeatInfoMarkupRenderer.registerLinkPreProcessor("seatinfo", (link) => {
+SeatInfoMarkupRenderer.registerLinkPreProcessor("seatinfo", (link, emitWarning) => {
     const articleLink = /^article\/(?<article_id>\d+)(?:#(?<hash>.*))?$/gm.exec(link)
     if (articleLink) {
         if (articleLink.groups.hash) {
-            return {
-                url: `/info/article/view/${articleLink.groups.article_id}#${articleLink.groups.hash}`
-            }
+            return ReturnStatus.new().ok(`/info/article/view/${articleLink.groups.article_id}#${articleLink.groups.hash}`)
         } else {
-            return {
-                url: `/info/article/view/${articleLink.groups.article_id}`
-            }
+            return ReturnStatus.new().ok(`/info/article/view/${articleLink.groups.article_id}`)
         }
     }
 
     const resourceLink = /^resource\/(?<resource_id>\d+$)/gm.exec(link)
     if (resourceLink) {
-        return {
-            url: `/info/resource/${resourceLink.groups.resource_id}`
-        }
+        return ReturnStatus.new().ok(`/info/resource/${resourceLink.groups.resource_id}`)
     }
 
-    return {
-        warning: "Unknown url schema!"
+    //at this point, we don't know what it is
+    return ReturnStatus.new().warning("Unknown url schema!")
+})
+
+SeatInfoMarkupRenderer.registerLinkPreProcessor("url", (link) => {
+    try {
+        new URL(link)
+    } catch (e) {
+        return ReturnStatus.new.warning("Invalid URL format!")
     }
+    return ReturnStatus.new().ok(link)
+})
+
+SeatInfoMarkupRenderer.registerLinkPreProcessor("relative", (link) => {
+    //TODO validate relative link
+    return ReturnStatus.new().ok(link)
 })
 
 SeatInfoMarkupRenderer.registerCommonProperty("id", (value, elementData) => {
@@ -103,13 +110,19 @@ function linkElementBuilder(elementInfo, htmlElement) {
     const a = htmlElement("a").content(elementInfo.content)
 
     const url = elementInfo.renderer.preprocessLink(elementInfo.properties["href"])
-    if (!url.warning) {
-        a.attribute("href", url.url)
+        .getValue((msg) => {
+            if (elementInfo.properties["src"]) {
+                elementInfo.renderer.warn(new MarkupWarning(elementInfo.properties["src"].tokens, msg))
+            } else {
+                elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, msg))
+            }
+        })
+
+    if (url) {
+        a.attribute("href", url)
     } else {
-        if (elementInfo.properties["href"]) {
-            elementInfo.renderer.warn(new MarkupWarning(elementInfo.properties["href"].tokens, `Href url is in an invalid format: ${url.warning}!`))
-        } else {
-            elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<a> elements need a src property to load the image!`))
+        if (!elementInfo.properties["href"]) {
+            elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<a> elements need a src property to link to another page!`))
         }
     }
 
@@ -203,14 +216,18 @@ function imageElementBuilder(elementInfo, htmlElement) {
     //TODO img error handling
 
     const url = elementInfo.renderer.preprocessLink(elementInfo.properties["src"])
-    if (!url.warning) {
-        img.attribute("src", url.url)
+        .getValue((msg) => {
+            if (elementInfo.properties["src"]) {
+                elementInfo.renderer.warn(new MarkupWarning(elementInfo.properties["src"].tokens, msg))
+            } else {
+                elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, msg))
+            }
+        })
+
+    if (url) {
+        img.attribute("src", url)
     } else {
-        if (elementInfo.properties["src"]) {
-            elementInfo.renderer.warn(new MarkupWarning(elementInfo.properties["src"].tokens, `Source url is in an invalid format: ${url.warning}!`))
-        } else {
-            elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `Image elements need a src property to load the image!`))
-        }
+        //TODO img has no url
     }
 
     if (elementInfo.properties["alt"]) {
@@ -260,8 +277,15 @@ SeatInfoMarkupRenderer.registerElement("colour", false, colorElementBuilder)
 SeatInfoMarkupRenderer.registerElement("audio", true, function (elementInfo, htmlElement) {
 
     const url = elementInfo.renderer.preprocessLink(elementInfo.properties["src"])
+        .getValue((msg) => {
+            if (elementInfo.properties["src"]) {
+                elementInfo.renderer.warn(new MarkupWarning(elementInfo.properties["src"].tokens, msg))
+            } else {
+                elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, msg))
+            }
+        })
 
-    if (!url.warning) {
+    if (url) {
         const formatSeconds = (duration) => {
             const seconds = duration % 60
             const minutes = Math.floor(duration / 60) % 60
@@ -283,7 +307,7 @@ SeatInfoMarkupRenderer.registerElement("audio", true, function (elementInfo, htm
             return `${formatSeconds(position)} / ${formatSeconds(length)}`
         }
 
-        const audio = new Audio(url.url)
+        const audio = new Audio(url)
 
         const container = htmlElement("div")
             .class("d-flex")
@@ -355,7 +379,7 @@ SeatInfoMarkupRenderer.registerElement("audio", true, function (elementInfo, htm
             disabledCommonProperties: ["text-align"]
         }
     } else {
-        elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<audio /> element doesn't contain a valid source: ${url.warning}.`))
+        elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<audio /> element doesn't contain a valid audio source.`))
         return {
             dom: htmlElement("div"),
             noContent: true,

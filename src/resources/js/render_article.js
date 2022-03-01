@@ -1,3 +1,31 @@
+class ReturnStatus {
+    static new(){
+        return new ReturnStatus()
+    }
+
+    ok(data){
+        this.data = data
+        return this
+    }
+
+    warning(message){
+        this.warningMsgs.push(message)
+        return this
+    }
+
+    constructor() {
+        this.data = null
+        this.warningMsgs = []
+    }
+
+    getValue(warningHandler){
+        for (const warningMsg of this.warningMsgs) {
+            warningHandler(warningMsg)
+        }
+        return this.data
+    }
+}
+
 class SeatInfoDomElementBuilder {
     static create(name) {
         return new SeatInfoDomElementBuilder(document.createElement(name))
@@ -98,32 +126,30 @@ class SeatInfoMarkupRenderer {
 
     preprocessLink(link) {
         if (!link) {
-            return {
-                warning: "No url specified!"
-            }
+            return ReturnStatus.new().warning("No url specified!")
         }
 
         if (link instanceof ASTTagProperty) {
             link = link.value
         }
 
-        const data = /^(?<resource>.+):(?<data>.*)$/gm.exec(link)
+        const data = /^(?<resource>.+?):(?<data>.*)$/gm.exec(link)
 
         if (data) {
             const scope = data.groups.resource
             const handler = SeatInfoMarkupRenderer.LINK_PREPROCESSORS_REGISTRY[scope]
 
             if (!handler) {
-                return {
-                    url: data.groups.data
-                }
+                return ReturnStatus.new()
+                    .warning("Could not find a matching URL transformer. If you want to use a relative url, use 'relative:your/url/path', for absolute urls use 'url:https://example.com' or read the documentation to see all url transformers.")
+                    .ok(link)
             }
 
             return handler(data.groups.data)
         } else {
-            return {
-                url: link
-            }
+            return ReturnStatus.new()
+                .ok(data)
+                .warning("Could not find a matching URL transformer. If you want to use a relative url, use 'relative:your/url/path', for absolute urls use 'url:https://example.com' or read the documentation to see all url transformers.")
         }
     }
 
