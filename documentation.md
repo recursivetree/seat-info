@@ -2,15 +2,56 @@
 The syntax of the editor is quite similar to html, but it's not exactly the same. It only supports a small subset of 
 html listed in this documentation.
 
+##Differences
+ * No kind of header structure required, it's like if you write directly to the body
+ * Elements without content have to be closed with a /, like in xhtml: `<img src="..." />`
+ * Not all elements are available and some work different
+ * URLs in all elements work a bit different, see the section on URL preprocessors.
+ * Escaping characters is done by using a `\ `, e.g. `\<` for a `<` character. I think they are buggy atm tho.
+
 ## Attributes supported on all elements
-* You can give every element an `ìd` property.
+* You can give every element an `id` property.
 * Use `text-align="left"`, `text-align="center"` or `text-align="right"` to make the text left-bounded, right-bounded or
 centered.
 
-## Links
-`<a href="http://example.com">Click me</a>`
+## URL preprocessors
+To allow easier integration of links to custom targets, seat-info uses a preprocessor for all url. The general schema 
+for this preprocessor is `schema:data`. There are different schemas for different uses.
 
-`<a href="http://example.com" newtab>Click me</a>` Opens it in a new tab
+For compatibility reason, when the preprocessor can't find a schema, the unprocessed url is returned. This means you 
+don't need to change anything after updating, but it will throw a warning.
+
+### Absolute urls
+```
+url:http://example.com
+```
+
+### Relative urls
+```
+relative:path/to/wherever
+```
+
+### Other seatinfo articles
+```
+seatinfo:article/{id}
+seatinfo:article/9
+```
+
+### Seatinfo resources
+```
+seatinfo:resource/{id}
+seatinfo:resource/9
+```
+### Elements within the same page using an ID
+```
+id:myIdName
+```
+Also take a look at the section about links
+
+## Links
+`<a href="url:http://example.com">Click me</a>`
+
+`<a href="url:http://example.com" newtab>Click me</a>` Opens it in a new tab
 
 `<a href="seatinfo:article/id">Click me</a>` Opens the article with id. You can find the whole url in the managment tab.
 
@@ -19,8 +60,8 @@ centered.
 
 ## Links within the page
 You can create links within the article to for example have a table of contents full of links that jump you to the right 
-section. To create such a link, add this to jump destination: `<pagelink id="your_id">`. To actually create the link to 
-the target, use a normal link like this: `<a href="#your_id">jump down</a>`.
+section. To create such a link, add this to jump destination: `<element id="your_id">content</element>`. To actually 
+create the link to the target, use a normal link like this: `<a href="#your_id">jump down</a>`.
 
 You aren't restricted to the `pagelink` element anymore, `id` should work on any element. As of right now, it only 
 remains as a compatibility element and will be removed in future versions.

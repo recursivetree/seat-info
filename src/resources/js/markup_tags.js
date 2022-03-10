@@ -31,6 +31,11 @@ SeatInfoMarkupRenderer.registerLinkPreProcessor("relative", (link) => {
     return ReturnStatus.new().ok(link)
 })
 
+SeatInfoMarkupRenderer.registerLinkPreProcessor("id", (link) => {
+    //TODO validate relative link
+    return ReturnStatus.new().ok(`#${link}`)
+})
+
 SeatInfoMarkupRenderer.registerCommonProperty("id", (value, elementData) => {
     elementData.htmlBuilder.attribute("id", value.value)
 })
@@ -141,7 +146,7 @@ function linkElementBuilder(elementInfo, htmlElement) {
 }
 
 SeatInfoMarkupRenderer.registerElement("a", false, linkElementBuilder)
-SeatInfoMarkupElementHelper.simpleElement("pagelink","span") // deprecated legacy element
+SeatInfoMarkupElementHelper.simpleSelfClosingElement("pagelink","span") // deprecated legacy element
 
 //lists
 SeatInfoMarkupElementHelper.simpleElement("li", "li")
