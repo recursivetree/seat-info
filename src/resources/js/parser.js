@@ -553,15 +553,25 @@ const parse = (lines) => {
                     continue;
                 }
 
-                let stackTop = elementStack.peek()
-                if (stackTop.tagName !== tagName) {
-                    warnings.push(new MarkupWarning(tokenReader.tokenRange(tagStartTokenIndex, tokenReader.position()), "Closing tag doesn't match last opened tag!"))
-                } else {
-                    //actually close the tag
-                    const tokens = tokenReader.tokenRange(tagStartTokenIndex, tokenReader.position())
+                //actually close the tag
+                const closingTagToken = tokenReader.tokenRange(tagStartTokenIndex, tokenReader.position())
 
-                    const element = elementStack.pop()
-                    element.appendTokens(tokens)
+                if(elementStack.size() === 1){
+                    warnings.push(new MarkupWarning(closingTagToken, "Cannot close tags at root level!"))
+                } else {
+                    let stackTop
+                    do {
+                        stackTop = elementStack.peek()
+
+                        if (stackTop.tagName !== tagName) {
+                            warnings.push(new MarkupWarning(closingTagToken, "Closing tag doesn't match last opened tag!"))
+                        }
+
+                        const element = elementStack.pop()
+
+                        //TODO what if it is the wrong tag? still add it?
+                        element.appendTokens(closingTagToken)
+                    } while (stackTop.tagName !== tagName && elementStack.size() > 1)
                 }
 
             } else {

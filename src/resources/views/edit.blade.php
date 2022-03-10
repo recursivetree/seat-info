@@ -53,7 +53,7 @@
 
                             <div class="d-flex w-100 form-group flex-column align-items-start">
                                 <div>
-                                    <label for="text">{{ trans('info::info.article_content') }}</label>
+                                    <label for="text" id="editorVisibilityScrollTarget">{{ trans('info::info.article_content') }}</label>
                                 </div>
 
                                 <div class="btn-group mb-1 btn-group-sm">
@@ -168,6 +168,7 @@
             }
 
             selectArea(start, end) {
+                document.getElementById("editorVisibilityScrollTarget").scrollIntoView()
                 this.editor.selection.setRange(new ace.Range(start.lineIndex, start.colIndex, end.lineIndex, end.colIndex+1), true)
                 this.editor.scrollToLine(start.lineIndex)
                 this.editor.focus()

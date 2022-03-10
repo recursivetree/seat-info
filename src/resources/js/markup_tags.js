@@ -141,7 +141,7 @@ function linkElementBuilder(elementInfo, htmlElement) {
 }
 
 SeatInfoMarkupRenderer.registerElement("a", false, linkElementBuilder)
-SeatInfoMarkupRenderer.registerElement("pagelink", false, linkElementBuilder) // deprecated legacy function
+SeatInfoMarkupElementHelper.simpleElement("pagelink","span") // deprecated legacy element
 
 //lists
 SeatInfoMarkupElementHelper.simpleElement("li", "li")
