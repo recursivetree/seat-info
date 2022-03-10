@@ -141,7 +141,7 @@ class SeatInfoMarkupRenderer {
 
             if (!handler) {
                 return ReturnStatus.new()
-                    .warning("Could not find a matching URL transformer. If you want to use a relative url, use 'relative:your/url/path', for absolute urls use 'url:https://example.com' or read the documentation to see all url transformers.")
+                    .warning("Could not find a matching URL transformer. If you want to use a relative url, use 'relative:your/url/path', for absolute urls use 'url:https://example.com' or read the documentation to see all url transformers. If this warning appears after an update, please read the documentation regarding URL transformers.")
                     .ok(link)
             }
 
@@ -149,7 +149,7 @@ class SeatInfoMarkupRenderer {
         } else {
             return ReturnStatus.new()
                 .ok(data)
-                .warning("Could not find a matching URL transformer. If you want to use a relative url, use 'relative:your/url/path', for absolute urls use 'url:https://example.com' or read the documentation to see all url transformers.")
+                .warning("Could not find a matching URL transformer. If you want to use a relative url, use 'relative:your/url/path', for absolute urls use 'url:https://example.com' or read the documentation to see all url transformers. If this warning appears after an update, please read the documentation regarding URL transformers.")
         }
     }
 

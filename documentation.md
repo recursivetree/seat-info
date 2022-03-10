@@ -6,7 +6,7 @@ html listed in this documentation.
  * No kind of header structure required, it's like if you write directly to the body
  * Elements without content have to be closed with a /, like in xhtml: `<img src="..." />`
  * Not all elements are available and some work different
- * URLs in all elements work a bit different, see the section on URL preprocessors.
+ * URLs in all elements work a bit different, see the section on URL transformerss.
  * Escaping characters is done by using a `\ `, e.g. `\<` for a `<` character. I think they are buggy atm tho.
 
 ## Attributes supported on all elements
@@ -14,11 +14,11 @@ html listed in this documentation.
 * Use `text-align="left"`, `text-align="center"` or `text-align="right"` to make the text left-bounded, right-bounded or
 centered.
 
-## URL preprocessors
-To allow easier integration of links to custom targets, seat-info uses a preprocessor for all url. The general schema 
-for this preprocessor is `schema:data`. There are different schemas for different uses.
+## URL Transformers
+To allow easier integration of links to custom targets, seat-info uses a transformer for all urls. The general schema 
+for the url transformers is `schema:data`. There are different schemas for different uses.
 
-For compatibility reason, when the preprocessor can't find a schema, the unprocessed url is returned. This means you 
+For compatibility reason, when the transformer can't find a schema, the unprocessed url is returned. This means you 
 don't need to change anything after updating, but it will throw a warning.
 
 ### Absolute urls
