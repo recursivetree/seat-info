@@ -30,7 +30,7 @@
                     <div class="card-header">
                         Articles
                         <div class="btn-group float-right" role="group">
-                            @if($can_edit)
+                            @if(auth()->user()->can("info.create_article"))
                                 <a href="{{ route("info.create") }}" class="float-right btn btn-secondary">{{ trans("info::info.list_article_new") }}</a>
                                 <a href="{{ route("info.manage") }}" class="float-right btn btn-secondary">{{ trans("info::info.list_article_manage") }}</a>
                             @endif
@@ -41,7 +41,7 @@
 
                         <div class="list-group">
                             @foreach ($articles as $article)
-                                @if($article->public || $can_edit)
+                                @if(($article->public && Illuminate\Support\Facades\Gate::allows("info.article.view",$article->id)) || Illuminate\Support\Facades\Gate::allows("info.article.edit",$article->id))
                                     <div class="list-group-item list-group-item-action">
                                         <a href="{{ route("info.view", $article->id) }}">{{ $article->name }}</a>
                                         @if(!$article->public)

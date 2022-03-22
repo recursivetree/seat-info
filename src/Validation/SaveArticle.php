@@ -18,7 +18,7 @@ class SaveArticle extends FormRequest
             'name' => 'required|string',
             'text' => 'required|string',
             'id' => '',
-            'public' => ''
+            'public' => '',
         ];
     }
 }

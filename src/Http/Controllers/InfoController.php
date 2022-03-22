@@ -2,16 +2,18 @@
 
 namespace RecursiveTree\Seat\InfoPlugin\Http\Controllers;
 
+use RecursiveTree\Seat\InfoPlugin\Acl\RoleHelper;
 use RecursiveTree\Seat\InfoPlugin\Model\Article;
 use RecursiveTree\Seat\InfoPlugin\Model\Resource;
 use RecursiveTree\Seat\InfoPlugin\Validation\ConfirmModalRequest;
-use RecursiveTree\Seat\InfoPlugin\Validation\GenericRequestWithID;
 use RecursiveTree\Seat\InfoPlugin\Validation\SaveArticle;
 use RecursiveTree\Seat\InfoPlugin\Validation\UploadResource;
 use Seat\Web\Http\Controllers\Controller;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Gate;
+use Seat\Web\Models\User;
 
 
 class InfoController extends Controller
@@ -19,9 +21,8 @@ class InfoController extends Controller
     public function getHomeView(Request $request){
 
         $article = Article::where("home_entry",true)->first();
-        $can_edit = auth()->user()->can("info.edit_article");
 
-        if ($article===null){
+        if ($article==null){
             $request->session()->flash('message', [
                 'message' => trans("info::info.home_no_article"),
                 'type' => 'warning'
@@ -29,7 +30,10 @@ class InfoController extends Controller
             return redirect()->route('info.list');
         }
 
-        if(!$article->public && !$can_edit){
+        $can_view = Gate::allows("info.article.view", $article->id);
+        $can_edit = Gate::allows("info.article.edit", $article->id);
+
+        if((!$article->public && !$can_edit) || !$can_view){
             $request->session()->flash('message', [
                 'message' => trans("info::info.home_insufficient_permissions"),
                 'type' => 'warning'
@@ -157,20 +161,32 @@ class InfoController extends Controller
 
     public function getCreateView(){
         $article = new Article();
+        $article->view_role = RoleHelper::getDefaultViewRole();
+        $article->edit_role = RoleHelper::getDefaultEditRole();
         return view("info::edit", compact('article'));
     }
 
-    public function getSaveInterface(SaveArticle $request){
+    public function getSaveInterface(User $user,SaveArticle $request){
         $article = Article::find($request->id);
+
+        if($request->id){
+            Gate::authorize("info.article.edit", $request->id);
+        } else {
+            Gate::authorize("info.manage_article");
+        }
 
         if ($article===null){
             $article = new Article();
         }
 
+        $view_role_id = RoleHelper::checkForExistenceOrDefault($request->view_role, RoleHelper::getDefaultViewRole());
+        $edit_role_id = RoleHelper::checkForExistenceOrDefault($request->edit_role, RoleHelper::getDefaultEditRole());
 
         $article->name = $request->name;
         $article->text = $request->text;
         $article->public = isset($request->public);
+        $article->view_role = $view_role_id;
+        $article->edit_role = $edit_role_id;
 
         $article->save();
 
@@ -178,7 +194,7 @@ class InfoController extends Controller
             'message' => trans("info::info.manage_save_article_success"),
             'type' => 'success'
         ]);
-        return redirect()->route('info.manage');
+        return redirect()->route('info.view',["id"=>$article->id]);
     }
 
     public function getEditView(Request $request,$id){
@@ -198,8 +214,7 @@ class InfoController extends Controller
     public function getListView(){
 
         $articles = Article::all();
-        $can_edit = auth()->user()->can("info.edit_article");
-        return view("info::list", compact('articles','can_edit'));
+        return view("info::list", compact('articles'));
     }
 
     public function getManageView(){
@@ -212,7 +227,7 @@ class InfoController extends Controller
 
     public function getArticleView(Request $request,$id){
         $article = Article::find($id);
-        $can_edit = auth()->user()->can("info.edit_article");
+        $can_edit = Gate::allows("info.article.edit", $article->id);
 
         if ($article===null){
             $request->session()->flash('message', [
@@ -298,6 +313,7 @@ class InfoController extends Controller
     }
 
     public function about(){
+
         return view("info::about");
     }
 }

@@ -112,6 +112,48 @@
                                 </ul>
                             </div>
 
+                            <div class="form-group">
+                                <label>
+                                    View Access
+                                    <a href="{{ route("squads.index") }}" target="_blank">
+                                        Squads
+                                    </a>
+                                    @can("global.superuser")
+                                        <a href="{{ route("configuration.access.roles") }}" target="_blank">Roles</a>
+                                    @endcan
+                                </label>
+                                <select name="view_role" class="form-control" id="view_role_select">
+                                    @foreach(\Seat\Web\Models\Acl\Role::all() as $role)
+                                        @if($role->id == $article->view_role)
+                                            <option value="{{ $role->id }}" selected="selected">{{ $role->title }}</option>
+                                        @else
+                                            <option value="{{ $role->id }}">{{ $role->title }}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    Edit Access
+                                    <a href="{{ route("squads.index") }}" target="_blank">
+                                        Squads
+                                    </a>
+                                    @can("global.superuser")
+                                        <a href="{{ route("configuration.access.roles") }}" target="_blank">Roles</a>
+                                    @endcan
+                                </label>
+                                <select name="edit_role" class="form-control" id="edit_role_select">
+                                    @foreach(\Seat\Web\Models\Acl\Role::all() as $role)
+                                        @if($role->id == $article->edit_role)
+                                            <option value="{{ $role->id }}" selected="selected">{{ $role->title }}</option>
+                                        @else
+                                            <option value="{{ $role->id }}">{{ $role->title }}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </div>
+
                             <div class="form-check form-group">
                                 @if($article->public)
                                     <input type="checkbox" class="form-check-input" id="public" name="public" checked>
@@ -143,6 +185,9 @@
     <script src="@infoVersionedAsset('info/js/render_article.js')"></script>
     <script src="@infoVersionedAsset('info/js/markup_tags.js')"></script>
     <script>
+
+        $("#view_role_select").select2()
+        $("#edit_role_select").select2()
 
         class MarkupEditor {
             editor;

@@ -2,17 +2,14 @@
 
 namespace RecursiveTree\Seat\InfoPlugin;
 
+use RecursiveTree\Seat\InfoPlugin\Acl\ArticlePolicy;
 use Seat\Services\AbstractSeatPlugin;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
 
 
 class InfoServiceProvider extends AbstractSeatPlugin
 {
-    /**
-     * Bootstrap the application services.
-     *
-     * @return void
-     */
     public function boot(){
 
         $this->publishes([
@@ -31,63 +28,31 @@ class InfoServiceProvider extends AbstractSeatPlugin
         Blade::directive('infoVersionedAsset', function($path) use ($version) {
             return "<?php echo asset({$path}) . '?v=$version'; ?>";
         });
+
+        Gate::define('info.article.view',[ArticlePolicy::class,"view"]);
+        Gate::define('info.article.edit',[ArticlePolicy::class,"edit"]);
     }
 
-    /**
-     * Register the application services.
-     *
-     * @return void
-     */
     public function register(){
         $this->mergeConfigFrom(__DIR__ . '/Config/info.sidebar.php','package.sidebar');
         $this->registerPermissions(__DIR__ . '/Config/Permissions/info.permissions.php', 'info');
     }
 
-
-    /**
-     * Return the plugin public name as it should be displayed into settings.
-     *
-     * @example SeAT Web
-     *
-     * @return string
-     */
     public function getName(): string
     {
         return 'SeAT Info';
     }
 
-
-    /**
-     * Return the plugin repository address.
-     *
-     * @example https://github.com/eveseat/web
-     *
-     * @return string
-     */
     public function getPackageRepositoryUrl(): string
     {
         return 'https://github.com/recursivetree/seat-info';
     }
 
-    /**
-     * Return the plugin technical name as published on package manager.
-     *
-     * @example web
-     *
-     * @return string
-     */
     public function getPackagistPackageName(): string
     {
         return 'seat-info';
     }
 
-    /**
-     * Return the plugin vendor tag as published on package manager.
-     *
-     * @example eveseat
-     *
-     * @return string
-     */
     public function getPackagistVendorName(): string
     {
         return 'recursivetree';

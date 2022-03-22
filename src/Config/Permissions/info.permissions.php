@@ -9,4 +9,8 @@ return [
         'label' => 'info::info.permission_view_article',
         'description' => 'info::info.permission_view_article_desc',
     ],
+    'manage_article' => [
+        'label' => 'info::info.permission_manage_article',
+        'description' => 'info::info.permission_manage_article_desc',
+    ],
 ];

@@ -6,9 +6,9 @@ return [
     'article_content_placeholder' => 'Write your article here.',
     'article_content' => 'Article Content',
     'permission_edit_article' => 'Edit articles',
-    'permission_edit_article_desc' => 'Allows to edit and create articles',
+    'permission_edit_article_desc' => 'Allowed to edit and create articles. This permission isn\'t in use anymore.',
     'permission_view_article' => 'View articles',
-    'permission_view_article_desc' => 'Allows to view articles',
+    'permission_view_article_desc' => 'Allowed to view articles. This permission isn\'t in use anymore.',
     'editor_syntax_documentation_link' => 'The documentation for the editor syntax is available on github.',
     'link' => 'Link',
     'editor_public_checkbox' => 'Make this article public',
@@ -81,5 +81,7 @@ return [
     'about_donation_info' => "I hope you enjoy working with seat-info. To support the development, have you considered donating something? Donations are always welcome and motivate me to put more effort into this project, although they are by no means required. If you end up using this module a lot, I'd appreciate a donation. You can give ISK or contract PLEX and Ships to 'recursivetree'.",
     'about_ace_text_editor' => 'This plugin uses the ace text editor.',
     'about_website_link' => 'Website',
-    'about_github_link' => 'Github'
+    'about_github_link' => 'Github',
+    'permission_manage_article' => 'Article Manager',
+    'permission_manage_article_desc' => 'This article allows you to manage everything that isn\'t configured over ACLs'
 ];
