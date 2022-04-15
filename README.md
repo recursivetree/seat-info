@@ -27,6 +27,9 @@ I can also recommend reading through the [official seat documentation](https://e
 
 ### Docker Install
 
+> :warning: The default seat docker container doesn't store images and resources you upload to seat-info permanently due 
+> to a misconfiguration of laravel. To fix this, read the section about changing the server settings.
+
 Open your .env file and edit the SEAT_PLUGINS variable to include the package.
 
 ```
@@ -55,11 +58,9 @@ sudo -H -u www-data bash -c 'php artisan route:cache'
 sudo -H -u www-data bash -c 'php artisan up'
 ```
 
-## Increase the upload file size
-This is optional and only required when you intend to upload files larger than 2MB.
-
+## Changing the server settings
 Per default, the configuration for the max allowed file size of php is rather low, meaning you can't upload big files in
-the resources tab. If you use a barebone install, you can fix it like this:
+the resources tab. Additionally, on docker images and resources aren't stored permanently.
 
 ### Barebone
 1. Open the `/etc/php/7.3/fpm/php.ini ` file, for example with nano:
@@ -85,8 +86,8 @@ the resources tab. If you use a barebone install, you can fix it like this:
 
 ### Docker
 1. Go to the directory with your `docker-compose.yml` file.
-2. In this directory, create a new file `seat_info.ini`
-3. Put the following in the file:
+2. In this directory, create a new file `seat_info.ini` and a directory `recursive_tree_info_module_resources`
+3. Put the following in the `seat_info.ini` file:
    ```
    ; Increase the maximum file upload size for the seat-info plugin
    upload_max_filesize = 40M ; increase this to a value larger than the largest file you intend to upload
@@ -98,8 +99,9 @@ the resources tab. If you use a barebone install, you can fix it like this:
 6. In there, add the following to the volumes section:
    ```
    - ./seat_info.ini:/usr/local/etc/php/conf.d/seat_info.ini:ro
+   - ./recursive_tree_info_module_resources:/var/www/seat/storage/app/recursive_tree_info_module_resources:rw
    ```
-   It should look something like this:
+   It should look something like this(details might differ):
    ```
    seat-web:
     image: eveseat/seat:4
@@ -108,11 +110,15 @@ the resources tab. If you use a barebone install, you can fix it like this:
     volumes:
       - ./packages:/var/www/seat/packages:ro  # development only
       - ./seat_info.ini:/usr/local/etc/php/conf.d/seat_info.ini:ro
+      - ./recursive_tree_info_module_resources:/var/www/seat/storage/app/recursive_tree_info_module_resources:rw
     env_file:
       - .env
     ...
    ```
 7. Restart the container and reload the management page.
+
+> For advanced users: Instead of adding the `recursive_tree_info_module_resources` volume, you can also look into 
+> configuring the laravel [storage driver](https://laravel.com/docs/6.x/filesystem) properly.
 
 ## Donations
 Donations are always welcome, although not required. If you end up using this module a lot, I'd appreciate a donation. 
