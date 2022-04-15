@@ -1,8 +1,12 @@
-# The syntax 
+# seat-info documentation
+This is rather a loose collection of information than a guide on how to write and format articles. It should still help 
+a bit. Yes, I'm too lazy to write something good. If you have issues, recursivetree#6692 on discord.
+
+## The syntax 
 The syntax of the editor is quite similar to html, but it's not exactly the same. It only supports a small subset of 
 html listed in this documentation.
 
-##Differences
+## Differences to HTML
  * No kind of header structure required, it's like if you write directly to the body
  * Elements without content have to be closed with a /, like in xhtml: `<img src="..." />`
  * Not all elements are available and some work different
@@ -15,10 +19,15 @@ html listed in this documentation.
 centered.
 
 ## URL Transformers
-To allow easier integration of links to custom targets, seat-info uses a transformer for all urls. The general schema 
-for the url transformers is `schema:data`. There are different schemas for different uses.
+To allow easier integration of links to custom targets(other seat info articles,zkill, just to name a few ideas), 
+seat-info uses a transformer for all urls. It takes in the url you specified in the markup(e.g. `seatinfo:article/1`) 
+and turns it in the real url that links to that page (e.g. `http://my-seat-site.com/info/artice/view/1`). 
 
-For compatibility reason, when the transformer can't find a schema, the unprocessed url is returned. This means you 
+The general schema for the url transformers is `type:data`. Type represents the type of the url, e.g. is it a link to 
+another article, to another website or to an image. Data is just additional data required for a type to get a working 
+url.
+
+For compatibility reason, when the transformer can't find a valid type, the unprocessed url is returned. This means you 
 don't need to change anything after updating, but it will throw a warning.
 
 ### Absolute urls
