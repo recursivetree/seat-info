@@ -113,45 +113,44 @@
                             </div>
 
                             <div class="form-group">
-                                <label>
-                                    View Access
-                                    <a href="{{ route("squads.index") }}" target="_blank">
-                                        Squads
-                                    </a>
-                                    @can("global.superuser")
-                                        <a href="{{ route("configuration.access.roles") }}" target="_blank">Roles</a>
-                                    @endcan
-                                </label>
-                                <select name="view_role" class="form-control" id="view_role_select">
-                                    @foreach(\Seat\Web\Models\Acl\Role::all() as $role)
-                                        @if($role->id == $article->view_role)
-                                            <option value="{{ $role->id }}" selected="selected">{{ $role->title }}</option>
-                                        @else
-                                            <option value="{{ $role->id }}">{{ $role->title }}</option>
-                                        @endif
+                                <label for="name">{{ trans('info::info.access_management_label') }}</label>
+                                <ul class="list-group" id="aclConfigurationList">
+                                    @foreach($article->aclRoles as $role)
+                                        <li class="list-group-item d-flex flex-row">
+                                            <span class="mr-auto">
+                                                {{ $role->roleModel->title }}
+                                            </span>
+
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="aclAccessType[{{ $role->role }}]" value="view"
+                                                @if($role->allows_view)
+                                                    checked
+                                                @endif>
+                                                <label class="form-check-label">Allow Viewing</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="aclAccessType[{{ $role->role }}]" value="edit"
+                                                @if($role->allows_edit)
+                                                    checked
+                                                @endif>
+                                                <label class="form-check-label">Allow Editing</label>
+                                            </div>
+                                            <button class="btn btn-danger aclRemoveButton" type="button">Remove</button>
+                                        </li>
                                     @endforeach
-                                </select>
+                                </ul>
                             </div>
 
                             <div class="form-group">
-                                <label>
-                                    Edit Access
-                                    <a href="{{ route("squads.index") }}" target="_blank">
-                                        Squads
-                                    </a>
-                                    @can("global.superuser")
-                                        <a href="{{ route("configuration.access.roles") }}" target="_blank">Roles</a>
-                                    @endcan
-                                </label>
-                                <select name="edit_role" class="form-control" id="edit_role_select">
+                                <label for="aclRoleSelect">Select Role to configure</label>
+                                <select id="aclRoleSelect" style="width: 100%">
                                     @foreach(\Seat\Web\Models\Acl\Role::all() as $role)
-                                        @if($role->id == $article->edit_role)
-                                            <option value="{{ $role->id }}" selected="selected">{{ $role->title }}</option>
-                                        @else
-                                            <option value="{{ $role->id }}">{{ $role->title }}</option>
-                                        @endif
+                                        <option value="{{ $role->id }}">{{$role->title}}</option>
                                     @endforeach
                                 </select>
+                                <button type="button" class="btn btn-secondary btn-block mt-2" id="addAclRoleButton">
+                                    Add role to access list
+                                </button>
                             </div>
 
                             <div class="form-check form-group">
@@ -179,6 +178,43 @@
 @stop
 
 @push('javascript')
+    <script>
+        $("#aclRoleSelect").select2({
+            placeholder: "Select role to add"
+        })
+
+        $("#addAclRoleButton").click(function () {
+            const role = $("#aclRoleSelect").select2('data')[0]
+            $("#aclConfigurationList").append(`
+                <li class="list-group-item d-flex flex-row">
+                    <span class="mr-auto">
+                        ${ role.text }
+                    </span>
+
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="aclAccessType[${ role.id }]" value="view" checked>
+                        <label class="form-check-label">Allow Viewing</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="aclAccessType[${ role.id }]" value="edit">
+                        <label class="form-check-label">Allow Editing</label>
+                    </div>
+                    <button class="btn btn-danger aclRemoveButton" type=button>Remove</button>
+                </li>
+            `)
+
+            setupAclRemoveButtons()
+        })
+
+        function setupAclRemoveButtons() {
+            $(".aclRemoveButton").click(function () {
+                $(this).parent().remove()
+            })
+        }
+
+        setupAclRemoveButtons()
+    </script>
+
     <script src="@infoVersionedAsset('info/js/lib/ace.js')"></script>
 
     <script src="@infoVersionedAsset('info/js/parser.js')"></script>

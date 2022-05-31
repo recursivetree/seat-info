@@ -83,5 +83,6 @@ return [
     'about_website_link' => 'Website',
     'about_github_link' => 'Github',
     'permission_manage_article' => 'Article Manager',
-    'permission_manage_article_desc' => 'This article allows you to manage everything that isn\'t configured over ACLs'
+    'permission_manage_article_desc' => 'This article allows you to manage everything that isn\'t configured over ACLs',
+    'access_management_label' => "Access Management"
 ];

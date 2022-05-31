@@ -3,6 +3,7 @@
 namespace RecursiveTree\Seat\InfoPlugin\Http\Controllers;
 
 use RecursiveTree\Seat\InfoPlugin\Acl\RoleHelper;
+use RecursiveTree\Seat\InfoPlugin\Model\AclRole;
 use RecursiveTree\Seat\InfoPlugin\Model\Article;
 use RecursiveTree\Seat\InfoPlugin\Model\Resource;
 use RecursiveTree\Seat\InfoPlugin\Validation\ConfirmModalRequest;
@@ -161,8 +162,18 @@ class InfoController extends Controller
 
     public function getCreateView(){
         $article = new Article();
-        $article->view_role = RoleHelper::getDefaultViewRole();
-        $article->edit_role = RoleHelper::getDefaultEditRole();
+
+        $editAclRole = new AclRole();
+        $editAclRole->role =  RoleHelper::getDefaultEditRole();
+        $editAclRole->allows_edit = true;
+
+        $viewAclRole = new AclRole();
+        $viewAclRole->role =  RoleHelper::getDefaultViewRole();
+        $viewAclRole->allows_view = true;
+
+        //fake the relation
+        $article->aclRoles = collect([$editAclRole, $viewAclRole]);
+
         return view("info::edit", compact('article'));
     }
 
@@ -179,16 +190,32 @@ class InfoController extends Controller
             $article = new Article();
         }
 
-        $view_role_id = RoleHelper::checkForExistenceOrDefault($request->view_role, RoleHelper::getDefaultViewRole());
-        $edit_role_id = RoleHelper::checkForExistenceOrDefault($request->edit_role, RoleHelper::getDefaultEditRole());
+        //dd($request->aclRoleIDs, $request->aclAccessType);
+
+//        $view_role_id = RoleHelper::checkForExistenceOrDefault($request->view_role, RoleHelper::getDefaultViewRole());
+//        $edit_role_id = RoleHelper::checkForExistenceOrDefault($request->edit_role, RoleHelper::getDefaultEditRole());
 
         $article->name = $request->name;
         $article->text = $request->text;
         $article->public = isset($request->public);
-        $article->view_role = $view_role_id;
-        $article->edit_role = $edit_role_id;
 
         $article->save();
+
+        $article->aclRoles()->delete();
+
+        foreach ($request->aclAccessType as $id=>$value){
+            $aclRole = new AclRole();
+            $aclRole->article = $article->id;
+            if($value==="edit") {
+                $aclRole->role = RoleHelper::checkForExistenceOrDefault($id, RoleHelper::getDefaultEditRole());
+                $aclRole->allows_edit = true;
+            }
+            if($value==="view") {
+                $aclRole->role = RoleHelper::checkForExistenceOrDefault($id, RoleHelper::getDefaultViewRole());
+                $aclRole->allows_view = true;
+            }
+            $aclRole->save();
+        }
 
         $request->session()->flash('message', [
             'message' => trans("info::info.manage_save_article_success"),
@@ -207,6 +234,8 @@ class InfoController extends Controller
             ]);
             return redirect()->route('info.manage');
         }
+
+        //dd($article->aclRoles->first()->roleModel);
 
         return view("info::edit", compact('article'));
     }

@@ -13,4 +13,8 @@ class Article extends Model
     protected $fillable = [
         'name', 'text', 'id', 'home_entry', 'public'
     ];
+
+    public function aclRoles(){
+        return $this->hasMany(AclRole::class,"article","id");
+    }
 }
