@@ -41,20 +41,20 @@ class MultiRoleAcl extends Migration
             }
         }
 
-//        Schema::table('recursive_tree_seat_info_articles', function (Blueprint $table) {
-//            $table->dropColumn("view_role");
-//            $table->dropColumn("edit_role");
-//        });
+        Schema::table('recursive_tree_seat_info_articles', function (Blueprint $table) {
+            $table->dropColumn("view_role");
+            $table->dropColumn("edit_role");
+        });
     }
 
 
     public function down()
     {
-//
-//        Schema::table('recursive_tree_seat_info_articles', function (Blueprint $table) {
-//            $table->bigInteger("view_role")->nullable();
-//            $table->bigInteger("edit_role")->nullable();
-//        });
+
+        Schema::table('recursive_tree_seat_info_articles', function (Blueprint $table) {
+            $table->bigInteger("view_role")->nullable();
+            $table->bigInteger("edit_role")->nullable();
+        });
 
         Schema::dropIfExists('recursive_tree_seat_info_articles_acl_roles');
     }
