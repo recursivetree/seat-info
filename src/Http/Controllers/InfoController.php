@@ -93,6 +93,7 @@ class InfoController extends Controller
 
         if ($article !== null) {
             Article::destroy($request->data);
+            AclRole::where("article", $request->data)->delete();
 
             $request->session()->flash('message', [
                 'message' => trans("info::info.manage_delete_article_success"),
