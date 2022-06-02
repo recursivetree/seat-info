@@ -30,10 +30,12 @@
                     <div class="card-header">
                         Articles
                         <div class="btn-group float-right" role="group">
-                            @if(auth()->user()->can("info.create_article"))
+                            @can("info.create_article")
                                 <a href="{{ route("info.create") }}" class="float-right btn btn-secondary">{{ trans("info::info.list_article_new") }}</a>
+                            @endcan
+                            @can("info.manage_article")
                                 <a href="{{ route("info.manage") }}" class="float-right btn btn-secondary">{{ trans("info::info.list_article_manage") }}</a>
-                            @endif
+                            @endcan
                             <a class="btn btn-primary" href="{{ url()->previous() }}">{{ trans("info::info.view_back_button") }}</a>
                         </div>
                     </div>

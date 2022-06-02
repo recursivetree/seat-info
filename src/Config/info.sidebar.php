@@ -15,11 +15,11 @@ return [
                 'icon'  => 'fas fa-list',
                 'route' => 'info.list',
             ],
-            [   // Edit pages
+            [   // Create pages
                 'name'  => 'New',
                 'icon'  => 'fas fa-pen',
                 'route' => 'info.create',
-                'permission' => 'info.manage_article',
+                'permission' => 'info.create_article',
             ],
             [   // Manage Pages
                 'name'  => 'Manage',

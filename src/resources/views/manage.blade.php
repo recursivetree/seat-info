@@ -19,10 +19,12 @@
                 <div class="modal-footer">
                     <form method="POST" action="" id="confirmModalForm">
                         @csrf
-                        <button type="submit" class="btn btn-danger" id="confirmModalConfirm">{{ trans("info::info.manage_confirm_confirm") }}</button>
+                        <button type="submit" class="btn btn-danger"
+                                id="confirmModalConfirm">{{ trans("info::info.manage_confirm_confirm") }}</button>
                         <input type="hidden" id="confirmModalData" name="data">
                     </form>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ trans("info::info.manage_confirm_cancel") }}</button>
+                    <button type="button" class="btn btn-secondary"
+                            data-dismiss="modal">{{ trans("info::info.manage_confirm_cancel") }}</button>
                 </div>
             </div>
         </div>
@@ -52,15 +54,22 @@
                 <div class="card">
                     <div class="card-header">
                         {{ trans("info::info.manage_article_title") }}
-                        <a href="{{ route("info.create") }}" class="float-right btn btn-primary">{{ trans("info::info.manage_article_new") }}</a>
+
+                        @can("info.create_article")
+                            <a href="{{ route("info.create") }}"
+                               class="float-right btn btn-primary">{{ trans("info::info.manage_article_new") }}</a>
+                        @endcan
                     </div>
                     <div class="card-body">
 
-                        @if($noHomeArticle)
-                            <div class="alert alert-warning" role="alert">
-                                {{ trans("info::info.manage_article_no_home_article") }}
-                            </div>
-                        @endif
+                        @can("info.configure_home_article")
+                            @if($noHomeArticle)
+                                <div class="alert alert-warning" role="alert">
+                                    {{ trans("info::info.manage_article_no_home_article") }}
+                                </div>
+                            @endif
+                        @endcan
+
                         @if($articles->count()>=10)
                             <div class="alert alert-info">
                                 {{ trans("info::info.manage_donation_info") }}
@@ -73,14 +82,20 @@
                                 <th>{{ trans("info::info.manage_article_table_name") }}</th>
                                 <th>{{ trans("info::info.manage_article_table_idlink") }}</th>
                                 <th>{{ trans("info::info.manage_article_table_labels") }}</th>
-                                <th><span class="float-right">{{ trans("info::info.manage_article_table_actions") }}</span></th>
+                                <th>
+                                    <span class="float-right">{{ trans("info::info.manage_article_table_actions") }}</span>
+                                </th>
                             </tr>
                             </thead>
                             <tbody>
                             @foreach ($articles as $article)
                                 <tr>
                                     <td>
-                                        <a href="{{ route("info.view", $article->id) }}">{{ $article->name }}</a>
+                                        @can("info.article.view",$article->id)
+                                            <a href="{{ route("info.view", $article->id) }}">{{ $article->name }}</a>
+                                        @else
+                                            {{ $article->name }}
+                                        @endcan
                                     </td>
                                     <td>
                                         {{ "seatinfo:article/{$article->id}" }}
@@ -97,8 +112,12 @@
                                     </td>
                                     <td>
                                         <div class="btn-group float-right" role="group">
-                                            <a href="{{ route("info.edit_article", $article->id) }}"
-                                               class="btn btn-primary mr-auto">{{ trans("info::info.manage_article_edit") }}</a>
+
+                                            @can("info.article.edit",$article->id)
+                                                <a href="{{ route("info.edit_article", $article->id) }}"
+                                                   class="btn btn-primary mr-auto">{{ trans("info::info.manage_article_edit") }}</a>
+                                            @endcan
+
                                             <button id="btnGroupDropArticles{{ $article->id }}" type="button"
                                                     class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
                                                     aria-haspopup="true" aria-expanded="false">
@@ -107,42 +126,50 @@
                                             <div class="dropdown-menu p-0"
                                                  aria-labelledby="btnGroupDropArticles{{ $article->id }}">
                                                 <div class="btn-group-vertical dropdown-item p-0">
-                                                    @if($article->home_entry)
-                                                        <button
-                                                                class="btn btn-warning confirm-action"
-                                                                data-confirm-warning="{{ trans("info::info.manage_article_unset_home_article_confirmation") }}"
-                                                                data-url="{{ route("info.unset_home_article") }}"
-                                                        >{{ trans("info::info.manage_article_unset_home_article") }}</button>
-                                                    @else
-                                                        <button
-                                                                class="btn btn-warning confirm-action"
-                                                                data-confirm-warning="{{ trans("info::info.manage_article_set_home_article_confirmation") }}"
-                                                                data-url="{{ route("info.set_home_article") }}"
-                                                                data-data="{{ $article->id }}"
-                                                        >{{ trans("info::info.manage_article_set_home_article") }}</button>
-                                                    @endif
 
-                                                    @if(!$article->public)
+                                                    @can("info.configure_home_article")
+                                                        @if($article->home_entry)
+                                                            <button
+                                                                    class="btn btn-warning confirm-action"
+                                                                    data-confirm-warning="{{ trans("info::info.manage_article_unset_home_article_confirmation") }}"
+                                                                    data-url="{{ route("info.unset_home_article") }}"
+                                                            >{{ trans("info::info.manage_article_unset_home_article") }}</button>
+                                                        @else
+                                                            <button
+                                                                    class="btn btn-warning confirm-action"
+                                                                    data-confirm-warning="{{ trans("info::info.manage_article_set_home_article_confirmation") }}"
+                                                                    data-url="{{ route("info.set_home_article") }}"
+                                                                    data-data="{{ $article->id }}"
+                                                            >{{ trans("info::info.manage_article_set_home_article") }}</button>
+                                                        @endif
+                                                    @endcan
+
+                                                    @can("info.article.edit",$article->id)
+                                                        @if(!$article->public)
+                                                            <button
+                                                                    class="btn btn-warning confirm-action"
+                                                                    data-confirm-warning="{{ trans("info::info.manage_article_set_public_confirmation") }}"
+                                                                    data-url="{{ route("info.set_article_public") }}"
+                                                                    data-data="{{ $article->id }}"
+                                                            >{{ trans("info::info.manage_article_set_public") }}</button>
+                                                        @else
+                                                            <button
+                                                                    class="btn btn-warning confirm-action"
+                                                                    data-confirm-warning="{{ trans("info::info.manage_article_set_private_confirmation") }}"
+                                                                    data-url="{{ route("info.set_article_private") }}"
+                                                                    data-data="{{ $article->id }}"
+                                                            >{{ trans("info::info.manage_article_set_private") }}</button>
+                                                        @endif
+                                                    @endcan
+
+                                                    @can("info.article.edit",$article->id)
                                                         <button
-                                                                class="btn btn-warning confirm-action"
-                                                                data-confirm-warning="{{ trans("info::info.manage_article_set_public_confirmation") }}"
-                                                                data-url="{{ route("info.set_article_public") }}"
+                                                                class="btn btn-danger confirm-action"
+                                                                data-confirm-warning="{{ trans("info::info.manage_article_delete_confirmation") }}"
+                                                                data-url="{{ route("info.delete_article") }}"
                                                                 data-data="{{ $article->id }}"
-                                                        >{{ trans("info::info.manage_article_set_public") }}</button>
-                                                    @else
-                                                        <button
-                                                                class="btn btn-warning confirm-action"
-                                                                data-confirm-warning="{{ trans("info::info.manage_article_set_private_confirmation") }}"
-                                                                data-url="{{ route("info.set_article_private") }}"
-                                                                data-data="{{ $article->id }}"
-                                                        >{{ trans("info::info.manage_article_set_private") }}</button>
-                                                    @endif
-                                                    <button
-                                                            class="btn btn-danger confirm-action"
-                                                            data-confirm-warning="{{ trans("info::info.manage_article_delete_confirmation") }}"
-                                                            data-url="{{ route("info.delete_article") }}"
-                                                            data-data="{{ $article->id }}"
-                                                    >{{ trans("info::info.manage_article_delete") }}</button>
+                                                        >{{ trans("info::info.manage_article_delete") }}</button>
+                                                    @endcan
                                                 </div>
                                             </div>
                                         </div>
@@ -164,6 +191,8 @@
                         <span>{{ trans("info::info.manage_resources_title") }}</span>
                     </div>
                     <div class="card-body">
+
+                        @can("info.edit_resource")
                         <div class="border rounded p-4">
                             <form action="{{ route("info.upload_resource") }}" method="POST"
                                   enctype="multipart/form-data">
@@ -173,18 +202,23 @@
                                     <div class="custom-file">
                                         <input type="file" name="file" class="custom-file-input"
                                                id="resourceFileUpload">
-                                        <label class="custom-file-label" for="resourceFileUpload">{{ trans("info::info.manage_resources_upload_choose") }}</label>
+                                        <label class="custom-file-label"
+                                               for="resourceFileUpload">{{ trans("info::info.manage_resources_upload_choose") }}</label>
                                     </div>
                                 </div>
                                 <div class="form-check form-group">
-                                    <input type="checkbox" class="form-check-input" id="mime-src" name="mime_src_client">
-                                    <label class="form-check-label" for="mime-src">{{ trans("info::info.manage_resources_mime_client_label") }}</label>
+                                    <input type="checkbox" class="form-check-input" id="mime-src"
+                                           name="mime_src_client">
+                                    <label class="form-check-label"
+                                           for="mime-src">{{ trans("info::info.manage_resources_mime_client_label") }}</label>
                                 </div>
                                 <div class="form-group mb-0">
-                                    <button class="btn btn-primary" type="submit">{{ trans("info::info.manage_resources_upload") }}</button>
+                                    <button class="btn btn-primary"
+                                            type="submit">{{ trans("info::info.manage_resources_upload") }}</button>
                                 </div>
                             </form>
                         </div>
+                        @endcan
 
                         <table id="pages" class="table table table-striped">
                             <thead>
@@ -192,7 +226,9 @@
                                 <th>{{ trans("info::info.manage_resources_table_name") }}</th>
                                 <th>{{ trans("info::info.manage_resources_table_idlink") }}</th>
                                 <th>{{ trans("info::info.manage_resources_table_type") }}</th>
-                                <th><span class="float-right">{{ trans("info::info.manage_resources_table_actions") }}</span></th>
+                                <th>
+                                    <span class="float-right">{{ trans("info::info.manage_resources_table_actions") }}</span>
+                                </th>
                             </tr>
                             </thead>
                             <tbody>
@@ -208,6 +244,7 @@
                                         {{ $resource->mime }}
                                     </td>
                                     <td>
+                                        @can("info.delete_resource")
                                         <div class="float-right row">
                                             <button id="btnGroupDropResources{{ $resource->id }}" type="button"
                                                     class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
@@ -224,7 +261,7 @@
                                                     >{{ trans("info::info.manage_resources_table_delete") }}</button>
                                                 </div>
                                             </div>
-
+                                            @endcan
 
 
                                         </div>

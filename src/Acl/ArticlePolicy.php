@@ -20,7 +20,7 @@ class ArticlePolicy extends AbstractPolicy
                 ->whereIn("id", $roles)
                 ->exists()
             || $user->isAdmin()
-            || $user->can("info.manage_article")
+            || $user->can("info.edit_all")
             || self::edit($user,$article_id);
     }
 
@@ -36,7 +36,7 @@ class ArticlePolicy extends AbstractPolicy
                 ->roles()
                 ->whereIn("id", $roles)
                 ->exists()
-            || $user->can("info.manage_article")
+            || $user->can("info.edit_all")
             || $user->isAdmin();
     }
 }

@@ -191,10 +191,11 @@ class InfoController extends Controller
     public function getSaveInterface(User $user,SaveArticle $request){
         $article = Article::find($request->id);
 
+        //if the article exists, check for edit access, otherwise for article creation access
         if($request->id){
             Gate::authorize("info.article.edit", $request->id);
         } else {
-            Gate::authorize("info.manage_article");
+            Gate::authorize("info.create_article");
         }
 
         if ($article===null){
