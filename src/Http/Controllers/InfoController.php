@@ -14,6 +14,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Gate;
+use Seat\Web\Models\Acl\Role;
 use Seat\Web\Models\User;
 
 
@@ -172,9 +173,19 @@ class InfoController extends Controller
         $viewAclRole->allows_view = true;
 
         //fake the relation
-        $article->aclRoles = collect([$editAclRole, $viewAclRole]);
+        $roles = collect([$editAclRole, $viewAclRole]);
 
-        return view("info::edit", compact('article'));
+        $other_roles = Role::whereNotIn("id",$roles->pluck("role"))
+            ->get()
+            ->map(function ($role){
+                $aclRole = new AclRole();
+                $aclRole->role = $role->id;
+                return $aclRole;
+            });
+
+        $roles = $roles->merge($other_roles);
+
+        return view("info::edit", compact('article','roles'));
     }
 
     public function getSaveInterface(User $user,SaveArticle $request){
@@ -204,6 +215,7 @@ class InfoController extends Controller
         $article->aclRoles()->delete();
 
         foreach ($request->aclAccessType as $id=>$value){
+            if($value === "nothing") continue;
             $aclRole = new AclRole();
             $aclRole->article = $article->id;
             if($value==="edit") {
@@ -235,9 +247,19 @@ class InfoController extends Controller
             return redirect()->route('info.manage');
         }
 
-        //dd($article->aclRoles->first()->roleModel);
+        $roles = $article->aclRoles;
 
-        return view("info::edit", compact('article'));
+        $other_roles = Role::whereNotIn("id",$roles->pluck("role"))
+            ->get()
+            ->map(function ($role){
+                $aclRole = new AclRole();
+                $aclRole->role = $role->id;
+                return $aclRole;
+            });
+
+        $roles = $roles->toBase()->merge($other_roles->toBase());
+
+        return view("info::edit", compact('article', 'roles'));
     }
 
     public function getListView(){

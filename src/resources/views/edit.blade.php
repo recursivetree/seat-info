@@ -115,12 +115,19 @@
                             <div class="form-group">
                                 <label for="name">{{ trans('info::info.access_management_label') }}</label>
                                 <ul class="list-group" id="aclConfigurationList">
-                                    @foreach($article->aclRoles as $role)
+                                    @foreach($roles as $role)
                                         <li class="list-group-item d-flex flex-row">
                                             <span class="mr-auto">
                                                 {{ $role->roleModel->title }}
                                             </span>
 
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="aclAccessType[{{ $role->role }}]" value="nothing"
+                                                    @if(!$role->allows_edit && !$role->allows_view)
+                                                    checked
+                                                    @endif>
+                                                <label class="form-check-label">Nothing</label>
+                                            </div>
                                             <div class="form-check form-check-inline">
                                                 <input class="form-check-input" type="radio" name="aclAccessType[{{ $role->role }}]" value="view"
                                                 @if($role->allows_view)
@@ -135,22 +142,17 @@
                                                 @endif>
                                                 <label class="form-check-label">Allow Editing</label>
                                             </div>
+
                                             <button class="btn btn-danger aclRemoveButton" type="button">Remove</button>
                                         </li>
                                     @endforeach
-                                </ul>
-                            </div>
+                                    @if($roles->isEmpty())
+                                        <li class="list-group-item d-flex flex-row">
+                                            Seat-Info manages access over seat roles. To configure access for this article head over to access management under the settings section. In there, you can create roles and add members. To automatically manage members, take a look at squads.
+                                        </li>
+                                    @endif
 
-                            <div class="form-group">
-                                <label for="aclRoleSelect">Select Role to configure</label>
-                                <select id="aclRoleSelect" style="width: 100%">
-                                    @foreach(\Seat\Web\Models\Acl\Role::all() as $role)
-                                        <option value="{{ $role->id }}">{{$role->title}}</option>
-                                    @endforeach
-                                </select>
-                                <button type="button" class="btn btn-secondary btn-block mt-2" id="addAclRoleButton">
-                                    Add role to access list
-                                </button>
+                                </ul>
                             </div>
 
                             <div class="form-check form-group">
@@ -178,43 +180,6 @@
 @stop
 
 @push('javascript')
-    <script>
-        $("#aclRoleSelect").select2({
-            placeholder: "Select role to add"
-        })
-
-        $("#addAclRoleButton").click(function () {
-            const role = $("#aclRoleSelect").select2('data')[0]
-            $("#aclConfigurationList").append(`
-                <li class="list-group-item d-flex flex-row">
-                    <span class="mr-auto">
-                        ${ role.text }
-                    </span>
-
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="aclAccessType[${ role.id }]" value="view" checked>
-                        <label class="form-check-label">Allow Viewing</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="aclAccessType[${ role.id }]" value="edit">
-                        <label class="form-check-label">Allow Editing</label>
-                    </div>
-                    <button class="btn btn-danger aclRemoveButton" type=button>Remove</button>
-                </li>
-            `)
-
-            setupAclRemoveButtons()
-        })
-
-        function setupAclRemoveButtons() {
-            $(".aclRemoveButton").click(function () {
-                $(this).parent().remove()
-            })
-        }
-
-        setupAclRemoveButtons()
-    </script>
-
     <script src="@infoVersionedAsset('info/js/lib/ace.js')"></script>
 
     <script src="@infoVersionedAsset('info/js/parser.js')"></script>

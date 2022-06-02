@@ -3,9 +3,11 @@
 namespace RecursiveTree\Seat\InfoPlugin;
 
 use RecursiveTree\Seat\InfoPlugin\Acl\ArticlePolicy;
+use RecursiveTree\Seat\InfoPlugin\Observers\RoleObserver;
 use Seat\Services\AbstractSeatPlugin;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
+use Seat\Web\Models\Acl\Role;
 
 
 class InfoServiceProvider extends AbstractSeatPlugin
@@ -31,6 +33,8 @@ class InfoServiceProvider extends AbstractSeatPlugin
 
         Gate::define('info.article.view',[ArticlePolicy::class,"view"]);
         Gate::define('info.article.edit',[ArticlePolicy::class,"edit"]);
+
+        Role::observe(RoleObserver::class);
     }
 
     public function register(){
