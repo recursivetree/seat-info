@@ -5,22 +5,38 @@ on how to use seat.
 ![screenshot of the seat-info plugin](screenshot.png)
 
 ## Usage
-### Roles
-#### View Role
-Allows you to view articles and adds the `Start` and `Articles` page to the sidemenu.
-#### Edit Role
-This role allows you to create, manage and delete articles aswell as to upload images and other resources usable in the 
-articles.
 
 ### Editor
-The editor supports a markup language that's kinda close to HTML, but not quite. Currently, the parser is relatively 
-strict, and for example you can't have spaces in the tags where there doesn't need to be one. E.g. `<a></a>` is valid, 
-but `< a ></ a>` isn't.
+The editor supports a markup language that's kinda close to HTML, but not quite.
 
-For all available tags, please see the [documentation](documentation.md)
+Please read the [documentation](documentation.md).
 
-Currrently there are a lot of features missing that might be useful, and it could use some QOL updates. If you have 
-specific needs, open an issue or pull request.
+### Access Management
+Access is managed on a per-article level using roles provided by the seat core. This allows for automatisation over 
+squads as it is normally known. Additionally, there are a few fixed permission related to creating/modifying articles.
+
+#### Permissions "Edit Article" and "View Article"
+These permissions are no longer in use. Just ignore them, due to a few technical details they can't be deleted.
+
+#### Permission "Article Management Page"
+Gives access to the article management page with a list of all existing articles and resources(images, videos, etc)
+
+#### Permission "Create Article"
+Allows you to create new articles. Attention: If you don't configure the access list correctly, you might lock yourself 
+out of editing this article after creating it.
+
+#### Permission "Upload Resources"
+Allows you to upload resources like images or videos.
+
+#### Permission "Delete Resources"
+Allows you to delete resources like images or videos.
+
+#### Permission "Configure Home Article"
+The home article is the article you land on first. This permission allows you to select an article to act as home article.
+
+#### Permission "Edit all Articles"
+Due to the possibility of users looking themselves out of editing articles they could edit before, this role is intended 
+to recover these articles without using an admin account.
 
 ## Installation
 I can also recommend reading through the [official seat documentation](https://eveseat.github.io/docs/community_packages/).

@@ -5,8 +5,8 @@ return [
     'article_name' => 'Article Name',
     'article_content_placeholder' => 'Write your article here.',
     'article_content' => 'Article Content',
-    'permission_edit_article' => 'Edit articles',
-    'permission_edit_article_desc' => 'Allowed to edit and create articles. This permission isn\'t in use anymore.',
+    'permission_edit_article' => 'Edit Articles',
+    'permission_edit_article_desc' => 'This permission isn\'t in use anymore.',
     'permission_view_article' => 'View articles',
     'permission_view_article_desc' => 'Allowed to view articles. This permission isn\'t in use anymore.',
     'editor_syntax_documentation_link' => 'The documentation for the editor syntax is available on github.',
@@ -82,7 +82,7 @@ return [
     'about_ace_text_editor' => 'This plugin uses the ace text editor.',
     'about_website_link' => 'Website',
     'about_github_link' => 'Github',
-    'permission_manage_article' => 'Article Management page',
+    'permission_manage_article' => 'Article Management Page',
     'permission_manage_article_desc' => 'Gives you access to the article management page.',
     'access_management_label' => "Access Management",
     'permission_create_article' => 'Create Articles',
@@ -93,6 +93,6 @@ return [
     'permission_delete_resource_desc' => 'Allows you to delete resources.',
     'permission_configure_home_article' => 'Configure Home Article',
     'permission_configure_home_article_desc' => 'Allows you to set the home article',
-    'permission_edit_all' => 'Edit all articles',
+    'permission_edit_all' => 'Edit all Articles',
     'permission_edit_all_desc' => 'Allows you to edit all articles, regardless the acl settings'
 ];
