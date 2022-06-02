@@ -142,8 +142,6 @@
                                                 @endif>
                                                 <label class="form-check-label">Allow Editing</label>
                                             </div>
-
-                                            <button class="btn btn-danger aclRemoveButton" type="button">Remove</button>
                                         </li>
                                     @endforeach
                                     @if($roles->isEmpty())
