@@ -193,3 +193,8 @@ Any css color should work.
 ```
 
 The old `<audio src="...">` syntax still works for compatibility reasons, but is deprecated.
+
+## Video
+```
+<video src="url" />
+```

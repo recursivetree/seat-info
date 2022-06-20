@@ -101,6 +101,10 @@ class SeatInfoDomElementBuilder {
 
         return this
     }
+
+    getDOMElement(){
+        return this.domElement
+    }
 }
 
 class SeatInfoMarkupRenderer {

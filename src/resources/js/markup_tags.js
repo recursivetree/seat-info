@@ -278,6 +278,28 @@ function colorElementBuilder(elementInfo, htmlElement) {
 SeatInfoMarkupRenderer.registerElement("color", false, colorElementBuilder)
 SeatInfoMarkupRenderer.registerElement("colour", false, colorElementBuilder)
 
+//multimedia helper functions
+const formatSeconds = (duration) => {
+    const seconds = duration % 60
+    const minutes = Math.floor(duration / 60) % 60
+    const hours = Math.floor(duration / 3600)
+
+    const options = {
+        maximumFractionDigits: 0,
+        minimumIntegerDigits: 2,
+    }
+
+    if (hours > 0) {
+        return `${hours.toLocaleString(undefined, options)}:${minutes.toLocaleString(undefined, options)}:${seconds.toLocaleString(undefined, options)}`
+    }
+
+    return `${minutes.toLocaleString(undefined, options)}:${seconds.toLocaleString(undefined, options)}`
+}
+
+const formatTimeStamp = (position, length) => {
+    return `${formatSeconds(position)} / ${formatSeconds(length)}`
+}
+
 //audio
 SeatInfoMarkupRenderer.registerElement("audio", true, function (elementInfo, htmlElement) {
 
@@ -291,33 +313,12 @@ SeatInfoMarkupRenderer.registerElement("audio", true, function (elementInfo, htm
         })
 
     if (url) {
-        const formatSeconds = (duration) => {
-            const seconds = duration % 60
-            const minutes = Math.floor(duration / 60) % 60
-            const hours = Math.floor(duration / 3600)
-
-            const options = {
-                maximumFractionDigits: 0,
-                minimumIntegerDigits: 2,
-            }
-
-            if (hours > 0) {
-                return `${hours.toLocaleString(undefined, options)}:${minutes.toLocaleString(undefined, options)}:${seconds.toLocaleString(undefined, options)}`
-            }
-
-            return `${minutes.toLocaleString(undefined, options)}:${seconds.toLocaleString(undefined, options)}`
-        }
-
-        const formatTimeStamp = (position, length) => {
-            return `${formatSeconds(position)} / ${formatSeconds(length)}`
-        }
-
         const audio = new Audio(url)
 
         const container = htmlElement("div")
             .class("d-flex")
             .class("align-items-center")
-            .class("p-2")
+            .class("p-2","my-1")
             .style("background-color", "#BBBBBB")
             .style("border-radius", "5px")
 
@@ -387,6 +388,110 @@ SeatInfoMarkupRenderer.registerElement("audio", true, function (elementInfo, htm
         elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<audio /> element doesn't contain a valid audio source.`))
         return {
             dom: htmlElement("div"),
+            noContent: true,
+            supportedElementProperties: ["src"],
+            disabledCommonProperties: ["text-align"]
+        }
+    }
+})
+
+//video
+SeatInfoMarkupRenderer.registerElement("video",true,(elementInfo,htmlElement)=>{
+    const url = elementInfo.renderer.preprocessLink(elementInfo.properties["src"])
+        .getValue((msg) => {
+            if (elementInfo.properties["src"]) {
+                elementInfo.renderer.warn(new MarkupWarning(elementInfo.properties["src"].tokens, msg))
+            } else {
+                elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, msg))
+            }
+        })
+
+    if(!url){
+        elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<video /> element doesn't contain a valid video source.`))
+        return {
+            dom: htmlElement("div"),
+            noContent: true,
+            supportedElementProperties: ["src"],
+            disabledCommonProperties: ["text-align"]
+        }
+    } else {
+        //we have a video
+
+        const container = htmlElement("div")
+            .class("p-2","my-1")
+            .class("d-flex")
+            .class("flex-column")
+            .style("background-color", "#BBBBBB")
+            .style("border-radius", "5px")
+
+        const videoElement = htmlElement("video")
+            .attribute("src",url)
+
+        const video = videoElement.getDOMElement()
+
+        const controlsContainer = htmlElement("div")
+            .class("d-flex", "mt-2")
+            .class("align-items-center")
+
+        const buttonIcon = htmlElement("i")
+            .class("fas", "fa-play")
+
+        const button = htmlElement("button")
+            .class("btn", "btn-primary")
+            .content(buttonIcon)
+            .event("click", () => {
+                if (video.paused) {
+                    video.play();
+                } else {
+                    video.pause()
+                }
+            })
+
+        const label = htmlElement("span")
+            .style("white-space", "nowrap")
+            .class("m-1")
+            .content("00:00 / 00:00")
+
+        const progressBar = htmlElement("div")
+            .class("progress-bar")
+
+        const progress = htmlElement("div")
+            .class("progress", "m-1", "w-100")
+            .style("min-width", "150px")
+            .content(progressBar)
+            .event("click", function (e) {
+                let progress = e.offsetX / e.currentTarget.offsetWidth
+                video.currentTime = progress * video.duration
+            })
+
+        controlsContainer.content(button, label, progress)
+        container.content(videoElement,controlsContainer)
+
+        video.addEventListener("play", function () {
+            buttonIcon.removeClass("fa-play")
+            buttonIcon.class("fa-pause")
+        })
+        video.addEventListener("ended", function () {
+            buttonIcon.removeClass("fa-pause")
+            buttonIcon.class("fa-play")
+        })
+        video.addEventListener("pause", function () {
+            buttonIcon.removeClass("fa-pause")
+            buttonIcon.class("fa-play")
+        })
+        video.addEventListener("durationchange", () => {
+            let progress = video.currentTime / video.duration
+            progressBar.style("width", `${progress * 100}%`)
+            label.clearContent(formatTimeStamp(video.currentTime, video.duration))
+        })
+        video.addEventListener("timeupdate", () => {
+            let progress = video.currentTime / video.duration
+            progressBar.style("width", `${progress * 100}%`)
+            label.clearContent(formatTimeStamp(video.currentTime, video.duration))
+        })
+
+        return {
+            dom: htmlElement("div").content(container),
             noContent: true,
             supportedElementProperties: ["src"],
             disabledCommonProperties: ["text-align"]
