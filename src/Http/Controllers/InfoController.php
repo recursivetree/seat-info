@@ -20,73 +20,6 @@ use Seat\Web\Models\User;
 
 class InfoController extends Controller
 {
-    public function getHomeView(Request $request){
-
-        $article = Article::where("home_entry",true)->first();
-
-        if ($article==null){
-            $request->session()->flash('message', [
-                'message' => trans("info::info.home_no_article"),
-                'type' => 'warning'
-            ]);
-            return redirect()->route('info.list');
-        }
-
-        $can_view = Gate::allows("info.article.view", $article->id);
-        $can_edit = Gate::allows("info.article.edit", $article->id);
-
-        if((!$article->public && !$can_edit) || !$can_view){
-            $request->session()->flash('message', [
-                'message' => trans("info::info.home_insufficient_permissions"),
-                'type' => 'warning'
-            ]);
-            return redirect()->route('info.list');
-        }
-
-        return view("info::view", compact('can_edit','article'));
-
-    }
-
-    public function setHomeArticle(ConfirmModalRequest $request){
-        Article::query()->update(['home_entry' => false]);
-
-        $article = Article::find($request->data);
-
-        if($article == null){
-            $request->session()->flash('message', [
-                'message' => trans("info::info.manage_article_not_found"),
-                'type' => 'error'
-            ]);
-            return redirect()->route('info.manage');
-        }
-
-        if(!$article->public){
-            $request->session()->flash('message', [
-                'message' => trans("info::info.manage_only_public_home_article_error"),
-                'type' => 'error'
-            ]);
-            return redirect()->route('info.manage');
-        }
-
-        $article->home_entry = true;
-        $article->save();
-
-        $request->session()->flash('message', [
-            'message' => trans("info::info.manage_set_home_article_success"),
-            'type' => 'success'
-        ]);
-        return redirect()->route('info.manage');
-    }
-
-    public function unsetHomeArticle(ConfirmModalRequest $request){
-        Article::query()->update(['home_entry' => false]);
-
-        $request->session()->flash('message', [
-            'message' => trans("info::info.manage_unset_home_article_success"),
-            'type' => 'success'
-        ]);
-        return redirect()->route('info.manage');
-    }
 
     public function deleteArticle(ConfirmModalRequest $request){
         $article = Article::find($request->data);
@@ -138,10 +71,6 @@ class InfoController extends Controller
         $article = Article::find($request->data);
 
         if ($article !== null) {
-
-            if($article->home_entry){
-                $article->home_entry = false;
-            }
 
             $article->public = false;
             $article->save();
@@ -273,9 +202,8 @@ class InfoController extends Controller
     public function getManageView(){
         $articles = Article::all();
         $resources = Resource::all();
-        $noHomeArticle = !Article::where("home_entry",true)->exists();
 
-        return view("info::manage", compact('articles','resources','noHomeArticle'));
+        return view("info::manage", compact('articles','resources'));
     }
 
     public function getArticleView(Request $request,$id){

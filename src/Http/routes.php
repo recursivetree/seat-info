@@ -5,10 +5,6 @@ Route::group([
     'prefix' => 'info'
 ], function () {
 
-    Route::get('/home', [
-        'as'   => 'info.home',
-        'uses' => 'InfoController@getHomeView',
-    ]);
 
     Route::get('/article/create', [
         'as'   => 'info.create',
@@ -62,22 +58,10 @@ Route::group([
         'middleware' => 'can:info.delete_resource'
     ]);
 
-    Route::post('/article/manage/set_home_article', [
-        'as'   => 'info.set_home_article',
-        'uses' => 'InfoController@setHomeArticle',
-        'middleware' => 'can:info.configure_home_article'
-    ]);
-
     Route::post('/article/manage/delete', [
         'as'   => 'info.delete_article',
         'uses' => 'InfoController@deleteArticle',
         'middleware' => 'can:info.article.edit,id'
-    ]);
-
-    Route::post('/article/manage/unset_home_article', [
-        'as'   => 'info.unset_home_article',
-        'uses' => 'InfoController@unsetHomeArticle',
-        'middleware' => 'can:info.configure_home_article'
     ]);
 
     Route::post('/article/manage/set_public', [

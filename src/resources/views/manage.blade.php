@@ -4,32 +4,6 @@
 @section('page_header', trans('info::info.module_title'))
 
 @section('full')
-    <!-- Modal -->
-    <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmModalLabel">{{ trans("info::info.manage_confirm_title") }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" id="confirmModalWarningText"></div>
-                <div class="modal-footer">
-                    <form method="POST" action="" id="confirmModalForm">
-                        @csrf
-                        <button type="submit" class="btn btn-danger"
-                                id="confirmModalConfirm">{{ trans("info::info.manage_confirm_confirm") }}</button>
-                        <input type="hidden" id="confirmModalData" name="data">
-                    </form>
-                    <button type="button" class="btn btn-secondary"
-                            data-dismiss="modal">{{ trans("info::info.manage_confirm_cancel") }}</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Main -->
     <div class="row w-100">
         <div class="col">
@@ -61,14 +35,6 @@
                         @endcan
                     </div>
                     <div class="card-body">
-
-                        @can("info.configure_home_article")
-                            @if($noHomeArticle)
-                                <div class="alert alert-warning" role="alert">
-                                    {{ trans("info::info.manage_article_no_home_article") }}
-                                </div>
-                            @endif
-                        @endcan
 
                         @if($articles->count()>=10)
                             <div class="alert alert-info">
@@ -106,72 +72,39 @@
                                         @else
                                             <span class="badge badge-warning">{{ trans("info::info.manage_article_private") }}</span>
                                         @endif
-                                        @if($article->home_entry)
-                                            <span class="badge badge-info">{{ trans("info::info.manage_article_home_article") }}</span>
-                                        @endif
                                     </td>
                                     <td>
-                                        <div class="btn-group float-right" role="group">
+                                        <div class="float-right d-flex flex-row">
 
                                             @can("info.article.edit",$article->id)
-                                                <a href="{{ route("info.edit_article", $article->id) }}"
-                                                   class="btn btn-primary mr-auto">{{ trans("info::info.manage_article_edit") }}</a>
+                                                <a href="{{ route("info.edit_article", $article->id) }}" class="btn btn-primary ml-1">{{ trans("info::info.manage_article_edit") }}</a>
                                             @endcan
 
-                                            <button id="btnGroupDropArticles{{ $article->id }}" type="button"
-                                                    class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
-                                                    aria-haspopup="true" aria-expanded="false">
-                                                {{ trans("info::info.manage_article_options") }}
-                                            </button>
-                                            <div class="dropdown-menu p-0"
-                                                 aria-labelledby="btnGroupDropArticles{{ $article->id }}">
-                                                <div class="btn-group-vertical dropdown-item p-0">
 
-                                                    @can("info.configure_home_article")
-                                                        @if($article->home_entry)
-                                                            <button
-                                                                    class="btn btn-warning confirm-action"
-                                                                    data-confirm-warning="{{ trans("info::info.manage_article_unset_home_article_confirmation") }}"
-                                                                    data-url="{{ route("info.unset_home_article") }}"
-                                                            >{{ trans("info::info.manage_article_unset_home_article") }}</button>
-                                                        @else
-                                                            <button
-                                                                    class="btn btn-warning confirm-action"
-                                                                    data-confirm-warning="{{ trans("info::info.manage_article_set_home_article_confirmation") }}"
-                                                                    data-url="{{ route("info.set_home_article") }}"
-                                                                    data-data="{{ $article->id }}"
-                                                            >{{ trans("info::info.manage_article_set_home_article") }}</button>
-                                                        @endif
-                                                    @endcan
 
-                                                    @can("info.article.edit",$article->id)
-                                                        @if(!$article->public)
-                                                            <button
-                                                                    class="btn btn-warning confirm-action"
-                                                                    data-confirm-warning="{{ trans("info::info.manage_article_set_public_confirmation") }}"
-                                                                    data-url="{{ route("info.set_article_public") }}"
-                                                                    data-data="{{ $article->id }}"
-                                                            >{{ trans("info::info.manage_article_set_public") }}</button>
-                                                        @else
-                                                            <button
-                                                                    class="btn btn-warning confirm-action"
-                                                                    data-confirm-warning="{{ trans("info::info.manage_article_set_private_confirmation") }}"
-                                                                    data-url="{{ route("info.set_article_private") }}"
-                                                                    data-data="{{ $article->id }}"
-                                                            >{{ trans("info::info.manage_article_set_private") }}</button>
-                                                        @endif
-                                                    @endcan
+                                            @can("info.article.edit",$article->id)
+                                                @if(!$article->public)
+                                                    <form action="{{ route("info.set_article_public") }}" method="POST">
+                                                        @csrf
+                                                        <input type="hidden" name="data" value="{{ $article->id }}">
+                                                        <button type="submit" class="btn btn-warning ml-1 confirmform" data-seat-action="{{ trans("info::info.manage_article_set_public_confirmation") }}">{{ trans("info::info.manage_article_set_public") }}</button>
+                                                    </form>
+                                                @else
+                                                    <form action="{{ route("info.set_article_private") }}" method="POST">
+                                                        @csrf
+                                                        <input type="hidden" name="data" value="{{ $article->id }}">
+                                                        <button type="submit" class="btn btn-warning ml-1 confirmform" data-seat-action="{{ trans("info::info.manage_article_set_private_confirmation") }}">{{ trans("info::info.manage_article_set_private") }}</button>
+                                                    </form>
+                                                @endif
+                                            @endcan
 
-                                                    @can("info.article.edit",$article->id)
-                                                        <button
-                                                                class="btn btn-danger confirm-action"
-                                                                data-confirm-warning="{{ trans("info::info.manage_article_delete_confirmation") }}"
-                                                                data-url="{{ route("info.delete_article") }}"
-                                                                data-data="{{ $article->id }}"
-                                                        >{{ trans("info::info.manage_article_delete") }}</button>
-                                                    @endcan
-                                                </div>
-                                            </div>
+                                            @can("info.article.edit",$article->id)
+                                                <form action="{{ route("info.delete_article") }}" method="POST">
+                                                    @csrf
+                                                    <input type="hidden" name="data" value="{{ $article->id }}">
+                                                    <button type="submit" class="btn btn-danger ml-1 confirmdelete" data-seat-entity="{{ trans("info::info.article") }}">{{ trans("info::info.manage_article_delete") }}</button>
+                                                </form>
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>
@@ -245,26 +178,12 @@
                                     </td>
                                     <td>
                                         @can("info.delete_resource")
-                                        <div class="float-right row">
-                                            <button id="btnGroupDropResources{{ $resource->id }}" type="button"
-                                                    class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
-                                                    aria-haspopup="true" aria-expanded="false"
-                                            >{{ trans("info::info.manage_resources_table_options") }}</button>
-                                            <div class="dropdown-menu p-0"
-                                                 aria-labelledby="btnGroupDropArticles{{ $resource->id }}">
-                                                <div class="btn-group-vertical dropdown-item p-0">
-                                                    <button
-                                                            class="btn btn-danger confirm-action"
-                                                            data-confirm-warning="{{ trans("info::info.manage_resources_table_delete_confirm") }}"
-                                                            data-url="{{ route("info.delete_resource") }}"
-                                                            data-data="{{ $resource->id }}"
-                                                    >{{ trans("info::info.manage_resources_table_delete") }}</button>
-                                                </div>
-                                            </div>
-                                            @endcan
-
-
-                                        </div>
+                                            <form action="{{ route("info.delete_resource") }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="data" value="{{ $resource->id }}">
+                                                <button type="submit" class="btn btn-danger ml-1 confirmdelete" data-seat-entity="{{ trans("info::info.manage_resources_table_delete_confirm") }}">{{ trans("info::info.manage_resources_table_delete") }}</button>
+                                            </form>
+                                        @endcan
                                     </td>
                                 </tr>
                             @endforeach

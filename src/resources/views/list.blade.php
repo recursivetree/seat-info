@@ -49,9 +49,6 @@
                                         @if(!$article->public)
                                             <span class="badge badge-secondary">{{ trans('info::info.list_private_article') }}</span>
                                         @endif
-                                        @if($article->home_entry)
-                                            <span class="badge badge-primary">{{ trans('info::info.list_home_article') }}</span>
-                                        @endif
                                     </div>
                                 @endif
                             @endforeach
