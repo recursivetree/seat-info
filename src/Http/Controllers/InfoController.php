@@ -339,7 +339,7 @@ class InfoController extends Controller
         $size = Storage::size($db_entry->path);
         $type = $db_entry->mime;
 
-        return Storage::response($db_entry->path,$db_entry->name,[
+        return Storage::download($db_entry->path, $db_entry->name, [
             'Content-Type'=> $type,
             'Accept-Ranges'=>'bytes',
             'Content-Length',strlen($size)
