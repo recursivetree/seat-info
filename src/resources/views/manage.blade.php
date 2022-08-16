@@ -65,7 +65,9 @@
                                         @endcan
                                     </td>
                                     <td>
-                                        {{ "seatinfo:article/{$article->id}" }}
+                                        <code>
+                                            seatinfo:article/{{ $article->id }}/{{ substr($article->name,0,12) }}
+                                        </code>
                                     </td>
                                     <td>
                                         @if($article->public)

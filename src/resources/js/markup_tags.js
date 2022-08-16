@@ -1,5 +1,7 @@
 SeatInfoMarkupRenderer.registerLinkPreProcessor("seatinfo", (link, emitWarning) => {
-    const articleLink = /^article\/(?<article_id>\d+)(?:#(?<hash>.*))?$/gm.exec(link)
+
+    //note for future myself: always prefer id, as the name can be cut off to fit the length of text fields
+    const articleLink = /^article\/(?<article_id>\d+)\/?(?:.+?)?(?:#(?<hash>.*))?$/gm.exec(link)
     if (articleLink) {
         if (articleLink.groups.hash) {
             return ReturnStatus.new().ok(`/info/article/view/${articleLink.groups.article_id}#${articleLink.groups.hash}`)
