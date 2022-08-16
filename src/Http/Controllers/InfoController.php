@@ -319,8 +319,6 @@ class InfoController extends Controller
     }
 
     public function viewResource($id){
-        Gate::authorize("info.resource.view", $id);
-
         $db_entry = Resource::find($id);
 
         if($db_entry === null){
@@ -330,6 +328,8 @@ class InfoController extends Controller
         if ($db_entry===null){
             return abort(404);
         }
+
+        Gate::authorize("info.resource.view", $db_entry->id);
 
         if(!Storage::exists($db_entry->path)){
             abort(500);
