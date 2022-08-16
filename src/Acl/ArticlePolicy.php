@@ -40,11 +40,17 @@ class ArticlePolicy extends AbstractPolicy
 
         $user = auth()->user();
 
+        $article = Article::find($article_id);
+        if($article === null){
+            return false;
+        }
+
         return $user
                 ->roles()
                 ->whereIn("id", $roles)
                 ->exists()
             || $user->can("info.edit_all")
-            || $user->isAdmin();
+            || $user->isAdmin()
+            || $user->id === $article->owner;
     }
 }

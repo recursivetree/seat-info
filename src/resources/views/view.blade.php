@@ -33,8 +33,8 @@
                             <div class="btn-group float-right" role="group">
                                 @if($can_edit)
                                     <a href="{{ route("info.edit_article", $article->id) }}" class="float-right btn btn-secondary">{{ trans("info::info.view_article_edit") }}</a>
-                                    <a href="{{ route("info.manage") }}" class="float-right btn btn-secondary">{{ trans("info::info.view_article_manage") }}</a>
                                 @endif
+                                <a href="{{ route("info.manage") }}" class="float-right btn btn-secondary">{{ trans("info::info.view_article_manage") }}</a>
                                 <a class="btn btn-primary" href="{{ url()->previous() }}">{{ trans("info::info.view_back_button") }}</a>
                             </div>
                         </div>
