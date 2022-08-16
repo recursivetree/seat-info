@@ -295,7 +295,8 @@ class InfoController extends Controller
         $resource = new Resource();
         $resource->mime = $mime_type;
         $resource->path = $path;
-        $resource->name = $file->getClientOriginalName();;
+        $resource->name = $file->getClientOriginalName();
+        $resource->owner = auth()->user()->id;
         $resource->save();
 
         $request->session()->flash('message', [

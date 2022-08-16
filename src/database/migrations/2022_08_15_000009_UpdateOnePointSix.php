@@ -31,6 +31,11 @@ class UpdateOnePointSix extends Migration
         Schema::table('recursive_tree_seat_info_articles', function (Blueprint $table) {
             $table->bigInteger("owner")->unsigned()->nullable();
         });
+
+        //resource owner migration
+        Schema::table('recursive_tree_seat_info_resources', function (Blueprint $table) {
+            $table->bigInteger("owner")->unsigned()->nullable();
+        });
     }
 
 
@@ -40,6 +45,10 @@ class UpdateOnePointSix extends Migration
         Schema::table('recursive_tree_seat_info_articles', function (Blueprint $table) {
             $table->boolean("home_entry")->default(false);
             $table->dropColumn("pinned");
+            $table->dropColumn("owner");
+        });
+
+        Schema::table('recursive_tree_seat_info_resources', function (Blueprint $table) {
             $table->dropColumn("owner");
         });
     }

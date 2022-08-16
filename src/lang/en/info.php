@@ -53,6 +53,7 @@ return [
     'manage_resources_table_actions' => 'Actions',
     'manage_resources_table_delete' => 'Delete',
     'manage_resources_table_delete_confirm' => 'delete this file',
+    'manage_resources_table_owner'=>'Owner',
     'manage_resources_no_resources' => 'There are no resources',
     'list_article_new' => 'New',
     'list_article_manage' => 'Manage Articles',

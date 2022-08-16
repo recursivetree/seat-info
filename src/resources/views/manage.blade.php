@@ -204,6 +204,7 @@
                             <tr>
                                 <th>{{ trans("info::info.manage_resources_table_name") }}</th>
                                 <th>{{ trans("info::info.manage_resources_table_idlink") }}</th>
+                                <th>{{ trans("info::info.manage_resources_table_owner") }}</th>
                                 <th>{{ trans("info::info.manage_resources_table_type") }}</th>
                                 <th>
                                     <span class="float-right">{{ trans("info::info.manage_resources_table_actions") }}</span>
@@ -220,6 +221,9 @@
                                         <code>
                                             seatinfo:resource/{{$resource->name}}
                                         </code>
+                                    </td>
+                                    <td>
+                                        {{ $resource->owner_user->name ?? trans('info::info.manage_unknown_user') }}
                                     </td>
                                     <td>
                                         {{ $resource->mime }}

@@ -3,6 +3,7 @@
 namespace RecursiveTree\Seat\InfoPlugin\Model;
 
 use Illuminate\Database\Eloquent\Model;
+use Seat\Web\Models\User;
 
 class Resource extends Model
 {
@@ -11,6 +12,10 @@ class Resource extends Model
     protected $table = 'recursive_tree_seat_info_resources';
 
     protected $fillable = [
-        'id', 'path', 'mime', "name"
+        'id', 'path', 'mime', "name", "owner"
     ];
+
+    public function owner_user(){
+        return $this->hasOne(User::class,'id','owner');
+    }
 }
