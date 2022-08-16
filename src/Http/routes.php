@@ -18,6 +18,7 @@ Route::group([
         'uses' => 'InfoController@getSaveInterface',
     ]);
 
+    //permission in controller
     Route::get('/article/edit/{id}', [
         'as'   => 'info.edit_article',
         'uses' => 'InfoController@getEditView',
@@ -29,51 +30,52 @@ Route::group([
         'uses' => 'InfoController@getListView',
     ]);
 
-    Route::get('/manage', [
+    Route::get('/personal', [
         'as'   => 'info.manage',
         'uses' => 'InfoController@getManageView',
         'middleware' => 'can:info.create_article'
     ]);
 
+    //permission in controller
     Route::get('/article/view/{id}', [
         'as'   => 'info.view',
         'uses' => 'InfoController@getArticleView',
-        'middleware' => 'can:info.article.view,id'
     ]);
 
     Route::post('/resource/upload', [
         'as'   => 'info.upload_resource',
         'uses' => 'InfoController@uploadResource',
-        'middleware' => 'can:info.edit_resource'
+        'middleware' => 'can:info.upload_resource'
     ]);
 
+    //permission in controller
     Route::get('/resource/{id}', [
         'as'   => 'info.view_resource',
         'uses' => 'InfoController@viewResource',
     ]);
 
+    //permission in controller
     Route::post('/resource/delete', [
         'as'   => 'info.delete_resource',
         'uses' => 'InfoController@deleteResource',
-        'middleware' => 'can:info.delete_resource'
     ]);
 
+    //permission in controller
     Route::post('/article/manage/delete', [
         'as'   => 'info.delete_article',
         'uses' => 'InfoController@deleteArticle',
-        'middleware' => 'can:info.article.edit,id'
     ]);
 
     Route::post('/article/manage/set/public', [
         'as'   => 'info.set_article_public',
         'uses' => 'InfoController@setArticlePublic',
-        'middleware' => 'can:info.article.edit,id'
+        'middleware' => 'can:info.make_public'
     ]);
 
     Route::post('/article/manage/set/private', [
         'as'   => 'info.set_article_private',
         'uses' => 'InfoController@setArticlePrivate',
-        'middleware' => 'can:info.article.edit,id'
+        'middleware' => 'can:info.make_public'
     ]);
 
     Route::post('/article/manage/set/pinned', [
@@ -85,7 +87,7 @@ Route::group([
     Route::post('/article/manage/set/unpinned', [
         'as'   => 'info.set_article_unpinned',
         'uses' => 'InfoController@setArticleUnpinned',
-        'middleware' => 'can:info.article.edit,id'
+        'middleware' => 'can:info.pin_article'
     ]);
 
     Route::get('/about', [

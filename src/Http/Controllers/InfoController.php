@@ -22,6 +22,8 @@ class InfoController extends Controller
 {
 
     public function deleteArticle(ConfirmModalRequest $request){
+        Gate::authorize("info.article.edit", $request->data);
+
         $article = Article::find($request->data);
 
         if ($article !== null) {
@@ -191,7 +193,14 @@ class InfoController extends Controller
 
         $article->name = $request->name;
         $article->text = $request->text;
-        $article->public = isset($request->public);
+
+        if(Gate::allows("info.make_public")){
+            $article->public = isset($request->public);
+        }
+
+        if($article->public === null){
+            $article->public = false;
+        }
 
         $article->save();
 
@@ -220,6 +229,8 @@ class InfoController extends Controller
     }
 
     public function getEditView(Request $request,$id){
+        Gate::authorize("info.article.edit", $id);
+
         $article = Article::find($id);
 
         if ($article===null){
@@ -247,7 +258,9 @@ class InfoController extends Controller
 
     public function getListView(){
 
-        $articles = Article::orderBy("pinned","desc")->get();
+        $articles = Article::orderBy("pinned","desc")->get()->filter(function ($article){
+            return Gate::allows("info.article.view",$article->id);
+        });
         return view("info::list", compact('articles'));
     }
 
@@ -256,12 +269,16 @@ class InfoController extends Controller
             return Gate::allows("info.article.edit",$article->id);
         });
 
-        $resources = Resource::all();
+        $resources = Resource::all()->filter(function ($resource){
+            return Gate::allows("info.resource.edit",$resource->id);
+        });
 
         return view("info::manage", compact('articles','resources'));
     }
 
     public function getArticleView(Request $request,$id){
+        Gate::authorize("info.article.view", $id);
+
         $article = Article::find($id);
         $can_edit = Gate::allows("info.article.edit", $article->id);
 
@@ -310,6 +327,8 @@ class InfoController extends Controller
     }
 
     public function viewResource($id){
+        Gate::authorize("info.resource.view", $id);
+
         $db_entry = Resource::find($id);
 
         if($db_entry === null){
@@ -335,6 +354,8 @@ class InfoController extends Controller
     }
 
     public function deleteResource(ConfirmModalRequest $request){
+        Gate::authorize("info.resource.edit", $request->data);
+
         $resource = Resource::find($request->data);
         if ($resource===null){
             $request->session()->flash('message', [

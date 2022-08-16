@@ -153,15 +153,17 @@
                                 </ul>
                             </div>
 
-                            <div class="form-check form-group">
-                                @if($article->public)
-                                    <input type="checkbox" class="form-check-input" id="public" name="public" checked>
-                                @else
-                                    <input type="checkbox" class="form-check-input" id="public" name="public">
-                                @endif
-                                <label class="form-check-label"
-                                       for="public">{{ trans('info::info.editor_public_checkbox') }}</label>
-                            </div>
+                            @can("info.make_public")
+                                <div class="form-check form-group">
+                                    @if($article->public)
+                                        <input type="checkbox" class="form-check-input" id="public" name="public" checked>
+                                    @else
+                                        <input type="checkbox" class="form-check-input" id="public" name="public">
+                                    @endif
+                                    <label class="form-check-label"
+                                           for="public">{{ trans('info::info.editor_public_checkbox') }}</label>
+                                </div>
+                            @endcan
 
                             <div class="form-group">
                                 <button type="submit" class="btn btn-primary"

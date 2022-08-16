@@ -58,11 +58,7 @@
                             @foreach ($articles as $article)
                                 <tr>
                                     <td>
-                                        @can("info.article.view",$article->id)
-                                            <a href="{{ route("info.view", $article->id) }}">{{ $article->name }}</a>
-                                        @else
-                                            {{ $article->name }}
-                                        @endcan
+                                        <a href="{{ route("info.view", $article->id) }}">{{ $article->name }}</a>
                                     </td>
                                     <td>
                                         <code>
@@ -89,16 +85,12 @@
                                     <td>
                                         <div class="float-right d-flex flex-row">
 
-                                            @can("info.article.edit",$article->id)
-                                                <a href="{{ route("info.edit_article", $article->id) }}" class="btn btn-primary ml-1" style="min-width: 6rem">
-                                                    <i class="fas fa-pen"></i>
-                                                    {{ trans("info::info.manage_article_edit") }}
-                                                </a>
-                                            @endcan
+                                            <a href="{{ route("info.edit_article", $article->id) }}" class="btn btn-primary ml-1" style="min-width: 6rem">
+                                                <i class="fas fa-pen"></i>
+                                                {{ trans("info::info.manage_article_edit") }}
+                                            </a>
 
-
-
-                                            @can("info.article.edit",$article->id)
+                                            @can("info.make_public")
                                                 @if(!$article->public)
                                                     <form action="{{ route("info.set_article_public") }}" method="POST">
                                                         @csrf
@@ -142,15 +134,13 @@
                                                 @endif
                                             @endcan
 
-                                            @can("info.article.edit",$article->id)
-                                                <form action="{{ route("info.delete_article") }}" method="POST">
-                                                    @csrf
-                                                    <input type="hidden" name="data" value="{{ $article->id }}">
-                                                    <button type="submit" class="btn btn-danger ml-1 confirmdelete" data-seat-entity="{{ trans("info::info.article") }}" style="min-width: 6rem">
-                                                        {{ trans("info::info.manage_article_delete") }}
-                                                    </button>
-                                                </form>
-                                            @endcan
+                                            <form action="{{ route("info.delete_article") }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="data" value="{{ $article->id }}">
+                                                <button type="submit" class="btn btn-danger ml-1 confirmdelete" data-seat-entity="{{ trans("info::info.article") }}" style="min-width: 6rem">
+                                                    {{ trans("info::info.manage_article_delete") }}
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>
@@ -171,45 +161,45 @@
                     </div>
                     <div class="card-body">
 
-                        @can("info.edit_resource")
-                        <div class="border rounded p-4">
-                            <form action="{{ route("info.upload_resource") }}" method="POST"
-                                  enctype="multipart/form-data">
-                                @csrf
-                                <div class="form-group">
-                                    <label for="resourceFileUpload"> {{ trans("info::info.manage_resources_upload_label",['max'=>ini_get("upload_max_filesize")]) }}</label>
-                                    <div class="custom-file">
-                                        <input type="file" name="file" class="custom-file-input"
-                                               id="resourceFileUpload">
-                                        <label class="custom-file-label"
-                                               for="resourceFileUpload">{{ trans("info::info.manage_resources_upload_choose") }}</label>
+                        @can("info.upload_resource")
+                            <div class="border rounded p-4">
+                                <form action="{{ route("info.upload_resource") }}" method="POST"
+                                      enctype="multipart/form-data">
+                                    @csrf
+                                    <div class="form-group">
+                                        <label for="resourceFileUpload"> {{ trans("info::info.manage_resources_upload_label",['max'=>ini_get("upload_max_filesize")]) }}</label>
+                                        <div class="custom-file">
+                                            <input type="file" name="file" class="custom-file-input"
+                                                   id="resourceFileUpload">
+                                            <label class="custom-file-label"
+                                                   for="resourceFileUpload">{{ trans("info::info.manage_resources_upload_choose") }}</label>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="form-check form-group">
-                                    <input type="checkbox" class="form-check-input" id="mime-src"
-                                           name="mime_src_client">
-                                    <label class="form-check-label"
-                                           for="mime-src">{{ trans("info::info.manage_resources_mime_client_label") }}</label>
-                                </div>
-                                <div class="form-group mb-0">
-                                    <button class="btn btn-primary"
-                                            type="submit">{{ trans("info::info.manage_resources_upload") }}</button>
-                                </div>
-                            </form>
-                        </div>
+                                    <div class="form-check form-group">
+                                        <input type="checkbox" class="form-check-input" id="mime-src"
+                                               name="mime_src_client">
+                                        <label class="form-check-label"
+                                               for="mime-src">{{ trans("info::info.manage_resources_mime_client_label") }}</label>
+                                    </div>
+                                    <div class="form-group mb-0">
+                                        <button class="btn btn-primary"
+                                                type="submit">{{ trans("info::info.manage_resources_upload") }}</button>
+                                    </div>
+                                </form>
+                            </div>
                         @endcan
 
                         <table id="pages" class="table table table-striped">
                             <thead>
-                            <tr>
-                                <th>{{ trans("info::info.manage_resources_table_name") }}</th>
-                                <th>{{ trans("info::info.manage_resources_table_idlink") }}</th>
-                                <th>{{ trans("info::info.manage_resources_table_owner") }}</th>
-                                <th>{{ trans("info::info.manage_resources_table_type") }}</th>
-                                <th>
-                                    <span class="float-right">{{ trans("info::info.manage_resources_table_actions") }}</span>
-                                </th>
-                            </tr>
+                                <tr>
+                                    <th>{{ trans("info::info.manage_resources_table_name") }}</th>
+                                    <th>{{ trans("info::info.manage_resources_table_idlink") }}</th>
+                                    <th>{{ trans("info::info.manage_resources_table_owner") }}</th>
+                                    <th>{{ trans("info::info.manage_resources_table_type") }}</th>
+                                    <th>
+                                        <span class="float-right">{{ trans("info::info.manage_resources_table_actions") }}</span>
+                                    </th>
+                                </tr>
                             </thead>
                             <tbody>
                             @foreach ($resources as $resource)
@@ -230,7 +220,7 @@
                                     </td>
                                     <td>
                                         <div class="float-right">
-                                            @can("info.delete_resource")
+                                            @can("info.resource.edit",$resource->id)
                                                 <form action="{{ route("info.delete_resource") }}" method="POST">
                                                     @csrf
                                                     <input type="hidden" name="data" value="{{ $resource->id }}">
