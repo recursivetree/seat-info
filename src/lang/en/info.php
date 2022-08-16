@@ -70,7 +70,6 @@ return [
     'manage_article_pin_article_confirmation'=>'pin this article',
     'manage_save_article_success' => 'Successfully saved article.',
     'view_article_not_found' => 'Could not find article',
-    'view_article_insufficient_permissions' => 'This article is private.',
     'manage_resource_upload_success' => 'Successfully uploaded file!',
     'resource_not_found' => 'Could not find requested resource!',
     'manage_resource_delete_success' => 'Successfully deleted file!',

@@ -290,14 +290,6 @@ class InfoController extends Controller
             return view("info::view");
         }
 
-        if(!$article->public && !$can_edit){
-            $request->session()->flash('message', [
-                'message' => trans("info::info.view_article_insufficient_permissions"),
-                'type' => 'warning'
-            ]);
-            return view("info::view");
-        }
-
         return view("info::view", compact('can_edit','article'));
     }
 

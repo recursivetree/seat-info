@@ -42,24 +42,22 @@
                         <div class="list-group">
                             @foreach ($articles as $article)
 
-                                @if($article->public || auth()->user()->can("info.article.edit", $article->id))
-                                    <div class="list-group-item list-group-item-action d-flex flex-row align-items-baseline">
-                                        <a href="{{ route("info.view", $article->id) }}" class="mr-auto">{{ $article->name }}</a>
+                                <div class="list-group-item list-group-item-action d-flex flex-row align-items-baseline">
+                                    <a href="{{ route("info.view", $article->id) }}" class="mr-auto">{{ $article->name }}</a>
 
-                                        <div class="mx-3">
-                                            @if($article->pinned)
-                                                <span class="badge badge-primary">
-                                                    <i class="fas fa-map-pin"></i>
-                                                    {{ trans('info::info.list_pinned_article') }}
-                                                </span>
-                                            @endif
+                                    <div class="mx-3">
+                                        @if($article->pinned)
+                                            <span class="badge badge-primary">
+                                                <i class="fas fa-map-pin"></i>
+                                                {{ trans('info::info.list_pinned_article') }}
+                                            </span>
+                                        @endif
 
-                                            @if(!$article->public)
-                                                <span class="badge badge-secondary">{{ trans('info::info.list_private_article') }}</span>
-                                            @endif
-                                        </div>
+                                        @if(!$article->public)
+                                            <span class="badge badge-secondary">{{ trans('info::info.list_private_article') }}</span>
+                                        @endif
                                     </div>
-                                @endif
+                                </div>
 
                             @endforeach
                         </div>

@@ -15,13 +15,21 @@ class ArticlePolicy extends AbstractPolicy
             ->where("allows_view",true)
             ->pluck("role");
 
-        return $user
+        $article = Article::find($article_id);
+        if($article === null){
+            return false;
+        }
+
+        return
+            ($user
                 ->roles()
                 ->whereIn("id", $roles)
                 ->exists()
+                && $article->public)
             || $user->isAdmin()
             || $user->can("info.edit_all")
-            || self::edit($user,$article_id);
+            || self::edit($user,$article_id)
+            || $user->id === $article->owner;
     }
 
     public static function edit(User $user,$article_id)
