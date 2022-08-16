@@ -43,13 +43,20 @@ relative:path/to/wherever
 ### Other seatinfo articles
 ```
 seatinfo:article/{id}
+seatinfo:article/{id}/{optional comment, e.g. article name}
+seatinfo:article/{id}#{hash to jump to a section inside the article}
+
+Examples
 seatinfo:article/9
+seatinfo:article/9/CorpBuypack
+seatinfo:article/9/CorpBuypack#Contacts
 ```
 
 ### Seatinfo resources
 ```
-seatinfo:resource/{id}
+seatinfo:resource/{id or file name}
 seatinfo:resource/9
+seatinfo:resource/alliancelogo.png
 ```
 ### Elements within the same page using an ID
 ```
