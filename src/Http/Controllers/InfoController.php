@@ -256,7 +256,11 @@ class InfoController extends Controller
     public function viewResource($id){
         $db_entry = Resource::find($id);
 
-        if ($db_entry==null){
+        if($db_entry === null){
+            $db_entry = Resource::where("name",$id)->first();
+        }
+
+        if ($db_entry===null){
             return abort(404);
         }
 

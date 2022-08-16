@@ -171,19 +171,23 @@
                                         <a href="{{ route("info.view_resource",$resource->id) }}">{{ $resource->name }}</a>
                                     </td>
                                     <td>
-                                        {{ "seatinfo:resource/{$resource->id}"}}
+                                        <code>
+                                            seatinfo:resource/{{$resource->name}}
+                                        </code>
                                     </td>
                                     <td>
                                         {{ $resource->mime }}
                                     </td>
                                     <td>
-                                        @can("info.delete_resource")
-                                            <form action="{{ route("info.delete_resource") }}" method="POST">
-                                                @csrf
-                                                <input type="hidden" name="data" value="{{ $resource->id }}">
-                                                <button type="submit" class="btn btn-danger ml-1 confirmdelete" data-seat-entity="{{ trans("info::info.manage_resources_table_delete_confirm") }}">{{ trans("info::info.manage_resources_table_delete") }}</button>
-                                            </form>
-                                        @endcan
+                                        <div class="float-right">
+                                            @can("info.delete_resource")
+                                                <form action="{{ route("info.delete_resource") }}" method="POST">
+                                                    @csrf
+                                                    <input type="hidden" name="data" value="{{ $resource->id }}">
+                                                    <button type="submit" class="btn btn-danger ml-1 confirmdelete" data-seat-entity="{{ trans("info::info.manage_resources_table_delete_confirm") }}">{{ trans("info::info.manage_resources_table_delete") }}</button>
+                                                </form>
+                                            @endcan
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -208,22 +212,6 @@
         $(".custom-file-input").on("change", function () {
             let fileName = $(this).val().split("\\").pop();
             $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-        });
-
-
-        // Bind click to OK button within popup
-        $('.confirm-action').click(function (e) {
-            const toggleBtn = $(e.target)
-            const warningText = toggleBtn.data("confirm-warning")
-
-            $("#confirmModalWarningText").text(warningText)
-
-            console.log(toggleBtn.data("url"))
-
-            $("#confirmModalForm").attr("action", toggleBtn.data("url"))
-            $("#confirmModalData").attr("value", toggleBtn.data("data"))
-
-            $('#confirmModal').modal()
         });
     </script>
 @endpush
