@@ -91,6 +91,58 @@ class InfoController extends Controller
         }
     }
 
+    public function setArticlePinned(Request $request){
+        $request->validate([
+           "data" => "required|integer"
+        ]);
+
+        $article = Article::find($request->data);
+
+        if($article === null){
+            $request->session()->flash('message', [
+                'message' => trans("info::info.manage_article_not_found"),
+                'type' => 'error'
+            ]);
+            return redirect()->back();
+        } else {
+            $article->pinned = true;
+            $article->save();
+
+            $request->session()->flash('message', [
+                'message' => trans("info::info.manage_pin_article_success"),
+                'type' => 'success'
+            ]);
+
+            return redirect()->back();
+        }
+    }
+
+    public function setArticleUnpinned(Request $request){
+        $request->validate([
+            "data" => "required|integer"
+        ]);
+
+        $article = Article::find($request->data);
+
+        if($article === null){
+            $request->session()->flash('message', [
+                'message' => trans("info::info.manage_article_not_found"),
+                'type' => 'error'
+            ]);
+            return redirect()->back();
+        } else {
+            $article->pinned = false;
+            $article->save();
+
+            $request->session()->flash('message', [
+                'message' => trans("info::info.manage_unpin_article_success"),
+                'type' => 'success'
+            ]);
+
+            return redirect()->back();
+        }
+    }
+
     public function getCreateView(){
         $article = new Article();
 
@@ -195,7 +247,7 @@ class InfoController extends Controller
 
     public function getListView(){
 
-        $articles = Article::all();
+        $articles = Article::orderBy("pinned","desc")->get();
         return view("info::list", compact('articles'));
     }
 

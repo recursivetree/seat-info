@@ -1,6 +1,7 @@
 <?php
 
 return [
+    //Legacy
     'edit_article' => [
         'label' => 'info::info.permission_edit_article',
         'description' => 'info::info.permission_edit_article_desc',
@@ -8,6 +9,12 @@ return [
     'view_article' => [
         'label' => 'info::info.permission_view_article',
         'description' => 'info::info.permission_view_article_desc',
+    ],
+
+    //In use
+    'pin_article' => [
+        'label' => 'info::info.permission_pin_article',
+        'description' => 'info::info.permission_pin_article_desc',
     ],
     'manage_article' => [
         'label' => 'info::info.permission_manage_article',

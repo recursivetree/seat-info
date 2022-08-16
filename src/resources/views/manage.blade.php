@@ -72,12 +72,22 @@
                                         @else
                                             <span class="badge badge-warning">{{ trans("info::info.manage_article_private") }}</span>
                                         @endif
+
+                                        @if($article->pinned)
+                                            <span class="badge badge-primary">
+                                                <i class="fas fa-map-pin"></i>
+                                                {{ trans('info::info.list_pinned_article') }}
+                                            </span>
+                                        @endif
                                     </td>
                                     <td>
                                         <div class="float-right d-flex flex-row">
 
                                             @can("info.article.edit",$article->id)
-                                                <a href="{{ route("info.edit_article", $article->id) }}" class="btn btn-primary ml-1">{{ trans("info::info.manage_article_edit") }}</a>
+                                                <a href="{{ route("info.edit_article", $article->id) }}" class="btn btn-primary ml-1" style="min-width: 6rem">
+                                                    <i class="fas fa-pen"></i>
+                                                    {{ trans("info::info.manage_article_edit") }}
+                                                </a>
                                             @endcan
 
 
@@ -87,13 +97,41 @@
                                                     <form action="{{ route("info.set_article_public") }}" method="POST">
                                                         @csrf
                                                         <input type="hidden" name="data" value="{{ $article->id }}">
-                                                        <button type="submit" class="btn btn-warning ml-1 confirmform" data-seat-action="{{ trans("info::info.manage_article_set_public_confirmation") }}">{{ trans("info::info.manage_article_set_public") }}</button>
+                                                        <button type="submit" class="btn btn-warning ml-1 confirmform" data-seat-action="{{ trans("info::info.manage_article_set_public_confirmation") }}" style="min-width: 6rem">
+                                                            <i class="fas fa-eye"></i>
+                                                            {{ trans("info::info.manage_article_set_public") }}
+                                                        </button>
                                                     </form>
                                                 @else
                                                     <form action="{{ route("info.set_article_private") }}" method="POST">
                                                         @csrf
                                                         <input type="hidden" name="data" value="{{ $article->id }}">
-                                                        <button type="submit" class="btn btn-warning ml-1 confirmform" data-seat-action="{{ trans("info::info.manage_article_set_private_confirmation") }}">{{ trans("info::info.manage_article_set_private") }}</button>
+                                                        <button type="submit" class="btn btn-warning ml-1 confirmform" data-seat-action="{{ trans("info::info.manage_article_set_private_confirmation") }}" style="min-width: 6rem">
+                                                            <i class="fas fa-eye-slash"></i>
+                                                            {{ trans("info::info.manage_article_set_private") }}
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            @endcan
+
+                                            @can("info.pin_article")
+                                                @if($article->pinned)
+                                                    <form action="{{ route("info.set_article_unpinned") }}" method="POST">
+                                                        @csrf
+                                                        <input type="hidden" name="data" value="{{ $article->id }}">
+                                                        <button class="btn btn-warning ml-1 confirmform" style="min-width: 6rem" data-seat-action="{{ trans("info::info.manage_article_unpin_article_confirmation") }}">
+                                                            <i class="fas fa-map-pin"></i>
+                                                            {{ trans('info::info.unpin_article') }}
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <form action="{{ route("info.set_article_pinned") }}" method="POST">
+                                                        @csrf
+                                                        <input type="hidden" name="data" value="{{ $article->id }}">
+                                                        <button class="btn btn-warning ml-1 confirmform" style="min-width: 6rem" data-seat-action="{{ trans("info::info.manage_article_pin_article_confirmation") }}">
+                                                            <i class="fas fa-map-pin"></i>
+                                                            {{ trans('info::info.pin_article') }}
+                                                        </button>
                                                     </form>
                                                 @endif
                                             @endcan
@@ -102,7 +140,9 @@
                                                 <form action="{{ route("info.delete_article") }}" method="POST">
                                                     @csrf
                                                     <input type="hidden" name="data" value="{{ $article->id }}">
-                                                    <button type="submit" class="btn btn-danger ml-1 confirmdelete" data-seat-entity="{{ trans("info::info.article") }}">{{ trans("info::info.manage_article_delete") }}</button>
+                                                    <button type="submit" class="btn btn-danger ml-1 confirmdelete" data-seat-entity="{{ trans("info::info.article") }}" style="min-width: 6rem">
+                                                        {{ trans("info::info.manage_article_delete") }}
+                                                    </button>
                                                 </form>
                                             @endcan
                                         </div>

@@ -64,15 +64,27 @@ Route::group([
         'middleware' => 'can:info.article.edit,id'
     ]);
 
-    Route::post('/article/manage/set_public', [
+    Route::post('/article/manage/set/public', [
         'as'   => 'info.set_article_public',
         'uses' => 'InfoController@setArticlePublic',
         'middleware' => 'can:info.article.edit,id'
     ]);
 
-    Route::post('/article/manage/set_private', [
+    Route::post('/article/manage/set/private', [
         'as'   => 'info.set_article_private',
         'uses' => 'InfoController@setArticlePrivate',
+        'middleware' => 'can:info.article.edit,id'
+    ]);
+
+    Route::post('/article/manage/set/pinned', [
+        'as'   => 'info.set_article_pinned',
+        'uses' => 'InfoController@setArticlePinned',
+        'middleware' => 'can:info.pin_article'
+    ]);
+
+    Route::post('/article/manage/set/unpinned', [
+        'as'   => 'info.set_article_unpinned',
+        'uses' => 'InfoController@setArticleUnpinned',
         'middleware' => 'can:info.article.edit,id'
     ]);
 
