@@ -184,10 +184,10 @@ class InfoController extends Controller
             $article = new Article();
         }
 
-        //dd($request->aclRoleIDs, $request->aclAccessType);
-
-//        $view_role_id = RoleHelper::checkForExistenceOrDefault($request->view_role, RoleHelper::getDefaultViewRole());
-//        $edit_role_id = RoleHelper::checkForExistenceOrDefault($request->edit_role, RoleHelper::getDefaultEditRole());
+        //add a user for new articles, or when saving old articles
+        if ($article->owner === null){
+            $article->owner = auth()->user()->id;
+        }
 
         $article->name = $request->name;
         $article->text = $request->text;

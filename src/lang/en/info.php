@@ -30,6 +30,8 @@ return [
     'manage_article_table_name' => 'Name',
     'manage_article_table_idlink' => 'Article-Reference-Link',
     'manage_article_table_labels' => 'Labels',
+    'manage_article_table_owner'=>'Owner',
+    'manage_unknown_user'=>'No owner',
     'manage_article_table_actions' => 'Actions',
     'manage_article_public' => 'Public',
     'manage_article_private' => 'Private',

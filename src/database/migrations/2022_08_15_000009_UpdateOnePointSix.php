@@ -5,15 +5,15 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 use RecursiveTree\Seat\InfoPlugin\Model\ArticleAccessRole;
 
-class HomeArticleToPins extends Migration
+class UpdateOnePointSix extends Migration
 {
     public function up()
     {
+        //home article to pin migration
         //step 1: add field
         Schema::table('recursive_tree_seat_info_articles', function (Blueprint $table) {
             $table->boolean("pinned")->default(false);
         });
-
         //migrate home article to a pinned article
         try {
             $article = RecursiveTree\Seat\InfoPlugin\Model\Article::where("home_entry",true)->first();
@@ -22,10 +22,14 @@ class HomeArticleToPins extends Migration
         } catch (Exception $e){
             //ignore
         }
-
         //delete home article property
         Schema::table('recursive_tree_seat_info_articles', function (Blueprint $table) {
             $table->dropColumn("home_entry");
+        });
+
+        //article owner migration
+        Schema::table('recursive_tree_seat_info_articles', function (Blueprint $table) {
+            $table->bigInteger("owner")->unsigned()->nullable();
         });
     }
 
@@ -36,6 +40,7 @@ class HomeArticleToPins extends Migration
         Schema::table('recursive_tree_seat_info_articles', function (Blueprint $table) {
             $table->boolean("home_entry")->default(false);
             $table->dropColumn("pinned");
+            $table->dropColumn("owner");
         });
     }
 }

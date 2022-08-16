@@ -48,6 +48,7 @@
                                 <th>{{ trans("info::info.manage_article_table_name") }}</th>
                                 <th>{{ trans("info::info.manage_article_table_idlink") }}</th>
                                 <th>{{ trans("info::info.manage_article_table_labels") }}</th>
+                                <th>{{ trans("info::info.manage_article_table_owner") }}</th>
                                 <th>
                                     <span class="float-right">{{ trans("info::info.manage_article_table_actions") }}</span>
                                 </th>
@@ -79,6 +80,9 @@
                                                 {{ trans('info::info.list_pinned_article') }}
                                             </span>
                                         @endif
+                                    </td>
+                                    <td>
+                                        {{ $article->owner_user->name ?? trans('info::info.manage_unknown_user') }}
                                     </td>
                                     <td>
                                         <div class="float-right d-flex flex-row">

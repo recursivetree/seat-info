@@ -3,6 +3,7 @@
 namespace RecursiveTree\Seat\InfoPlugin\Model;
 
 use Illuminate\Database\Eloquent\Model;
+use Seat\Web\Models\User;
 
 class Article extends Model
 {
@@ -16,5 +17,9 @@ class Article extends Model
 
     public function aclRoles(){
         return $this->hasMany(AclRole::class,"article","id");
+    }
+
+    public function owner_user(){
+        return $this->hasOne(User::class,'id','owner');
     }
 }
