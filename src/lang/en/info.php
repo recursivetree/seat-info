@@ -88,7 +88,7 @@ return [
     'permission_delete_resource' => 'Delete Resources',
     'permission_delete_resource_desc' => 'Allows you to delete resources.',
     'permission_edit_all' => 'Edit all Articles',
-    'permission_edit_all_desc' => 'Allows you to edit all articles, regardless the acl settings',
+    'permission_edit_all_desc' => 'Allows you to edit all articles, regardless the acl settings. To work properly, please also grant the \'Create Articles\' permission.',
     'permission_pin_article' => 'Change pinned articles',
     'permission_pin_article_desc' => 'Allows to to pin new articles and remove existing pins',
 ];

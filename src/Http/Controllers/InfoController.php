@@ -252,7 +252,10 @@ class InfoController extends Controller
     }
 
     public function getManageView(){
-        $articles = Article::all();
+        $articles = Article::all()->filter(function ($article){
+            return Gate::allows("info.article.edit",$article->id);
+        });
+
         $resources = Resource::all();
 
         return view("info::manage", compact('articles','resources'));

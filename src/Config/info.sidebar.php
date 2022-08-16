@@ -17,12 +17,12 @@ return [
                 'permission' => 'info.create_article',
             ],
             [   // Manage Pages
-                'name'  => 'Manage',
-                'icon'  => 'fas fa-cogs',
+                'name'  => "Personal",
+                'icon'  => 'fas fa-user-edit',
                 'route' => 'info.manage',
-                'permission' => 'info.manage_article',
+                'permission' => 'info.create_article',
             ],
-            [   // Manage Pages
+            [   // About Page
                 'name'  => 'About',
                 'icon'  => 'fas fa-info',
                 'route' => 'info.about',

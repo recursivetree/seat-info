@@ -32,7 +32,7 @@ Route::group([
     Route::get('/manage', [
         'as'   => 'info.manage',
         'uses' => 'InfoController@getManageView',
-        'middleware' => 'can:info.manage_article'
+        'middleware' => 'can:info.create_article'
     ]);
 
     Route::get('/article/view/{id}', [
