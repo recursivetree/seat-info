@@ -11,14 +11,15 @@ class ArticlePolicy extends AbstractPolicy
 {
     public static function view(User $user,$article_id)
     {
-        $roles = AclRole::where("article",$article_id)
-            ->where("allows_view",true)
-            ->pluck("role");
-
         $article = Article::find($article_id);
         if($article === null){
             return false;
         }
+
+        $roles = $article->aclRoles()
+            ->where("article",$article_id)
+            ->where("allows_view",true)
+            ->pluck("role");
 
         return
             ($user
@@ -34,16 +35,15 @@ class ArticlePolicy extends AbstractPolicy
 
     public static function edit(User $user,$article_id)
     {
-        $roles = AclRole::where("article",$article_id)
-            ->where("allows_edit",true)
-            ->pluck("role");
-
-        $user = auth()->user();
-
         $article = Article::find($article_id);
         if($article === null){
             return false;
         }
+
+        $roles = $article->aclRoles()
+            ->where("article",$article_id)
+            ->where("allows_edit",true)
+            ->pluck("role");
 
         return $user
                 ->roles()
