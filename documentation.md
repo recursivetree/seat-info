@@ -54,9 +54,10 @@ seatinfo:article/9/CorpBuypack#Contacts
 
 ### Seatinfo resources
 ```
-seatinfo:resource/{id or file name}
+seatinfo:resource/{id}
+seatinfo:resource/{id}/{filename}
 seatinfo:resource/9
-seatinfo:resource/alliancelogo.png
+seatinfo:resource/8/alliancelogo.png
 ```
 ### Elements within the same page using an ID
 ```
