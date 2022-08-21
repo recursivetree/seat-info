@@ -16,7 +16,7 @@ class Article extends Model
     ];
 
     public function aclRoles(){
-        return $this->hasMany(AclRole::class,"article","id");
+        return $this->hasMany(ArticleAclRole::class,"article","id");
     }
 
     public function owner_user(){

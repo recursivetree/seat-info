@@ -219,8 +219,9 @@
                                         {{ $resource->mime }}
                                     </td>
                                     <td>
-                                        <div class="float-right">
+                                        <div class="d-flex flex-row justify-content-end">
                                             @can("info.resource.edit",$resource->id)
+                                                <a class="btn btn-secondary" href="{{ route("info.configure_resource",$resource->id) }}">{{ trans("info::info.manage_resources_table_configure") }}</a>
                                                 <form action="{{ route("info.delete_resource") }}" method="POST">
                                                     @csrf
                                                     <input type="hidden" name="data" value="{{ $resource->id }}">

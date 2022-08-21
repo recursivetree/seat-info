@@ -36,6 +36,14 @@ class UpdateOnePointSix extends Migration
         Schema::table('recursive_tree_seat_info_resources', function (Blueprint $table) {
             $table->bigInteger("owner")->unsigned()->nullable();
         });
+
+        //resource acl migration
+        Schema::create('recursive_tree_seat_info_resources_acl_roles', function (Blueprint $table) {
+            $table->bigInteger("resource")->index();
+            $table->bigInteger("role");
+            $table->boolean("allows_edit")->default(false);
+            $table->boolean("allows_view")->default(false);
+        });
     }
 
 

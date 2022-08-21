@@ -88,4 +88,9 @@ return [
     'permission_make_public_desc' => 'Allows you to change the public/private setting of an article',
     'permission_upload_resource' => 'Upload Resources',
     'permission_upload_resource_desc' => 'Allows you to upload resources like images or videos.',
+    'manage_resources_table_configure' => 'Configure',
+    'configure_resource_resource_name' => 'Resource Name',
+    'configure_resource_resource_name_placeholder' => 'Enter a name like \'donate2tree4developing.png\'',
+    'configure_resource_resource_safe' => 'Safe',
+    'configure_resource_personal_article_link' => 'Back'
 ];

@@ -3,9 +3,10 @@
 namespace RecursiveTree\Seat\InfoPlugin\Http\Controllers;
 
 use RecursiveTree\Seat\InfoPlugin\Acl\RoleHelper;
-use RecursiveTree\Seat\InfoPlugin\Model\AclRole;
+use RecursiveTree\Seat\InfoPlugin\Model\ArticleAclRole;
 use RecursiveTree\Seat\InfoPlugin\Model\Article;
 use RecursiveTree\Seat\InfoPlugin\Model\Resource;
+use RecursiveTree\Seat\InfoPlugin\Model\ResourceAclRole;
 use RecursiveTree\Seat\InfoPlugin\Validation\ConfirmModalRequest;
 use RecursiveTree\Seat\InfoPlugin\Validation\SaveArticle;
 use RecursiveTree\Seat\InfoPlugin\Validation\UploadResource;
@@ -28,7 +29,7 @@ class InfoController extends Controller
 
         if ($article !== null) {
             Article::destroy($request->data);
-            AclRole::where("article", $request->data)->delete();
+            ArticleAclRole::where("article", $request->data)->delete();
 
             $request->session()->flash('message', [
                 'message' => trans("info::info.manage_delete_article_success"),
@@ -148,11 +149,11 @@ class InfoController extends Controller
     public function getCreateView(){
         $article = new Article();
 
-        $editAclRole = new AclRole();
+        $editAclRole = new ArticleAclRole();
         $editAclRole->role =  RoleHelper::getDefaultEditRole();
         $editAclRole->allows_edit = true;
 
-        $viewAclRole = new AclRole();
+        $viewAclRole = new ArticleAclRole();
         $viewAclRole->role =  RoleHelper::getDefaultViewRole();
         $viewAclRole->allows_view = true;
 
@@ -162,7 +163,7 @@ class InfoController extends Controller
         $other_roles = Role::whereNotIn("id",$roles->pluck("role"))
             ->get()
             ->map(function ($role){
-                $aclRole = new AclRole();
+                $aclRole = new ArticleAclRole();
                 $aclRole->role = $role->id;
                 return $aclRole;
             });
@@ -208,7 +209,7 @@ class InfoController extends Controller
 
         foreach ($request->aclAccessType as $id=>$value){
             if($value === "nothing") continue;
-            $aclRole = new AclRole();
+            $aclRole = new ArticleAclRole();
             $aclRole->article = $article->id;
             if($value==="edit") {
                 $aclRole->role = RoleHelper::checkForExistenceOrDefault($id, RoleHelper::getDefaultEditRole());
@@ -246,7 +247,7 @@ class InfoController extends Controller
         $other_roles = Role::whereNotIn("id",$roles->pluck("role"))
             ->get()
             ->map(function ($role){
-                $aclRole = new AclRole();
+                $aclRole = new ArticleAclRole();
                 $aclRole->role = $role->id;
                 return $aclRole;
             });
@@ -269,8 +270,8 @@ class InfoController extends Controller
             return Gate::allows("info.article.edit",$article->id);
         });
 
-        $resources = Resource::all()->filter(function ($resource){
-            return Gate::allows("info.resource.edit",$resource->id);
+        $resources = Resource::query()->orderBy("owner")->get()->filter(function ($resource){
+            return Gate::allows("info.resource.view",$resource->id);
         });
 
         return view("info::manage", compact('articles','resources'));
@@ -365,6 +366,69 @@ class InfoController extends Controller
             'type' => 'success'
         ]);
         return redirect()->route('info.manage');
+    }
+
+    public function configureResource(Request $request, $id){
+        Gate::authorize("info.resource.edit", $id);
+
+        $resource = Resource::find($id);
+        if($resource === null){
+            $request->session()->flash('message', [
+                'message' => trans("info::info.resource_not_found"),
+                'type' => 'error'
+            ]);
+            return redirect()->back();
+        }
+
+        $roles = $resource->aclRoles;
+
+        $other_roles = Role::whereNotIn("id",$roles->pluck("role"))
+            ->get()
+            ->map(function ($role){
+                $aclRole = new ResourceAclRole();
+                $aclRole->role = $role->id;
+                return $aclRole;
+            });
+
+        $roles = $roles->toBase()->merge($other_roles->toBase());
+
+        return view("info::resource",compact("resource","roles"));
+    }
+
+    public function configureResourceSave(Request $request, $id){
+        Gate::authorize("info.resource.edit", $id);
+
+        //get resource. otherwise, we can directly abort
+        $resource = Resource::find($id);
+        if($resource === null){
+            $request->session()->flash('message', [
+                'message' => trans("info::info.resource_not_found"),
+                'type' => 'error'
+            ]);
+            return redirect()->back();
+        }
+
+        $resource->name = $request->name;
+
+        $resource->save();
+
+        $resource->aclRoles()->delete();
+        foreach ($request->aclAccessType as $id=>$value){
+            if($value === "nothing") continue;
+            $aclRole = new ResourceAclRole();
+            $aclRole->resource = $resource->id;
+            if($value==="edit") {
+                $aclRole->role = RoleHelper::checkForExistenceOrDefault($id, null);
+                $aclRole->allows_edit = true;
+            }
+            if($value==="view") {
+                $aclRole->role = RoleHelper::checkForExistenceOrDefault($id, null);
+                $aclRole->allows_view = true;
+            }
+            $aclRole->save();
+        }
+
+        return redirect()->route("info.manage");
     }
 
     public function about(){

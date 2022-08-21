@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 use RecursiveTree\Seat\InfoPlugin\Acl\RoleHelper;
-use RecursiveTree\Seat\InfoPlugin\Model\AclRole;
+use RecursiveTree\Seat\InfoPlugin\Model\ArticleAclRole;
 use RecursiveTree\Seat\InfoPlugin\Model\Article;
 use RecursiveTree\Seat\InfoPlugin\Model\ArticleAccessRole;
 use Seat\Web\Models\Acl\Permission;
@@ -26,14 +26,14 @@ class MultiRoleAcl extends Migration
         $articles = Article::all();
         foreach ($articles as $article){
             if($article->view_role !== null){
-                $role = new AclRole();
+                $role = new ArticleAclRole();
                 $role->article = $article->id;
                 $role->allows_view = true;
                 $role->role = $article->view_role;
                 $role->save();
             }
             if($article->edit_role !== null){
-                $role = new AclRole();
+                $role = new ArticleAclRole();
                 $role->article = $article->id;
                 $role->allows_edit = true;
                 $role->role = $article->edit_role;

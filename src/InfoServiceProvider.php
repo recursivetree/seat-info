@@ -34,7 +34,7 @@ class InfoServiceProvider extends AbstractSeatPlugin
 
         Gate::define('info.article.view',[ArticlePolicy::class,"view"]);
         Gate::define('info.article.edit',[ArticlePolicy::class,"edit"]);
-        Gate::define('info.resource.view',[ResourcePolicy::class,"edit"]);
+        Gate::define('info.resource.view',[ResourcePolicy::class,"view"]);
         Gate::define('info.resource.edit',[ResourcePolicy::class,"edit"]);
 
         Role::observe(RoleObserver::class);

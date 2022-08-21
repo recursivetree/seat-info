@@ -5,18 +5,18 @@ namespace RecursiveTree\Seat\InfoPlugin\Model;
 use Illuminate\Database\Eloquent\Model;
 use Seat\Web\Models\Acl\Role;
 
-class AclRole extends Model
+class ResourceAclRole extends Model
 {
     public $timestamps = false;
 
-    protected $table = 'recursive_tree_seat_info_articles_acl_roles';
+    protected $table = 'recursive_tree_seat_info_resources_acl_roles';
 
     protected $fillable = [
-        'article', 'allows_view', 'allows_edit', 'role'
+        'resource', 'allows_view', 'allows_edit', 'role'
     ];
 
-    public function article(){
-        return $this->belongsTo(Article::class,"id","article");
+    public function resource(){
+        return $this->belongsTo(Resource::class,"id","resource");
     }
 
     public function roleModel(){

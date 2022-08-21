@@ -55,6 +55,18 @@ Route::group([
     ]);
 
     //permission in controller
+    Route::get('/resource/{id}/configure', [
+        'as'   => 'info.configure_resource',
+        'uses' => 'InfoController@configureResource',
+    ]);
+
+    //permission in controller
+    Route::post('/resource/{id}/save', [
+        'as'   => 'info.configure_resource_save',
+        'uses' => 'InfoController@configureResourceSave',
+    ]);
+
+    //permission in controller
     Route::post('/resource/delete', [
         'as'   => 'info.delete_resource',
         'uses' => 'InfoController@deleteResource',

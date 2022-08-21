@@ -2,7 +2,7 @@
 
 namespace RecursiveTree\Seat\InfoPlugin\Acl;
 
-use RecursiveTree\Seat\InfoPlugin\Model\AclRole;
+use RecursiveTree\Seat\InfoPlugin\Model\ArticleAclRole;
 use RecursiveTree\Seat\InfoPlugin\Model\Article;
 use Seat\Web\Acl\Policies\AbstractPolicy;
 use Seat\Web\Models\User;
