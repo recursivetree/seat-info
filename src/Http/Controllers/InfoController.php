@@ -370,6 +370,9 @@ class InfoController extends Controller
             return redirect()->route('info.manage');
         }
 
+        //dd($resource->aclRoles);
+        $resource->aclRoles()->delete();
+
         Storage::delete($resource->path);
         Resource::destroy($request->data);
 
