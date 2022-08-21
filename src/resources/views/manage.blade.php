@@ -62,7 +62,7 @@
                                     </td>
                                     <td>
                                         <code>
-                                            seatinfo:article/{{ $article->id }}/{{ substr($article->name,0,12) }}
+                                            seatinfo:article/{{ $article->id }}/{{ $article->name }}
                                         </code>
                                     </td>
                                     <td>
@@ -209,7 +209,7 @@
                                     </td>
                                     <td>
                                         <code>
-                                            seatinfo:resource/{{$resource->name}}
+                                            seatinfo:resource/{{$resource->id}}/{{$resource->name}}
                                         </code>
                                     </td>
                                     <td>

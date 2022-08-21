@@ -10,7 +10,7 @@ SeatInfoMarkupRenderer.registerLinkPreProcessor("seatinfo", (link, emitWarning) 
         }
     }
 
-    const resourceLink = /^resource\/(?<resource_id>.+$)/gm.exec(link)
+    const resourceLink = /^resource\/(?<resource_id>\d+)\/?(?:.+?)?$/gm.exec(link)
     if (resourceLink) {
         return ReturnStatus.new().ok(`/info/resource/${resourceLink.groups.resource_id}`)
     }

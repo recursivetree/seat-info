@@ -277,11 +277,11 @@ class InfoController extends Controller
         return view("info::manage", compact('articles','resources'));
     }
 
-    public function getArticleView(Request $request,$id){
-        Gate::authorize("info.article.view", $id);
-
-        $article = Article::find($id);
-        $can_edit = Gate::allows("info.article.edit", $article->id);
+    public function getArticleView(Request $request, $article_id_name){
+        $article = Article::find($article_id_name);
+        if($article === null){
+            $article = Article::where("name",$article_id_name)->first();
+        }
 
         if ($article===null){
             $request->session()->flash('message', [
@@ -290,6 +290,10 @@ class InfoController extends Controller
             ]);
             return view("info::view");
         }
+
+        Gate::authorize("info.article.view", $article->id);
+
+        $can_edit = Gate::allows("info.article.edit", $article->id);
 
         return view("info::view", compact('can_edit','article'));
     }
@@ -319,11 +323,11 @@ class InfoController extends Controller
         return redirect()->route('info.manage');
     }
 
-    public function viewResource($id){
-        $db_entry = Resource::find($id);
+    public function viewResource($resource_name_id){
+        $db_entry = Resource::find($resource_name_id);
 
         if($db_entry === null){
-            $db_entry = Resource::where("name",$id)->first();
+            $db_entry = Resource::where("name",$resource_name_id)->first();
         }
 
         if ($db_entry===null){
