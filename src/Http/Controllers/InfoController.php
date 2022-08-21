@@ -51,6 +51,8 @@ class InfoController extends Controller
         $article = Article::find($request->data);
 
         if ($article !== null) {
+            Gate::authorize("info.article.edit", $article->id);
+
             $article->public = true;
             $article->save();
 
@@ -74,6 +76,8 @@ class InfoController extends Controller
         $article = Article::find($request->data);
 
         if ($article !== null) {
+
+            Gate::authorize("info.article.edit", $article->id);
 
             $article->public = false;
             $article->save();
@@ -108,6 +112,8 @@ class InfoController extends Controller
             ]);
             return redirect()->back();
         } else {
+            Gate::authorize("info.article.edit", $article->id);
+
             $article->pinned = true;
             $article->save();
 
@@ -134,6 +140,8 @@ class InfoController extends Controller
             ]);
             return redirect()->back();
         } else {
+            Gate::authorize("info.article.edit", $article->id);
+
             $article->pinned = false;
             $article->save();
 
