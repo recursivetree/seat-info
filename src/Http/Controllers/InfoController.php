@@ -7,9 +7,6 @@ use RecursiveTree\Seat\InfoPlugin\Model\ArticleAclRole;
 use RecursiveTree\Seat\InfoPlugin\Model\Article;
 use RecursiveTree\Seat\InfoPlugin\Model\Resource;
 use RecursiveTree\Seat\InfoPlugin\Model\ResourceAclRole;
-use RecursiveTree\Seat\InfoPlugin\Validation\ConfirmModalRequest;
-use RecursiveTree\Seat\InfoPlugin\Validation\SaveArticle;
-use RecursiveTree\Seat\InfoPlugin\Validation\UploadResource;
 use Seat\Web\Http\Controllers\Controller;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -22,7 +19,11 @@ use Seat\Web\Models\User;
 class InfoController extends Controller
 {
 
-    public function deleteArticle(ConfirmModalRequest $request){
+    public function deleteArticle(Request $request){
+        $request->validate([
+            "data"=>"required|integer"
+        ]);
+
         Gate::authorize("info.article.edit", $request->data);
 
         $article = Article::find($request->data);
@@ -41,7 +42,11 @@ class InfoController extends Controller
         }
     }
 
-    public function setArticlePublic(ConfirmModalRequest $request){
+    public function setArticlePublic(Request $request){
+        $request->validate([
+            "data"=>"required|integer"
+        ]);
+
         $article = Article::find($request->data);
 
         if ($article !== null) {
@@ -60,7 +65,11 @@ class InfoController extends Controller
         }
     }
 
-    public function setArticlePrivate(ConfirmModalRequest $request){
+    public function setArticlePrivate(Request $request){
+        $request->validate([
+            "data"=>"required|integer"
+        ]);
+
         $article = Article::find($request->data);
 
         if ($article !== null) {
@@ -151,7 +160,16 @@ class InfoController extends Controller
         return view("info::edit", compact('article','roles'));
     }
 
-    public function getSaveInterface(User $user,SaveArticle $request){
+    public function getSaveInterface(User $user,Request $request){
+        $request->validate([
+            "id"=>"nullable|integer",
+            "name"=>"required|string",
+            "text"=>"required|string",
+            "public"=>"nullable",
+            "aclAccessType"=>"required|array",
+            "aclAccessType.*"=>"required|string|in:nothing,edit,view"
+        ]);
+
         $article = Article::find($request->id);
 
         //if the article exists, check for edit access, otherwise for article creation access
@@ -267,7 +285,12 @@ class InfoController extends Controller
         return view("info::view", compact('can_edit','article'));
     }
 
-    public function uploadResource(UploadResource $request){
+    public function uploadResource(Request $request){
+        $request->validate([
+            "file"=>"required|file",
+            "mime_src_client"=>"nullable"
+        ]);
+
         $file = $request->file;
 
         if($request->mime_src_client){
@@ -316,7 +339,11 @@ class InfoController extends Controller
         ]);
     }
 
-    public function deleteResource(ConfirmModalRequest $request){
+    public function deleteResource(Request $request){
+        $request->validate([
+            "data"=>"required|integer",
+        ]);
+
         Gate::authorize("info.resource.edit", $request->data);
 
         $resource = Resource::find($request->data);
@@ -360,6 +387,12 @@ class InfoController extends Controller
     }
 
     public function configureResourceSave(Request $request, $id){
+        $request->validate([
+            "name"=>"required|string",
+            "aclAccessType"=>"required|array",
+            "aclAccessType.*"=>"required|string|in:nothing,edit,view"
+        ]);
+
         Gate::authorize("info.resource.edit", $id);
 
         //get resource. otherwise, we can directly abort
