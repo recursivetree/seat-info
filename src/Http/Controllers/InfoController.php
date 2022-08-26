@@ -390,7 +390,9 @@ class InfoController extends Controller
         $request->validate([
             "name"=>"required|string",
             "aclAccessType"=>"required|array",
-            "aclAccessType.*"=>"required|string|in:nothing,edit,view"
+            "aclAccessType.*"=>"required|string|in:nothing,edit,view",
+            "file" => "nullable|file",
+            "mime_src_client" => "nullable"
         ]);
 
         Gate::authorize("info.resource.edit", $id);
@@ -400,6 +402,20 @@ class InfoController extends Controller
         if($resource === null){
             $request->session()->flash('error', trans("info::info.resource_not_found"));
             return redirect()->back();
+        }
+
+        if ($request->file) {
+            $file = $request->file;
+
+            if ($request->mime_src_client) {
+                $resource->mime = $file->getClientMimeType();
+            } else {
+                $resource->mime = $file->getMimeType();
+            }
+
+            $path = $file->store('recursive_tree_info_module_resources');
+            Storage::delete($resource->path);
+            $resource->path = $path;
         }
 
         $resource->name = $request->name;

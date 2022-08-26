@@ -92,5 +92,7 @@ return [
     'configure_resource_resource_name' => 'Resource Name',
     'configure_resource_resource_name_placeholder' => 'Enter a name like \'donate2tree4developing.png\'',
     'configure_resource_resource_safe' => 'Safe',
-    'configure_resource_personal_article_link' => 'Back'
+    'configure_resource_personal_article_link' => 'Back',
+    'configure_resources_reupload_label' => 'Reupload File (max: :max)',
+    'configure_resources_upload_choose' => 'Choose a replacement file or leave it empty to keep the current one',
 ];
