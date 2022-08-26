@@ -31,17 +31,11 @@ class InfoController extends Controller
             Article::destroy($request->data);
             ArticleAclRole::where("article", $request->data)->delete();
 
-            $request->session()->flash('message', [
-                'message' => trans("info::info.manage_delete_article_success"),
-                'type' => 'success'
-            ]);
+            $request->session()->flash('success',  trans("info::info.manage_delete_article_success"));
 
             return redirect()->route('info.manage');
         } else {
-            $request->session()->flash('message', [
-                'message' => trans("info::info.manage_article_not_found"),
-                'type' => 'error'
-            ]);
+            $request->session()->flash('error', trans("info::info.manage_article_not_found"));
 
             return redirect()->route('info.manage');
         }
@@ -56,17 +50,11 @@ class InfoController extends Controller
             $article->public = true;
             $article->save();
 
-            $request->session()->flash('message', [
-                'message' => trans("info::info.manage_publish_article_success"),
-                'type' => 'success'
-            ]);
+            $request->session()->flash('success', trans("info::info.manage_publish_article_success"));
 
             return redirect()->route('info.manage');
         } else {
-            $request->session()->flash('message', [
-                'message' => trans("info::info.manage_article_not_found"),
-                'type' => 'error'
-            ]);
+            $request->session()->flash('error', trans("info::info.manage_article_not_found"));
 
             return redirect()->route('info.manage');
         }
@@ -82,17 +70,11 @@ class InfoController extends Controller
             $article->public = false;
             $article->save();
 
-            $request->session()->flash('message', [
-                'message' => trans("info::info.manage_set_article_private_success"),
-                'type' => 'success'
-            ]);
+            $request->session()->flash('success', trans("info::info.manage_set_article_private_success"));
 
             return redirect()->route('info.manage');
         } else {
-            $request->session()->flash('message', [
-                'message' => trans("info::info.manage_article_not_found"),
-                'type' => 'error'
-            ]);
+            $request->session()->flash('error', trans("info::info.manage_article_not_found"));
 
             return redirect()->route('info.manage');
         }
@@ -106,10 +88,7 @@ class InfoController extends Controller
         $article = Article::find($request->data);
 
         if($article === null){
-            $request->session()->flash('message', [
-                'message' => trans("info::info.manage_article_not_found"),
-                'type' => 'error'
-            ]);
+            $request->session()->flash('error', trans("info::info.manage_article_not_found"));
             return redirect()->back();
         } else {
             Gate::authorize("info.article.edit", $article->id);
@@ -117,10 +96,7 @@ class InfoController extends Controller
             $article->pinned = true;
             $article->save();
 
-            $request->session()->flash('message', [
-                'message' => trans("info::info.manage_pin_article_success"),
-                'type' => 'success'
-            ]);
+            $request->session()->flash('success',  trans("info::info.manage_pin_article_success"));
 
             return redirect()->back();
         }
@@ -134,10 +110,7 @@ class InfoController extends Controller
         $article = Article::find($request->data);
 
         if($article === null){
-            $request->session()->flash('message', [
-                'message' => trans("info::info.manage_article_not_found"),
-                'type' => 'error'
-            ]);
+            $request->session()->flash('error', trans("info::info.manage_article_not_found"));
             return redirect()->back();
         } else {
             Gate::authorize("info.article.edit", $article->id);
@@ -145,10 +118,7 @@ class InfoController extends Controller
             $article->pinned = false;
             $article->save();
 
-            $request->session()->flash('message', [
-                'message' => trans("info::info.manage_unpin_article_success"),
-                'type' => 'success'
-            ]);
+            $request->session()->flash('success', trans("info::info.manage_unpin_article_success"));
 
             return redirect()->back();
         }
@@ -230,10 +200,7 @@ class InfoController extends Controller
             $aclRole->save();
         }
 
-        $request->session()->flash('message', [
-            'message' => trans("info::info.manage_save_article_success"),
-            'type' => 'success'
-        ]);
+        $request->session()->flash('success', trans("info::info.manage_save_article_success"));
         return redirect()->route('info.view',["id"=>$article->id]);
     }
 
@@ -243,10 +210,7 @@ class InfoController extends Controller
         $article = Article::find($id);
 
         if ($article===null){
-            $request->session()->flash('message', [
-                'message' => trans("info::info.manage_article_not_found"),
-                'type' => 'error'
-            ]);
+            $request->session()->flash('error', trans("info::info.manage_article_not_found"));
             return redirect()->route('info.manage');
         }
 
@@ -292,10 +256,7 @@ class InfoController extends Controller
         }
 
         if ($article===null){
-            $request->session()->flash('message', [
-                'message' => trans("info::info.view_article_not_found"),
-                'type' => 'error'
-            ]);
+            $request->session()->flash('error',  trans("info::info.view_article_not_found"));
             return view("info::view");
         }
 
@@ -324,10 +285,7 @@ class InfoController extends Controller
         $resource->owner = auth()->user()->id;
         $resource->save();
 
-        $request->session()->flash('message', [
-            'message' => trans("info::info.manage_resource_upload_success"),
-            'type' => 'success'
-        ]);
+        $request->session()->flash('success', trans("info::info.manage_resource_upload_success"));
         return redirect()->route('info.manage');
     }
 
@@ -363,10 +321,7 @@ class InfoController extends Controller
 
         $resource = Resource::find($request->data);
         if ($resource===null){
-            $request->session()->flash('message', [
-                'message' => trans("info::info.resource_not_found"),
-                'type' => 'error'
-            ]);
+            $request->session()->flash('error', trans("info::info.resource_not_found"));
             return redirect()->route('info.manage');
         }
 
@@ -376,10 +331,7 @@ class InfoController extends Controller
         Storage::delete($resource->path);
         Resource::destroy($request->data);
 
-        $request->session()->flash('message', [
-            'message' => trans("info::info.manage_resource_delete_success"),
-            'type' => 'success'
-        ]);
+        $request->session()->flash('success', trans("info::info.manage_resource_delete_success"));
         return redirect()->route('info.manage');
     }
 
@@ -388,10 +340,7 @@ class InfoController extends Controller
 
         $resource = Resource::find($id);
         if($resource === null){
-            $request->session()->flash('message', [
-                'message' => trans("info::info.resource_not_found"),
-                'type' => 'error'
-            ]);
+            $request->session()->flash('error', trans("info::info.resource_not_found"));
             return redirect()->back();
         }
 
@@ -416,10 +365,7 @@ class InfoController extends Controller
         //get resource. otherwise, we can directly abort
         $resource = Resource::find($id);
         if($resource === null){
-            $request->session()->flash('message', [
-                'message' => trans("info::info.resource_not_found"),
-                'type' => 'error'
-            ]);
+            $request->session()->flash('error', trans("info::info.resource_not_found"));
             return redirect()->back();
         }
 

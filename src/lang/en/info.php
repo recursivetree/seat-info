@@ -61,7 +61,7 @@ return [
     'view_article_manage' => 'Personal Articles',
     'manage_donation_info' => "Congrats on reaching 10 articles! I hope you enjoy working with seat-info. To support the development, have you considered donating something? Donations are always welcome and motivate me to put more effort into this project, although they are by no means required. If you end up using this module a lot, I'd appreciate a donation. You can give ISK or contract PLEX and Ships to 'recursivetree'.",
     'manage_article_not_found' => 'Could not find the requested article. Try to reload the that lead you here page.',
-    'manage_delete_article_success' => 'Successfully changed article',
+    'manage_delete_article_success' => 'Successfully deleted article',
     'manage_publish_article_success' => 'Successfully published article',
     'manage_set_article_private_success' => 'Successfully made article private',
     'manage_pin_article_success' => 'Successfully pinned article.',
