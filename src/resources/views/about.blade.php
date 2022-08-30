@@ -21,6 +21,8 @@
                             <a href="https://github.com/ajaxorg/ace">{{ trans("info::info.about_github_link") }}</a>
                         </p>
                         <p>{{ trans("info::info.about_donation_info") }}</p>
+
+                        <img src="{{ asset('info/img/PartnerImage.jpg') }}" style="max-height: 30vh;margin-left: auto;margin-right: auto;display:block;">
                     </div>
                 </div>
 
