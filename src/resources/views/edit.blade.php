@@ -77,7 +77,7 @@
                                          <div class="w-100 h-100 form-control text-sm" id="text"></div>
                                     </div>
                                     <div class="w-50 ml-1">
-                                        <div class="form-control h-100 overflow-auto" id="editor-preview-target">
+                                        <div class="form-control h-100 overflow-auto pt-3" id="editor-preview-target">
 
                                         </div>
                                     </div>

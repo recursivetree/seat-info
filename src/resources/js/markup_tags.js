@@ -242,6 +242,15 @@ function imageElementBuilder(elementInfo, htmlElement) {
     }
     img.class("mw-100")
 
+    img.event("error",()=>{
+        img.replaceWith(htmlElement("div")
+            .class("alert", "alert-warning","mb-0")
+            .content(
+                htmlElement("i").class("fas","fa-ban"),
+                " Image was not found!"
+            ))
+    })
+
     return img
 }
 

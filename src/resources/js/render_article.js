@@ -105,6 +105,13 @@ class SeatInfoDomElementBuilder {
     getDOMElement(){
         return this.domElement
     }
+
+    replaceWith(replacement){
+        const parent = this.domElement.parentNode
+        if (parent){
+            parent.replaceChild(replacement.domElement,this.domElement)
+        }
+    }
 }
 
 class SeatInfoMarkupRenderer {
