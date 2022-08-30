@@ -22,7 +22,7 @@
                     <div class="card-header">Editor</div>
                     <div class="card-body">
 
-                        <form method="post" action="{{ route('info.save') }}">
+                        <form method="post" action="{{ route('info.save') }}" id="articleform">
                             @csrf
 
                             <input type="hidden" name="id" value="{{ $article->id }}">
@@ -173,11 +173,21 @@
         $("#view_role_select").select2()
         $("#edit_role_select").select2()
 
+        //ask before you close the tab
+        function beforeUnload(event) {
+            event.preventDefault();
+            event.returnValue = "You have unsaved changes in your article, do you really want to leave?";
+        }
+        const form = document.getElementById("articleform")
+        form.addEventListener("submit",()=>{
+            window.removeEventListener("beforeunload",beforeUnload)
+        })
+
         class MarkupEditor {
             editor;
             astTree;
 
-            constructor() {
+            constructor(options) {
                 this.astTree = null
 
                 this.editor = ace.edit("text");
@@ -190,6 +200,7 @@
                 this.editor.focus()
 
                 this.editor.on("change",  (e) => {
+                    window.addEventListener("beforeunload",beforeUnload)
                     this.render_preview()
                 })
 
