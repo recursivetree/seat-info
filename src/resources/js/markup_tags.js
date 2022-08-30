@@ -237,9 +237,10 @@ function imageElementBuilder(elementInfo, htmlElement) {
         //TODO img has no url
     }
 
-    if (elementInfo.properties["alt"]) {
-        img.attribute("alt", elementInfo.properties["alt"].value)
-    }
+    const alt = elementInfo.properties["alt"] ? elementInfo.properties["alt"].value : "No alternative text was specified for this image"
+
+    img.attribute("alt",alt )
+
     img.class("mw-100")
 
     img.event("error",()=>{
@@ -247,7 +248,8 @@ function imageElementBuilder(elementInfo, htmlElement) {
             .class("alert", "alert-warning","mb-0")
             .content(
                 htmlElement("i").class("fas","fa-ban"),
-                " Image was not found!"
+                " Image was not found! ",
+                alt
             ))
     })
 
