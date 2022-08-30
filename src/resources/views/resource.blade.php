@@ -58,7 +58,7 @@
                                     @endforeach
                                     @if($roles->isEmpty())
                                         <li class="list-group-item d-flex flex-row">
-                                            Seat-Info manages access over seat roles. To configure access for this article head over to access management under the settings section. In there, you can create roles and add members. To automatically manage members, take a look at squads.
+                                            {{ trans("info::info.configure_resource_acl_help") }}
                                         </li>
                                     @endif
 

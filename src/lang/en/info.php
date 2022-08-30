@@ -95,4 +95,6 @@ return [
     'configure_resource_personal_article_link' => 'Back',
     'configure_resources_reupload_label' => 'Reupload File (max: :max)',
     'configure_resources_upload_choose' => 'Choose a replacement file or leave it empty to keep the current one',
+    'edit_article_acl_help'=>'Seat-Info manages access over seat roles. To configure access for this article head over to access management under the settings section. In there, you can create roles and add members. To automatically manage members, take a look at squads.',
+    'configure_resource_acl_help'=>'Seat-Info manages access over seat roles. To configure access for this article head over to access management under the settings section. In there, you can create roles and add members. To automatically manage members, take a look at squads.',
 ];

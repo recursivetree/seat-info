@@ -74,8 +74,7 @@
 
                                 <div class="d-flex w-100" style="height: 60vh;">
                                     <div class="w-50">
-                                        {{--                                        <textarea name="text" style="resize: none;" class="form-control monospace-font text-sm h-100" id="text" placeholder="{{ trans('info::info.article_content_placeholder') }}" required>{{ $article->text }}</textarea>--}}
-                                        <div class="w-100 h-100 form-control text-sm" id="text"></div>
+                                         <div class="w-100 h-100 form-control text-sm" id="text"></div>
                                     </div>
                                     <div class="w-50 ml-1">
                                         <div class="form-control h-100 overflow-auto" id="editor-preview-target">
@@ -130,7 +129,7 @@
                                     @endforeach
                                     @if($roles->isEmpty())
                                         <li class="list-group-item d-flex flex-row">
-                                            Seat-Info manages access over seat roles. To configure access for this article head over to access management under the settings section. In there, you can create roles and add members. To automatically manage members, take a look at squads.
+                                            {{ trans("info::info.edit_article_acl_help") }}
                                         </li>
                                     @endif
 
