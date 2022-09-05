@@ -5,6 +5,7 @@ namespace RecursiveTree\Seat\InfoPlugin\Http\Controllers;
 use RecursiveTree\Seat\InfoPlugin\Acl\RoleHelper;
 use RecursiveTree\Seat\InfoPlugin\Model\ArticleAclRole;
 use RecursiveTree\Seat\InfoPlugin\Model\Article;
+use RecursiveTree\Seat\InfoPlugin\Model\PermaLink;
 use RecursiveTree\Seat\InfoPlugin\Model\Resource;
 use RecursiveTree\Seat\InfoPlugin\Model\ResourceAclRole;
 use Seat\Web\Http\Controllers\Controller;
@@ -31,6 +32,7 @@ class InfoController extends Controller
         if ($article !== null) {
             Article::destroy($request->data);
             ArticleAclRole::where("article", $request->data)->delete();
+            PermaLink::where("article", $request->data)->delete();
 
             $request->session()->flash('success',  trans("info::info.manage_delete_article_success"));
 
@@ -268,7 +270,7 @@ class InfoController extends Controller
     }
 
     public function getArticleView(Request $request, $article_id_name){
-        $article = Article::find($article_id_name);
+        $article = Article::with("permaLinks")->where("id",$article_id_name)->first();
         if($article === null){
             $article = Article::where("name",$article_id_name)->first();
         }
@@ -439,6 +441,40 @@ class InfoController extends Controller
         }
 
         return redirect()->route("info.manage");
+    }
+
+    public function permaLink($permalink) {
+        $permalink = PermaLink::find($permalink);
+        if($permalink === null){
+            return redirect()->route("info.list")->with('error',trans("info::info.permalink_not_found"));
+        }
+        return redirect()->route("info.view",$permalink->article);
+    }
+
+    public function createPermaLink(Request $request){
+        $request->validate([
+            "article"=>"required|integer",
+            "name"=>"required|string"
+        ]);
+
+        if(PermaLink::where("permalink",$request->name)->exists()){
+            return redirect()->back()->with("error",trans("info::info.permalink_in_use"));
+        }
+
+        $permalink = new PermaLink();
+        $permalink->permalink = $request->name;
+        $permalink->article = $request->article;
+        $permalink->save();
+
+        return redirect()->back()->with("success",trans("info::info.permalink_added"));
+    }
+
+    public function deletePermaLink(Request $request){
+        $request->validate([
+            "name"=>"required|string"
+        ]);
+        PermaLink::destroy($request->name);
+        return redirect()->back()->with("success",trans("info::info.permalink_deleted"));
     }
 
     public function about(){

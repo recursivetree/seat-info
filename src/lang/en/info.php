@@ -97,4 +97,15 @@ return [
     'configure_resources_upload_choose' => 'Choose a replacement file or leave it empty to keep the current one',
     'edit_article_acl_help'=>'Seat-Info manages access over seat roles. To configure access for this article head over to access management under the settings section. In there, you can create roles and add members. To automatically manage members, take a look at squads.',
     'configure_resource_acl_help'=>'Seat-Info manages access over seat roles. To configure access for this article head over to access management under the settings section. In there, you can create roles and add members. To automatically manage members, take a look at squads.',
+    'permalink_not_found'=>'This permalink doesn\'t exist. Maybe try to search through the article list.',
+    'permalink_in_use'=>'This permalink name is already in use!',
+    'permalink_added'=>'Successfully added permalink!',
+    'permission_edit_permalinks'=>'Manage Permalinks',
+    'permission_edit_permalinks_desc'=>'Allows you to create, manage and delete permalinks.',
+    'permalinks_title'=>'Permalinks',
+    'add_button'=>'Add',
+    'add_permalink_name_placeholder'=>'Enter the name of you new permalink',
+    'delete_button'=>'Delete',
+    'permalink_delete_modal'=>'permalink',
+    'permalink_deleted'=>'Successfully deleted permalink!'
 ];

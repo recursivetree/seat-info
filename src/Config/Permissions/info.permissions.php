@@ -22,4 +22,8 @@ return [
         'label' => 'info::info.permission_edit_all',
         'description' => 'info::info.permission_edit_all_desc',
     ],
+    'edit_permalinks' => [
+        'label' => 'info::info.permission_edit_permalinks',
+        'description' => 'info::info.permission_edit_permalinks_desc',
+    ],
 ];

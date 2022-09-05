@@ -2,10 +2,19 @@
 Route::group([
     'namespace' => 'RecursiveTree\Seat\InfoPlugin\Http\Controllers',
     'middleware' => ['web', 'auth'],
+    'prefix' => 'i'
+], function () {
+    Route::get('/{permalink}', [
+        'as'   => 'info.permalink',
+        'uses' => 'InfoController@permaLink',
+    ]);
+});
+
+Route::group([
+    'namespace' => 'RecursiveTree\Seat\InfoPlugin\Http\Controllers',
+    'middleware' => ['web', 'auth'],
     'prefix' => 'info'
 ], function () {
-
-
     Route::get('/article/create', [
         'as'   => 'info.create',
         'uses' => 'InfoController@getCreateView',
@@ -22,7 +31,6 @@ Route::group([
     Route::get('/article/edit/{id}', [
         'as'   => 'info.edit_article',
         'uses' => 'InfoController@getEditView',
-        'middleware' => 'can:info.article.edit,id'
     ]);
 
     Route::get('/article/list', [
@@ -100,6 +108,18 @@ Route::group([
         'as'   => 'info.set_article_unpinned',
         'uses' => 'InfoController@setArticleUnpinned',
         'middleware' => 'can:info.pin_article'
+    ]);
+
+    Route::post('/permalink/create', [
+        'as'   => 'info.create_permalink',
+        'uses' => 'InfoController@createPermaLink',
+        'middleware' => 'can:info.edit_permalinks'
+    ]);
+
+    Route::post('/permalink/delete', [
+        'as'   => 'info.delete_permalink',
+        'uses' => 'InfoController@deletePermaLink',
+        'middleware' => 'can:info.edit_permalinks'
     ]);
 
     Route::get('/about', [
