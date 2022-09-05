@@ -15,9 +15,9 @@
                         <div class="card-header">
                             <b>{{$article->name}}</b>
                             <div class="btn-group float-right" role="group">
-                                @if($can_edit)
+                                @can("info.article.edit", $article->id)
                                     <a href="{{ route("info.edit_article", $article->id) }}" class="float-right btn btn-secondary">{{ trans("info::info.view_article_edit") }}</a>
-                                @endif
+                                @endcan
                                 <a href="{{ route("info.manage") }}" class="float-right btn btn-secondary">{{ trans("info::info.view_article_manage") }}</a>
                                 <a class="btn btn-primary" href="{{ url()->previous() }}">{{ trans("info::info.view_back_button") }}</a>
                             </div>
