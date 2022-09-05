@@ -69,7 +69,7 @@ return [
     'manage_article_unpin_article_confirmation'=>'unpin this article',
     'manage_article_pin_article_confirmation'=>'pin this article',
     'manage_save_article_success' => 'Successfully saved article.',
-    'view_article_not_found' => 'Could not find article',
+    'view_article_not_found' => 'Could not find the requested article!',
     'manage_resource_upload_success' => 'Successfully uploaded file!',
     'resource_not_found' => 'Could not find requested resource!',
     'manage_resource_delete_success' => 'Successfully deleted file!',

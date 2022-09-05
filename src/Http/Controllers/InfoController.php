@@ -276,15 +276,12 @@ class InfoController extends Controller
         }
 
         if ($article===null){
-            $request->session()->flash('error',  trans("info::info.view_article_not_found"));
-            return view("info::view");
+            return redirect()->route("info.list")->with('error',  trans("info::info.view_article_not_found"));
         }
 
         Gate::authorize("info.article.view", $article->id);
 
-        $can_edit = Gate::allows("info.article.edit", $article->id);
-
-        return view("info::view", compact('can_edit','article'));
+        return view("info::view", compact('article'));
     }
 
     public function uploadResource(Request $request){
