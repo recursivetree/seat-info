@@ -4,6 +4,7 @@
 @section('page_header', trans('info::info.module_title'))
 
 @section('full')
+    @include("treelib::giveaway")
 
     <!-- Instructions -->
     <div class="row w-100">
