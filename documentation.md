@@ -206,3 +206,27 @@ The old `<audio src="...">` syntax still works for compatibility reasons, but is
 ```
 <video src="url" />
 ```
+
+## Fits
+```
+<fit>
+[Reaper, Max Range]
+
+Pro-Nav Compact Missile Guidance Enhancer
+Type-D Restrained Nanofiber Structure
+
+5MN Quad LiF Restrained Microwarpdrive
+Alumel-Wired Enduring Sensor Booster
+
+Arbalest Compact Light Missile Launcher
+Arbalest Compact Light Missile Launcher
+
+
+Acolyte I x1
+</fit>
+```
+Alternatively, you can directly show fits from `seat-fitting` by specifying a `from` attribute.
+```
+<fit from="seatfitting:fitting/MyFittingName" />
+```
+Small technical note: You can also point to another url, as long as it returns data in the same format as `InfoController::getFittingPluginFit` it will display the fit.

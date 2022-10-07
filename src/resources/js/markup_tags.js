@@ -474,7 +474,9 @@ SeatInfoMarkupRenderer.registerElement("fit", false, (elementInfo, htmlElement) 
         container.content(contentRow)
     }
 
+    let isSelfClosingVariant
     if (elementInfo.properties["from"]) {
+        isSelfClosingVariant = true
         let url = elementInfo.renderer.preprocessLink(elementInfo.properties["from"]).getValue((msg) => {
             elementInfo.renderer.warn(new MarkupWarning(elementInfo.properties["from"].tokens, msg))
         })
@@ -498,6 +500,7 @@ SeatInfoMarkupRenderer.registerElement("fit", false, (elementInfo, htmlElement) 
             })
 
     } else {
+        isSelfClosingVariant = false
         let fit = ""
         for (const child of elementInfo.content) {
             if (child.node instanceof ASTText) {
@@ -509,7 +512,7 @@ SeatInfoMarkupRenderer.registerElement("fit", false, (elementInfo, htmlElement) 
 
     return {
         dom: container,
-        noContent: false,
+        noContent: isSelfClosingVariant,
         supportedElementProperties: ["from"],
         disabledCommonProperties: ["text-align"]
     }
