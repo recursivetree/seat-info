@@ -126,4 +126,10 @@ Route::group([
         'as'   => 'info.about',
         'uses' => 'InfoController@about',
     ]);
+
+    //permissions in controller
+    Route::get('/integration/seat-fitting/fit', [
+        'as'   => 'info.getFittingPluginFit',
+        'uses' => 'InfoController@getFittingPluginFit',
+    ]);
 });

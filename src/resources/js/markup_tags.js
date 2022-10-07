@@ -38,6 +38,14 @@ SeatInfoMarkupRenderer.registerLinkPreProcessor("id", (link) => {
     return ReturnStatus.new().ok(`#${link}`)
 })
 
+SeatInfoMarkupRenderer.registerLinkPreProcessor("seatfitting", (link) => {
+    const fitLink = /^fitting\/(?<fitting_name>[\S ]+)$/gm.exec(link)
+    if (fitLink) {
+        return ReturnStatus.new().ok(`/info/integration/seat-fitting/fit?name=${encodeURIComponent(fitLink.groups.fitting_name)}`)
+    }
+    return ReturnStatus.new().warning("Invalid fitting link!")
+})
+
 SeatInfoMarkupRenderer.registerCommonProperty("id", (value, elementData) => {
     elementData.htmlBuilder.attribute("id", value.value)
 })
@@ -148,7 +156,7 @@ function linkElementBuilder(elementInfo, htmlElement) {
 }
 
 SeatInfoMarkupRenderer.registerElement("a", false, linkElementBuilder)
-SeatInfoMarkupElementHelper.simpleSelfClosingElement("pagelink","span") // deprecated legacy element
+SeatInfoMarkupElementHelper.simpleSelfClosingElement("pagelink", "span") // deprecated legacy element
 
 //lists
 SeatInfoMarkupElementHelper.simpleElement("li", "li")
@@ -239,15 +247,15 @@ function imageElementBuilder(elementInfo, htmlElement) {
 
     const alt = elementInfo.properties["alt"] ? elementInfo.properties["alt"].value : "No alternative text was specified for this image"
 
-    img.attribute("alt",alt )
+    img.attribute("alt", alt)
 
     img.class("mw-100")
 
-    img.event("error",()=>{
+    img.event("error", () => {
         img.replaceWith(htmlElement("div")
-            .class("alert", "alert-warning","mb-0")
+            .class("alert", "alert-warning", "mb-0")
             .content(
-                htmlElement("i").class("fas","fa-ban"),
+                htmlElement("i").class("fas", "fa-ban"),
                 " Image was not found! ",
                 alt
             ))
@@ -331,7 +339,7 @@ SeatInfoMarkupRenderer.registerElement("audio", true, function (elementInfo, htm
         const container = htmlElement("div")
             .class("d-flex")
             .class("align-items-center")
-            .class("p-2","my-1")
+            .class("p-2", "my-1")
             .style("background-color", "#BBBBBB")
             .style("border-radius", "5px")
 
@@ -408,25 +416,17 @@ SeatInfoMarkupRenderer.registerElement("audio", true, function (elementInfo, htm
     }
 })
 
-SeatInfoMarkupRenderer.registerElement("fit",false,(elementInfo,htmlElement)=>{
-    let fit = ""
-    for (const child of elementInfo.content) {
-        if(child.node instanceof ASTText){
-            fit += child.node.text
-        }
-    }
-    fit = fit.replace(/^(\r?\n)*/g,"")
+SeatInfoMarkupRenderer.registerElement("fit", false, (elementInfo, htmlElement) => {
+    const container = htmlElement("div")
+        .class("p-2", "my-1")
+        .style("background-color", "#BBBBBB")
+        .style("border-radius", "5px")
+        .style("text-align", "center")
 
-    const matches = /^\[[\S ]+,\s*(?<name>[\S ]+?)\s*]$/gm.exec(fit)
-
-    if(matches) {
+    function renderFit(fit) {
+        fit = fit.replace(/^(\r?\n)*/g, "")
+        const matches = /^\[[\S ]+,\s*(?<name>[\S ]+?)\s*]$/gm.exec(fit)
         const shipName = matches.groups.name
-
-        const container = htmlElement("div")
-            .class("p-2", "my-1")
-            .style("background-color", "#BBBBBB")
-            .style("border-radius", "5px")
-            .style("text-align", "center")
 
         const title = htmlElement("h4").content(shipName)
 
@@ -472,26 +472,51 @@ SeatInfoMarkupRenderer.registerElement("fit",false,(elementInfo,htmlElement)=>{
 
         container.content(title)
         container.content(contentRow)
+    }
 
-        return {
-            dom: container,
-            noContent: false,
-            supportedElementProperties: [],
-            disabledCommonProperties: ["text-align"]
+    if (elementInfo.properties["from"]) {
+        let url = elementInfo.renderer.preprocessLink(elementInfo.properties["from"]).getValue((msg) => {
+            elementInfo.renderer.warn(new MarkupWarning(elementInfo.properties["from"].tokens, msg))
+        })
+
+        try {
+            url = new URL(url)
+        } catch (e) {
+            url = new URL(url,window.location.origin)
         }
+        url.searchParams.append("api","true")
+        url = url.toString()
+
+        fetch(url)
+            .then(res=>res.json())
+            .then(fit=>{
+                if(fit.ok){
+                    renderFit(fit.fit)
+                } else {
+                    container.content(`Fit could not be loaded: ${fit.message}`)
+                }
+            })
+
     } else {
-        elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `Your fit seems to be in an invalid format!`))
-        return {
-            dom: htmlElement("div"),
-            noContent: false,
-            supportedElementProperties: [],
-            disabledCommonProperties: ["text-align"]
+        let fit = ""
+        for (const child of elementInfo.content) {
+            if (child.node instanceof ASTText) {
+                fit += child.node.text
+            }
         }
+        renderFit(fit)
+    }
+
+    return {
+        dom: container,
+        noContent: false,
+        supportedElementProperties: ["from"],
+        disabledCommonProperties: ["text-align"]
     }
 })
 
 //video
-SeatInfoMarkupRenderer.registerElement("video",true,(elementInfo,htmlElement)=>{
+SeatInfoMarkupRenderer.registerElement("video", true, (elementInfo, htmlElement) => {
     const url = elementInfo.renderer.preprocessLink(elementInfo.properties["src"])
         .getValue((msg) => {
             if (elementInfo.properties["src"]) {
@@ -501,7 +526,7 @@ SeatInfoMarkupRenderer.registerElement("video",true,(elementInfo,htmlElement)=>{
             }
         })
 
-    if(!url){
+    if (!url) {
         elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<video /> element doesn't contain a valid video source.`))
         return {
             dom: htmlElement("div"),
@@ -513,14 +538,14 @@ SeatInfoMarkupRenderer.registerElement("video",true,(elementInfo,htmlElement)=>{
         //we have a video
 
         const container = htmlElement("div")
-            .class("p-2","my-1")
+            .class("p-2", "my-1")
             .class("d-flex")
             .class("flex-column")
             .style("background-color", "#BBBBBB")
             .style("border-radius", "5px")
 
         const videoElement = htmlElement("video")
-            .attribute("src",url)
+            .attribute("src", url)
 
         const video = videoElement.getDOMElement()
 
@@ -560,7 +585,7 @@ SeatInfoMarkupRenderer.registerElement("video",true,(elementInfo,htmlElement)=>{
             })
 
         controlsContainer.content(button, label, progress)
-        container.content(videoElement,controlsContainer)
+        container.content(videoElement, controlsContainer)
 
         video.addEventListener("play", function () {
             buttonIcon.removeClass("fa-play")

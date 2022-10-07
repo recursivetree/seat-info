@@ -8,6 +8,7 @@ use RecursiveTree\Seat\InfoPlugin\Model\Article;
 use RecursiveTree\Seat\InfoPlugin\Model\PermaLink;
 use RecursiveTree\Seat\InfoPlugin\Model\Resource;
 use RecursiveTree\Seat\InfoPlugin\Model\ResourceAclRole;
+use RecursiveTree\Seat\TreeLib\Helpers\FittingPluginHelper;
 use Seat\Web\Http\Controllers\Controller;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -477,5 +478,35 @@ class InfoController extends Controller
     public function about(){
 
         return view("info::about");
+    }
+
+    public function getFittingPluginFit(Request $request){
+        $request->validate([
+            "name"=>"string|required",
+            "api"=>"nullable|in:true,false"
+        ]);
+
+        if(!$request->api && FittingPluginHelper::pluginIsAvailable()){
+            return redirect()->route("fitting.view");
+        }
+        if(!$request->api){
+            return redirect()->back()->with("error","seat-fitting is not installed!");
+        }
+
+        if(!FittingPluginHelper::pluginIsAvailable()){
+            return response()->json(["message"=>"seat-fitting not installed","ok"=>false],400);
+        }
+
+        if(!Gate::allows("fitting.view")){
+            return response()->json(["message"=>"You don't have the permissions to view this fit","ok"=>false],403);
+        }
+
+        $fit = FittingPluginHelper::$FITTING_PLUGIN_FITTING_MODEL::where("fitname","like",$request->name)->first();
+
+        if(!$fit){
+            return response()->json(["message"=>"fit not found","ok"=>false],404);
+        }
+
+        return response()->json(["message"=>"ok","fit"=>$fit->eftfitting,"ok"=>true]);
     }
 }
