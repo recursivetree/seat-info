@@ -78,12 +78,13 @@
         <script src="@infoVersionedAsset('info/js/parser.js')"></script>
         <script src="@infoVersionedAsset('info/js/render_article.js')"></script>
         <script src="@infoVersionedAsset('info/js/markup_tags.js')"></script>
+        <script src="@infoVersionedAsset('info/js/lib/shipfit.min.js')"></script>
 
         <script>
             window.addEventListener('load', (event) => {
                 const target = document.getElementById("info-content-target")
                 target.textContent = null
-                render_article({!! json_encode( $article->text) !!}, target, function (e) {
+                render_article({!! json_encode( $article->text) !!}.split("\n"), target, function (e) {
                     if (e.error || e.warnings.length > 0) {
                         console.log(e)
                         document.getElementById("rendering-error").style.display = "block"

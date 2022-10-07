@@ -408,6 +408,88 @@ SeatInfoMarkupRenderer.registerElement("audio", true, function (elementInfo, htm
     }
 })
 
+SeatInfoMarkupRenderer.registerElement("fit",false,(elementInfo,htmlElement)=>{
+    let fit = ""
+    for (const child of elementInfo.content) {
+        if(child.node instanceof ASTText){
+            fit += child.node.text
+        }
+    }
+    fit = fit.replace(/^(\r?\n)*/g,"")
+
+    const matches = /^\[[\S ]+,\s*(?<name>[\S ]+?)\s*]$/gm.exec(fit)
+
+    if(matches) {
+        const shipName = matches.groups.name
+
+        const container = htmlElement("div")
+            .class("p-2", "my-1")
+            .style("background-color", "#BBBBBB")
+            .style("border-radius", "5px")
+            .style("text-align", "center")
+
+        const title = htmlElement("h4").content(shipName)
+
+        const contentRow = htmlElement("div")
+            .class("d-flex", "flex-wrap", "justify-content-around")
+
+        const fitElement = htmlElement("ship-fit")
+            .content(fit)
+            .style("width", "100%")
+            .style("max-width", "30vw")
+            .attribute("hide-copy", true)
+
+        const textArea = htmlElement("textarea")
+            .attribute("readonly", true)
+            .class("form-control", "flex-grow-1")
+            .style("resize", "none")
+            .content(fit)
+
+        const copy = htmlElement("button")
+            .class("btn", "btn-primary", "btn-block", "mt-2")
+            .content("Copy Fit")
+            .attribute("type", "button")
+            .event("click", (e) => {
+                const button = e.currentTarget
+                navigator.clipboard.writeText(fit)
+                    .then(() => {
+                        button.textContent = "Copied"
+                        setTimeout(() => {
+                            button.textContent = "Copy Fit"
+                        }, 1000)
+                    })
+            })
+
+        const textAreaRow = htmlElement("div")
+            .class("flex-grow-1", "d-flex", "flex-column")
+            .style("min-height", "20vh")
+            .style("max-width", "30vw")
+            .content(textArea)
+            .content(copy)
+
+        contentRow.content(fitElement)
+        contentRow.content(textAreaRow)
+
+        container.content(title)
+        container.content(contentRow)
+
+        return {
+            dom: container,
+            noContent: false,
+            supportedElementProperties: [],
+            disabledCommonProperties: ["text-align"]
+        }
+    } else {
+        elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `Your fit seems to be in an invalid format!`))
+        return {
+            dom: htmlElement("div"),
+            noContent: false,
+            supportedElementProperties: [],
+            disabledCommonProperties: ["text-align"]
+        }
+    }
+})
+
 //video
 SeatInfoMarkupRenderer.registerElement("video",true,(elementInfo,htmlElement)=>{
     const url = elementInfo.renderer.preprocessLink(elementInfo.properties["src"])

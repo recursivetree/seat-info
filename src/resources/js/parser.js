@@ -2,7 +2,7 @@ class CharReader {
     constructor(lines) {
         this.lineIndex = 0
         this.colIndex = 0
-        this.lines = lines
+        this.lines = lines.map(line=>line+"\n")
         this.end_reached = false
     }
 

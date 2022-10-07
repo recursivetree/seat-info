@@ -168,6 +168,8 @@
     <script src="@infoVersionedAsset('info/js/parser.js')"></script>
     <script src="@infoVersionedAsset('info/js/render_article.js')"></script>
     <script src="@infoVersionedAsset('info/js/markup_tags.js')"></script>
+
+    <script src="@infoVersionedAsset('info/js/lib/shipfit.min.js')"></script>
     <script>
 
         $("#view_role_select").select2()
