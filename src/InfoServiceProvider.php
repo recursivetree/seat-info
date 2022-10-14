@@ -7,6 +7,7 @@ use RecursiveTree\Seat\InfoPlugin\Acl\ResourcePolicy;
 use RecursiveTree\Seat\InfoPlugin\Model\Article;
 use RecursiveTree\Seat\InfoPlugin\Model\Resource;
 use RecursiveTree\Seat\InfoPlugin\Observers\RoleObserver;
+use RecursiveTree\Seat\InfoPlugin\Observers\UserObserver;
 use Seat\Services\AbstractSeatPlugin;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
@@ -42,7 +43,7 @@ class InfoServiceProvider extends AbstractSeatPlugin
         Gate::define('info.resource.edit',[ResourcePolicy::class,"edit"]);
 
         Role::observe(RoleObserver::class);
-
+        User::observe(UserObserver::class);
 
         //artisan commands
 
