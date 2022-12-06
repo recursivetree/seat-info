@@ -17,9 +17,17 @@
                     </div>
                     <div class="card-body">
                         <p>
-                            {{ trans("info::info.about_ace_text_editor") }}
-                            <a href="https://ace.c9.io/">{{ trans("info::info.about_website_link") }}</a>
-                            <a href="https://github.com/ajaxorg/ace">{{ trans("info::info.about_github_link") }}</a>
+                            {{ trans("info::info.about_external_components") }}
+                            <ul>
+                                <li>
+                                    {{ trans("info::info.about_ace_text_editor") }}
+                                    <a href="https://ace.c9.io/">{{ trans("info::info.about_website_link") }}</a>
+                                    <a href="https://github.com/ajaxorg/ace">{{ trans("info::info.about_github_link") }}</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/souptheloop/shipfit">shipfit (MIT License)</a>
+                                </li>
+                            </ul>
                         </p>
                         <p>{{ trans("info::info.about_donation_info") }}</p>
 

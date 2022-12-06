@@ -77,6 +77,7 @@ return [
     'about_ace_text_editor' => 'This plugin uses the ace text editor.',
     'about_website_link' => 'Website',
     'about_github_link' => 'Github',
+    'about_external_components' => 'This plugin uses the following third-party components:',
     'access_management_label' => "Access Management",
     'permission_create_article' => 'Create Articles',
     'permission_create_article_desc' => 'Allows you to create new articles.',
