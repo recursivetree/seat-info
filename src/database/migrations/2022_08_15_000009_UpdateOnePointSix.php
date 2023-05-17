@@ -17,8 +17,10 @@ class UpdateOnePointSix extends Migration
         //migrate home article to a pinned article
         try {
             $article = RecursiveTree\Seat\InfoPlugin\Model\Article::where("home_entry",true)->first();
-            $article->pinned = true;
-            $article->save();
+            if($article) {
+                $article->pinned = true;
+                $article->save();
+            }
         } catch (Exception $e){
             //ignore
         }
