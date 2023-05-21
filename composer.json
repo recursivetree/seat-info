@@ -23,9 +23,11 @@
     }
   },
   "require": {
-    "eveseat/services": "^4.1",
-    "eveseat/eveapi": "^4.0",
-    "eveseat/web": "^4.0",
-    "recursivetree/seat-treelib": "^1.0.3"
+    "php": "^8.1",
+    "eveseat/services": "5.0.x-dev",
+    "laravel/framework": "^10.0",
+    "eveseat/eveapi": "5.0.x-dev",
+    "eveseat/web": "5.0.x-dev",
+    "recursivetree/seat-treelib": "5.0.x-dev"
   }
 }
