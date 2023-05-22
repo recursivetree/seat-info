@@ -173,6 +173,10 @@
                             </div>
                         @endcan
 
+                        <div class="alert alert-warning my-2">
+                            If your resource files aren't showing up correctly after upgrading to seat 5, ask an administrator to follow the <a href="https://github.com/recursivetree/seat-info/tree/5.0.x#upgrading">seat-info upgrade guide</a>.
+                        </div>
+
                         <table id="pages" class="table table table-striped">
                             <thead>
                                 <tr>
