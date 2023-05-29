@@ -86,7 +86,7 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn btn-primary confirmform">{{ trans('info::info.configure_resource_resource_safe') }}</button>
+                            <button type="submit" class="btn btn-primary confirmform">{{ trans('info::info.configure_resource_resource_save') }}</button>
 
                             <a href="{{ route("info.manage") }}" class="btn btn-secondary">{{ trans('info::info.configure_resource_personal_article_link') }}</a>
 
