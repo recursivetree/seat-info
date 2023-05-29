@@ -20,9 +20,16 @@
                     </div>
                     <div class="card-body">
 
-                        @if($articles->count()>=10)
+                        @if($articles->count()>=10 && !setting("seat_info_donation_optout")!=null)
                             <div class="alert alert-info">
-                                {{ trans("info::info.manage_donation_info") }}
+                                <p>
+                                    {{ trans("info::info.manage_donation_info") }}
+                                </p>
+
+                                <form action="{{ route("info.disable_donation_info") }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-secondary">Hide</button>
+                                </form>
                             </div>
                         @endif
 

@@ -44,6 +44,12 @@ Route::group([
         'middleware' => 'can:info.create_article'
     ]);
 
+    Route::post('/personal/disable/donationinfo', [
+        'as'   => 'info.disable_donation_info',
+        'uses' => 'InfoController@disableDonationInfo',
+    ]);
+
+
     //permission in controller
     Route::get('/article/view/{id}', [
         'as'   => 'info.view',
