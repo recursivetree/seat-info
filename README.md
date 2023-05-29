@@ -7,7 +7,7 @@ on how to use seat.
 ## Usage
 
 ### Editor
-The editor supports a markup language that's kinda close to HTML, but not quite.
+The editor supports a markup language that's close to HTML, but not quite.
 
 Please read the [documentation](documentation.md).
 
@@ -16,7 +16,7 @@ Access is managed on a per-article and per-resource level using roles provided b
 squads as it is normally known. Additionally, there are a few fixed permission related to creating/modifying articles and resources.
 
 ## Installation
-**This plugin requires special installation steps, please read the whole installation section!**
+**This plugin requires special installation steps, please read the whole installation section before doing anything.**
 
 I can also recommend reading through the [official seat documentation](https://eveseat.github.io/docs/community_packages/).
 
@@ -80,6 +80,8 @@ the resources tab. Additionally, on docker images and resources aren't stored pe
 6. Reload the management page, and it should state a higher value as the limit.
 
 ### Docker
+> On seat 5, you can leave all steps around `recursive_tree_info_module_resources` away. The `seat_info.ini` file is still required.
+
 1. Go to the directory with your `docker-compose.yml` file.
 2. In this directory, create a new file `seat_info.ini` and a directory `recursive_tree_info_module_resources`
 3. Put the following in the `seat_info.ini` file:
@@ -114,6 +116,35 @@ the resources tab. Additionally, on docker images and resources aren't stored pe
 
 > For advanced users: Instead of adding the `recursive_tree_info_module_resources` volume, you can also look into 
 > configuring the laravel [storage driver](https://laravel.com/docs/6.x/filesystem) properly.
+
+## Upgrading
+### 4.x -> 5.x
+Seat 5 finally supports storing resource files persistently out of the box, but it also means we have to import them to the new system.
+
+The following has to be run in your installation directory, per default `/opt/seat-docker`.
+
+First, migrate to seat 5 as normal and start up the stack once. Stop it again using `docker-compose down`.
+This ensures that the new storage location has been created.
+
+Run the following command: 
+```
+docker volume ls | grep $(basename $(pwd))_seat-storage
+```
+The output should look like this(the name might differ slightly):
+```
+local     seat-dev-5_seat-storage
+```
+If there is no output, please contact me on discord: `recursive_tree#6692`.
+
+Next, run
+```
+docker run --rm -v $(basename $(pwd))_seat-storage:/storage -v $(pwd)/recursive_tree_info_module_resources:/backup ubuntu bash -c "cp -a /backup/. /storage/app/recursive_tree_info_module_resources/"
+```
+If you changed the directory you store your resources in, you need to change the following part `$(pwd)/recursive_tree_info_module_resources:/backup` to `/path/to/your/resource/location:/backup`.
+
+This creates a temporary container, adds both the old and new data storage and copies them over.
+
+Restart the stack as usual with `docker-compose up -d` and your files should be back.
 
 ## Donations
 Donations are always welcome, although not required. If you end up using this module a lot, I'd appreciate a donation. 
