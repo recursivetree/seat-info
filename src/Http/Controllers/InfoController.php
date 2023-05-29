@@ -386,6 +386,11 @@ class InfoController extends Controller
         return view("info::resource",compact("resource","roles"));
     }
 
+    public function disableDonationInfo(){
+        setting(["seat_info_donation_optout", true]);
+        return redirect()->back();
+    }
+
     public function configureResourceSave(Request $request, $id){
         $request->validate([
             "name"=>"required|string",
