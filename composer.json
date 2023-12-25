@@ -28,6 +28,6 @@
     "laravel/framework": "^10.0",
     "eveseat/eveapi": "^5.0.1",
     "eveseat/web": "^5.0.0",
-    "recursivetree/seat-treelib": "^5.0.x-dev"
+    "recursivetree/seat-treelib": "^2.0"
   }
 }
