@@ -61,6 +61,8 @@ class UpdateOnePointSix extends Migration
         Schema::table('recursive_tree_seat_info_resources', function (Blueprint $table) {
             $table->dropColumn("owner");
         });
+
+        Schema::drop('recursive_tree_seat_info_resources_acl_roles');
     }
 }
 
