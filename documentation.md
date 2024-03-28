@@ -10,7 +10,7 @@ html listed in this documentation.
  * No kind of header structure required, it's like if you write directly to the body
  * Elements without content have to be closed with a /, like in xhtml: `<img src="..." />`
  * Not all elements are available and some work different
- * URLs in all elements work a bit different, see the section on URL transformerss.
+ * URLs in all elements work a bit different, see the section on URL transformers.
  * Escaping characters is done by using a `\ `, e.g. `\<` for a `<` character. I think they are buggy atm tho.
 
 ## Attributes supported on all elements
@@ -27,7 +27,7 @@ The general schema for the url transformers is `type:data`. Type represents the 
 another article, to another website or to an image. Data is just additional data required for a type to get a working 
 url.
 
-For compatibility reason, when the transformer can't find a valid type, the unprocessed url is returned. This means you 
+For compatibility reasons, when the transformer can't find a valid type, the unprocessed url is returned. This means you 
 don't need to change anything after updating, but it will throw a warning.
 
 ### Absolute urls
