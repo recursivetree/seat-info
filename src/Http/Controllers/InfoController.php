@@ -2,6 +2,7 @@
 
 namespace RecursiveTree\Seat\InfoPlugin\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use RecursiveTree\Seat\InfoPlugin\Acl\RoleHelper;
 use RecursiveTree\Seat\InfoPlugin\Model\ArticleAclRole;
 use RecursiveTree\Seat\InfoPlugin\Model\Article;
@@ -506,12 +507,12 @@ class InfoController extends Controller
             return response()->json(["message"=>"You don't have the permissions to view this fit","ok"=>false],403);
         }
 
-        $fit = FittingPluginHelper::$FITTING_PLUGIN_FITTING_MODEL::where("fitname","like",$request->name)->first();
+        $fit = FittingPluginHelper::$FITTING_PLUGIN_FITTING_MODEL::where(DB::raw("LTRIM(name)"),$request->name)->first();
 
         if(!$fit){
             return response()->json(["message"=>"fit not found","ok"=>false],404);
         }
 
-        return response()->json(["message"=>"ok","fit"=>$fit->eftfitting,"ok"=>true]);
+        return response()->json(["message"=>"ok","fit"=>$fit->toEve(),"ok"=>true]);
     }
 }
