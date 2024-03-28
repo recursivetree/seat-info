@@ -513,6 +513,45 @@ class InfoController extends Controller
             return response()->json(["message"=>"fit not found","ok"=>false],404);
         }
 
-        return response()->json(["message"=>"ok","fit"=>$fit->toEve(),"ok"=>true]);
+        $lines = [];
+        $lines[] = sprintf("[%s, %s]",$fit->ship->typeName, $fit->name);
+        //lows
+        foreach ($fit->low_slots as $module){
+            for ($i = 0; $i < $module->quantity; $i++) {
+                $lines[] = $module->type->typeName;
+            }
+        }
+        $lines[] = "";
+        //mid
+        foreach ($fit->medium_slots as $module){
+            for ($i = 0; $i < $module->quantity; $i++) {
+                $lines[] = $module->type->typeName;
+            }
+        }
+        $lines[] = "";
+        //highs
+        foreach ($fit->high_slots as $module){
+            for ($i = 0; $i < $module->quantity; $i++) {
+                $lines[] = $module->type->typeName;
+            }
+        }
+        $lines[] = "";
+        //sub_systems
+        foreach ($fit->sub_systems as $module){
+            for ($i = 0; $i < $module->quantity; $i++) {
+                $lines[] = $module->type->typeName;
+            }
+        }
+        $lines[] = "";
+        //rig_slots
+        foreach ($fit->rig_slots as $module){
+            for ($i = 0; $i < $module->quantity; $i++) {
+                $lines[] = $module->type->typeName;
+            }
+        }
+        $lines[] = "";
+
+
+        return response()->json(["message"=>"ok","fit"=>implode(PHP_EOL,$lines),"ok"=>true]);
     }
 }
