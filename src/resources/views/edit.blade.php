@@ -288,7 +288,6 @@
                     renderTarget,
                     this.update_errors.bind(this),
                     (elementAstRepresentation) => {
-                        console.log(elementAstRepresentation)
                         this.selectAreaFromTokenList(elementAstRepresentation.tokens)
                     })
 

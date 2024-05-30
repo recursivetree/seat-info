@@ -230,3 +230,7 @@ Alternatively, you can directly show fits from `seat-fitting` by specifying a `f
 <fit from="seatfitting:fitting/MyFittingName" />
 ```
 Small technical note: You can also point to another url, as long as it returns data in the same format as `InfoController::getFittingPluginFit` it will display the fit.
+
+## Click-To-Copy
+When adding the `click-to-copy` attribute to an element, you can click the element to copy the contents to the clipboard. 
+In the editor, this functionality is somewhat borken, as clicking an elements also jumps the cursor to the code of an element.

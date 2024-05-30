@@ -189,9 +189,8 @@ class SeatInfoMarkupRenderer {
 
                     if (astNodeClickCallback) {
                         textNode.addEventListener("click", (e) => {
-                            e.stopPropagation()
                             astNodeClickCallback(astNode)
-                        }, false)
+                        })
                     }
 
                     content.push({
@@ -253,9 +252,8 @@ class SeatInfoMarkupRenderer {
                         //add click callback
                         if (astNodeClickCallback) {
                             domElementBuilder.event("click", (e) => {
-                                e.stopPropagation()
                                 astNodeClickCallback(astNode)
-                            }, false)
+                            })
                         }
 
                         //add this element to element list

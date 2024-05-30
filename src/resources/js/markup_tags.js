@@ -67,6 +67,13 @@ SeatInfoMarkupRenderer.registerCommonProperty("text-align", (property, elementDa
     }
 })
 
+SeatInfoMarkupRenderer.registerCommonProperty("click-to-copy",(property, elementData)=>{
+    elementData.htmlBuilder.event("click",()=>{
+        navigator.clipboard.writeText(elementData.htmlBuilder.getDOMElement().innerText)
+    })
+    elementData.htmlBuilder.style("cursor","pointer")
+})
+
 
 class SeatInfoMarkupElementHelper {
     static simpleElement(markupName, htmlName) {
@@ -82,7 +89,7 @@ class SeatInfoMarkupElementHelper {
             return {
                 dom: htmlElement("span").content(htmlElement(htmlName)),
                 noContent: true,
-                disabledCommonProperties: ["text-align"]
+                disabledCommonProperties: ["text-align","click-to-copy"]
             }
         })
     }
@@ -276,7 +283,7 @@ SeatInfoMarkupRenderer.registerElement("icon", true, function (elementInfo, html
         dom: htmlElement("span").content(imageElementBuilder(elementInfo, htmlElement)),
         noContent: true,
         supportedElementProperties: ["src", "alt"],
-        disabledCommonProperties: ["text-align"]
+        disabledCommonProperties: ["text-align","click-to-copy"]
     }
 })
 
@@ -403,7 +410,7 @@ SeatInfoMarkupRenderer.registerElement("audio", true, function (elementInfo, htm
             dom: htmlElement("div").content(container),
             noContent: true,
             supportedElementProperties: ["src"],
-            disabledCommonProperties: ["text-align"]
+            disabledCommonProperties: ["text-align","click-to-copy"]
         }
     } else {
         elementInfo.renderer.warn(new MarkupWarning(elementInfo.node.tokens, `<audio /> element doesn't contain a valid audio source.`))
@@ -411,7 +418,7 @@ SeatInfoMarkupRenderer.registerElement("audio", true, function (elementInfo, htm
             dom: htmlElement("div"),
             noContent: true,
             supportedElementProperties: ["src"],
-            disabledCommonProperties: ["text-align"]
+            disabledCommonProperties: ["text-align","click-to-copy"]
         }
     }
 })
@@ -514,7 +521,7 @@ SeatInfoMarkupRenderer.registerElement("fit", false, (elementInfo, htmlElement) 
         dom: container,
         noContent: isSelfClosingVariant,
         supportedElementProperties: ["from"],
-        disabledCommonProperties: ["text-align"]
+        disabledCommonProperties: ["text-align","click-to-copy"]
     }
 })
 
@@ -535,7 +542,7 @@ SeatInfoMarkupRenderer.registerElement("video", true, (elementInfo, htmlElement)
             dom: htmlElement("div"),
             noContent: true,
             supportedElementProperties: ["src"],
-            disabledCommonProperties: ["text-align"]
+            disabledCommonProperties: ["text-align","click-to-copy"]
         }
     } else {
         //we have a video
@@ -617,7 +624,7 @@ SeatInfoMarkupRenderer.registerElement("video", true, (elementInfo, htmlElement)
             dom: htmlElement("div").content(container),
             noContent: true,
             supportedElementProperties: ["src"],
-            disabledCommonProperties: ["text-align"]
+            disabledCommonProperties: ["text-align","click-to-copy"]
         }
     }
 })
